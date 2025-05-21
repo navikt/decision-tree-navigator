@@ -17,12 +17,13 @@ async function loadTree() {
 function render() {
     const section = document.getElementById("tree");
     const pathSection = document.getElementById("path");
-    const ul = document.createElement("ul");
+
     pathSection.innerHTML = "";
     section.innerHTML = "";
 
 
-// Build the label path, skipping the first node (no label led to 'start')
+    // Build the path
+    const ul = document.createElement("ul");
     for (let i = 1; i < history.length; i++) {
         const prevNode = tree[history[i - 1]];
         const nextKey = history[i];
@@ -33,50 +34,54 @@ function render() {
             ul.appendChild(li);
         }
     }
-
     pathSection.appendChild(ul);
 
     const current = history[history.length - 1];
     const node = tree[current];
 
+    // Build the question
     const question = document.createElement("h2");
     question.id = "question";
     question.setAttribute("tabindex", "-1");
     question.textContent = node.q;
     section.appendChild(question);
 
+    // Build the button wrapper
+    const btnRow = document.createElement("div");
+    btnRow.className =
+        "navds-stack navds-hstack navds-stack-gap navds-stack-direction navds-stack-wrap";
+    /* give the utility its gap token */
+    btnRow.style.setProperty("--__ac-stack-gap-xs", "var(--a-spacing-4)");
+
+    // Put buttons in the wrapper
     if (node.end) {
+        // Restart button
         const restart = document.createElement("button");
         restart.textContent = "Start på nytt";
-        restart.onclick = () => {
-            history = ["start"];
-            render();
-        };
-        section.appendChild(restart);
-        question.focus();
-        return;
+        restart.className   = "navds-button navds-button--primary navds-button--medium";
+        restart.onclick     = () => { history = ["start"]; render(); };
+        btnRow.appendChild(restart);
+    } else {
+        // Answer buttons
+        for (const option of Object.values(node.options)) {
+            const btn = document.createElement("button");
+            btn.textContent = option.buttonText;
+            btn.className   = "navds-button navds-button--primary navds-button--medium";
+            btn.onclick     = () => { history.push(option.next); render(); };
+            btnRow.appendChild(btn);
+        }
+        // Back button
+        if (history.length > 1) {
+            const backBtn = document.createElement("button");
+            backBtn.textContent = "Tilbake";
+            backBtn.className   = "navds-button navds-button--tertiary navds-button--medium";
+            backBtn.onclick     = () => { history.pop(); render(); };
+            btnRow.appendChild(backBtn);
+        }
     }
 
-    for (const option of Object.values(node.options)) {
-        const btn = document.createElement("button");
-        btn.textContent = option.buttonText;
-        btn.onclick = () => {
-            history.push(option.next);
-            render();
-        };
-        section.appendChild(btn);
-    }
-
-    if (history.length > 1) {
-        const backBtn = document.createElement("button");
-        backBtn.textContent = "Tilbake";
-        backBtn.onclick = () => {
-            history.pop();
-            render();
-        };
-        section.appendChild(backBtn);
-        question.focus();
-    }
+    section.appendChild(btnRow);
+    question.focus();
 }
 
 document.addEventListener("DOMContentLoaded", loadTree);

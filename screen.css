@@ -1,10 +1,11 @@
+@import "https://unpkg.com/@navikt/ds-css@latest/dist/index.min.css";
+
 body {
-    max-width: 75em;
     margin: 2em auto;
     padding: 0 2em;
+    max-width: 50em;
 }
 
-button {
-    display: inline-block;
-    margin: 0 1em 1em 0;
+h2:focus {
+    outline: none
 }
