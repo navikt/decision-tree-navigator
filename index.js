@@ -16,7 +16,25 @@ async function loadTree() {
 
 function render() {
     const section = document.getElementById("tree");
+    const pathSection = document.getElementById("path");
+    const ul = document.createElement("ul");
+    pathSection.innerHTML = "";
     section.innerHTML = "";
+
+
+// Build the label path, skipping the first node (no label led to 'start')
+    for (let i = 1; i < history.length; i++) {
+        const prevNode = tree[history[i - 1]];
+        const nextKey = history[i];
+        const option = Object.values(prevNode.options).find(opt => opt.next === nextKey);
+        if (option && option.label) {
+            const li = document.createElement("li");
+            li.textContent = option.label;
+            ul.appendChild(li);
+        }
+    }
+
+    pathSection.appendChild(ul);
 
     const current = history[history.length - 1];
     const node = tree[current];

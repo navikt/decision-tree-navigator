@@ -5,12 +5,12 @@
       "yes": {
         "next": "doNotUseAI",
         "buttonText": "Ja",
-        "label": "Ja, det er ifm. saksbehandling."
+        "label": "Innholdet er ifm. saksbehandling."
       },
       "no": {
         "next": "contentType",
         "buttonText": "Nei",
-        "label": "Nei, det er ikke ifm. saksbehandling."
+        "label": "Innholdet er ikke ifm. saksbehandling."
       }
     }
   },
@@ -20,12 +20,12 @@
       "isReport": {
         "next": "utvidetMerking",
         "buttonText": "Ja",
-        "label": "Ja, det er en rapport."
+        "label": "Innholdet er en rapport."
       },
       "notReport": {
         "next": "publicContent",
         "buttonText": "Nei",
-        "label": "Nei, det er ikke en rapport."
+        "label": "Innholdet er ikke en rapport."
       }
     }
   },
@@ -35,12 +35,12 @@
       "isPublic": {
         "next": "minimalMarking",
         "buttonText": "Ja",
-        "label": "Ja, det er offentlig tilgjengelig."
+        "label": "Innholdet er offentlig tilgjengelig."
       },
       "notPublic": {
         "next": "realisticContent",
         "buttonText": "Nei",
-        "label": "Nei, det er bare til internt bruk."
+        "label": "Innholdet er bare til internt bruk."
       }
     }
   },
@@ -50,12 +50,12 @@
       "isRealistic": {
         "next": "minimalMarking",
         "buttonText": "Ja",
-        "label": "Ja, det er fotorealistisk eller virkelighetstro."
+        "label": "Innholdet fotorealistisk eller virkelighetstro."
       },
       "notRealistic": {
         "next": "normativeContent",
         "buttonText": "Nei",
-        "label": "Nei, det er ikke fotorealistisk eller virkelighetstro."
+        "label": "Innholdet er ikke fotorealistisk eller virkelighetstro."
       }
     }
   },
@@ -65,12 +65,12 @@
       "isNormative": {
         "next": "decideMarkingYourself",
         "buttonText": "Ja",
-        "label": "Ja, det er retningsgivende eller arkiveringspliktig."
+        "label": "Innholdet er retningsgivende eller arkiveringspliktig."
       },
       "notNormative": {
         "next": "markingNotRequired",
         "buttonText": "Nei",
-        "label": "Nei, det er ikke retningsgivende eller arkiveringspliktig."
+        "label": "Innholdet er ikke retningsgivende eller arkiveringspliktig."
       }
     }
   },
