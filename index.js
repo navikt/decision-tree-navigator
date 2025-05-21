@@ -1,6 +1,7 @@
 // Load decision tree from external JSON file instead of hardcoding
 let tree = {};
 let history = ["start"];
+let interacted = false;
 
 async function loadTree() {
     try {
@@ -59,7 +60,7 @@ function render() {
         const restart = document.createElement("button");
         restart.textContent = "Start på nytt";
         restart.className   = "navds-button navds-button--primary navds-button--medium";
-        restart.onclick     = () => { history = ["start"]; render(); };
+        restart.onclick     = () => { history = ["start"]; interacted = false; render(); };
         btnRow.appendChild(restart);
     } else {
         // Answer buttons
@@ -80,8 +81,13 @@ function render() {
         }
     }
 
+    // Only control focus after user interaction
+    if (interacted) question.focus();
+    interacted = true;
+
     section.appendChild(btnRow);
-    question.focus();
+
 }
+
 
 document.addEventListener("DOMContentLoaded", loadTree);
