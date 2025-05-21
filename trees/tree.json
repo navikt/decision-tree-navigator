@@ -1,0 +1,97 @@
+{
+  "start": {
+    "q": "Er innholdet ifm. saksbehandling?",
+    "options": {
+      "yes": {
+        "next": "doNotUseAI",
+        "buttonText": "Ja",
+        "label": "Ja, det er ifm. saksbehandling."
+      },
+      "no": {
+        "next": "contentType",
+        "buttonText": "Nei",
+        "label": "Nei, det er ikke ifm. saksbehandling."
+      }
+    }
+  },
+  "contentType": {
+    "q": "Er innholdet en rapport?",
+    "options": {
+      "isReport": {
+        "next": "utvidetMerking",
+        "buttonText": "Ja",
+        "label": "Ja, det er en rapport."
+      },
+      "notReport": {
+        "next": "publicContent",
+        "buttonText": "Nei",
+        "label": "Nei, det er ikke en rapport."
+      }
+    }
+  },
+  "publicContent": {
+    "q": "Er innholdet tilgjengelig for allmenheten?",
+    "options": {
+      "isPublic": {
+        "next": "minimalMarking",
+        "buttonText": "Ja",
+        "label": "Ja, det er offentlig tilgjengelig."
+      },
+      "notPublic": {
+        "next": "realisticContent",
+        "buttonText": "Nei",
+        "label": "Nei, det er bare til internt bruk."
+      }
+    }
+  },
+  "realisticContent": {
+    "q": "Er innholdet fotorealistisk/virkelighetstro media?",
+    "options": {
+      "isRealistic": {
+        "next": "minimalMarking",
+        "buttonText": "Ja",
+        "label": "Ja, det er fotorealistisk eller virkelighetstro."
+      },
+      "notRealistic": {
+        "next": "normativeContent",
+        "buttonText": "Nei",
+        "label": "Nei, det er ikke fotorealistisk eller virkelighetstro."
+      }
+    }
+  },
+  "normativeContent": {
+    "q": "Er innholdet retningsgivende eller arkiveringspliktig?",
+    "options": {
+      "isNormative": {
+        "next": "decideMarkingYourself",
+        "buttonText": "Ja",
+        "label": "Ja, det er retningsgivende eller arkiveringspliktig."
+      },
+      "notNormative": {
+        "next": "markingNotRequired",
+        "buttonText": "Nei",
+        "label": "Nei, det er ikke retningsgivende eller arkiveringspliktig."
+      }
+    }
+  },
+  "minimalMarking": {
+    "q": "Bruk minimal merking.",
+    "end": true
+  },
+  "utvidetMerking": {
+    "q": "Bruk utvidet merking.",
+    "end": true
+  },
+  "decideMarkingYourself": {
+    "q": "Bruk skjønn til å velge variant avhengig av kontekst og hvor omfattende innholdet er.",
+    "end": true
+  },
+  "markingNotRequired": {
+    "q": "Bruk skjønn til å velge om du vil merke innholdet eller ei, og i så fall hvordan.",
+    "end": true
+  },
+  "doNotUseAI": {
+    "q": "Generativ KI skal ikke brukes i forbindelse med saksbehandling.",
+    "end": true
+  }
+}
