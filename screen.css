@@ -1,3 +1,9 @@
 body {
-    color: green;
+    max-width: 75em;
+    margin: 2em auto;
+}
+
+button {
+    display: inline-block;
+    margin-right: 1em;
 }
