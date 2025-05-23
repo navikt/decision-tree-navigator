@@ -9,6 +9,7 @@ async function loadTree() {
         if (!response.ok) throw new Error("Could not load decision tree");
         tree = await response.json();
         render();
+        drawMermaid(tree);
     } catch (e) {
         console.error("Failed to load tree:", e);
         document.getElementById("tree").innerHTML = "<p>Kunne ikke laste beslutningstreet.</p>";
@@ -87,6 +88,39 @@ function render() {
 
     section.appendChild(btnRow);
 
+}
+
+// Generate Mermaid source code from the tree
+function mermaidSource(tree) {
+    const lines   = [];
+    const visited = new Set();
+
+    function visit(id) {
+        if (visited.has(id)) return;
+        visited.add(id);
+
+        const n   = tree[id];
+        const txt = n.q.replace(/"/g, '\\"').replace(/\n/g, ' ');
+        lines.push(`${id}["${txt}"]`);
+
+        if (!n.end) {
+            Object.values(n.options).forEach(opt => {
+                const edge = opt.buttonText.replace(/"/g, '\\"');
+                lines.push(`${id} -->|${edge}| ${opt.next}`);
+                visit(opt.next);           // DFS
+            });
+        }
+    }
+
+    visit("start");
+    return `graph TD\n${lines.join('\n')}`;
+}
+
+// Render the Mermaid diagram
+function drawMermaid(tree) {
+    const el = document.getElementById('mermaid-container');
+    el.textContent = mermaidSource(tree);
+    mermaid.run({ nodes: [el] });
 }
 
 
