@@ -1,15 +1,15 @@
-// Load decision tree from external JSON file instead of hardcoding
+
 let tree = {};
 let history = ["start"];
 let interacted = false;
 
+// Load decision tree from external JSON file instead of hardcoding
 async function loadTree() {
     try {
         const response = await fetch("trees/tree.json");
         if (!response.ok) throw new Error("Could not load decision tree");
         tree = await response.json();
         render();
-        drawMermaid(tree);
     } catch (e) {
         console.error("Failed to load tree:", e);
         document.getElementById("tree").innerHTML = "<p>Kunne ikke laste beslutningstreet.</p>";
@@ -22,7 +22,6 @@ function render() {
 
     pathSection.innerHTML = "";
     section.innerHTML = "";
-
 
     // Build the path
     const ul = document.createElement("ul");
@@ -52,7 +51,6 @@ function render() {
     const btnRow = document.createElement("div");
     btnRow.className =
         "navds-stack navds-hstack navds-stack-gap navds-stack-direction navds-stack-wrap";
-    /* give the utility its gap token */
     btnRow.style.setProperty("--__ac-stack-gap-xs", "var(--a-spacing-4)");
 
     // Put buttons in the wrapper
@@ -60,24 +58,34 @@ function render() {
         // Restart button
         const restart = document.createElement("button");
         restart.textContent = "Start på nytt";
-        restart.className   = "navds-button navds-button--primary navds-button--medium";
-        restart.onclick     = () => { history = ["start"]; interacted = false; render(); };
+        restart.className = "navds-button navds-button--primary navds-button--medium";
+        restart.onclick = () => {
+            history = ["start"];
+            interacted = false;
+            render();
+        };
         btnRow.appendChild(restart);
     } else {
         // Answer buttons
         for (const option of Object.values(node.options)) {
             const btn = document.createElement("button");
             btn.textContent = option.buttonText;
-            btn.className   = "navds-button navds-button--primary navds-button--medium";
-            btn.onclick     = () => { history.push(option.next); render(); };
+            btn.className = "navds-button navds-button--primary navds-button--medium";
+            btn.onclick = () => {
+                history.push(option.next);
+                render();
+            };
             btnRow.appendChild(btn);
         }
         // Back button
         if (history.length > 1) {
             const backBtn = document.createElement("button");
             backBtn.textContent = "Tilbake";
-            backBtn.className   = "navds-button navds-button--tertiary navds-button--medium";
-            backBtn.onclick     = () => { history.pop(); render(); };
+            backBtn.className = "navds-button navds-button--tertiary navds-button--medium";
+            backBtn.onclick = () => {
+                history.pop();
+                render();
+            };
             btnRow.appendChild(backBtn);
         }
     }
@@ -87,41 +95,70 @@ function render() {
     interacted = true;
 
     section.appendChild(btnRow);
-
+    drawMermaid(tree);
 }
 
 // Generate Mermaid source code from the tree
-function mermaidSource(tree) {
-    const lines   = [];
-    const visited = new Set();
+function mermaidSource(tree, history) {
+    const nodeLines = [];
+    const edgeLines = [];
+    const classLines = [];
+    let edgeNo = -1;
+    const visitedEdges = new Set();
+
+    const visitedNodes = new Set(history);
+    const current = history[history.length - 1];
 
     function visit(id) {
-        if (visited.has(id)) return;
-        visited.add(id);
+        const n = tree[id];
+        const txt = n.q.replace(/"/g, '\\"').replace(/\n/g, " ");
 
-        const n   = tree[id];
-        const txt = n.q.replace(/"/g, '\\"').replace(/\n/g, ' ');
-        lines.push(`${id}["${txt}"]`);
+        nodeLines.push(`${id}["${txt}"]`);
+
+        if (id === current) {
+            classLines.push(`class ${id} current`);
+        } else if (visitedNodes.has(id)) {
+            classLines.push(`class ${id} visited`);
+        }
 
         if (!n.end) {
             Object.values(n.options).forEach(opt => {
-                const edge = opt.buttonText.replace(/"/g, '\\"');
-                lines.push(`${id} -->|${edge}| ${opt.next}`);
-                visit(opt.next);           // DFS
+                const label = opt.buttonText.replace(/"/g, '\\"');
+                edgeNo += 1;
+                edgeLines.push(`${id} -->|${label}| ${opt.next}`);
+
+                // Mark edge as walked if it's part of the history
+                if (history.some((h, i) => i && history[i - 1] === id && h === opt.next)) {
+                    visitedEdges.add(edgeNo);
+                }
+                visit(opt.next);
             });
         }
     }
 
     visit("start");
-    return `graph TD\n${lines.join('\n')}`;
+
+    // Highlight walked edges
+    if (visitedEdges.size) {
+        edgeLines.push(
+            `linkStyle ${[...visitedEdges].join(",")} stroke:#1844a3,stroke-width:2px;`
+        );
+    }
+
+    classLines.push(
+        "classDef current fill:#fff2b3,stroke:#333,stroke-width:3px",
+        "classDef visited fill:#e6f0ff,stroke:#1844a3,stroke-width:2px"
+    );
+
+    return `graph TD\n${nodeLines.join("\n")}\n${edgeLines.join("\n")}\n${classLines.join("\n")}`;
 }
 
 // Render the Mermaid diagram
 function drawMermaid(tree) {
     const el = document.getElementById('mermaid-container');
-    el.textContent = mermaidSource(tree);
-    mermaid.run({ nodes: [el] });
+    el.textContent = mermaidSource(tree, history);
+    el.removeAttribute("data-processed");
+    mermaid.run({nodes: [el]});
 }
-
 
 document.addEventListener("DOMContentLoaded", loadTree);
