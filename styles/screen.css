@@ -108,3 +108,10 @@ footer {
     bottom: 0;
     background-color: #fff;
 }
+
+
+/* Graph styling overrides */
+.node rect, .node circle, .node ellipse, .node polygon, .node path {
+    fill: #fff!important
+
+}
