@@ -55,14 +55,30 @@ header {
 h2:focus {
     outline: none
 }
+
 #question {
     display: inline-block;
-    margin-top: 0;
+    margin: 0;
+
 }
 
 #question.final-result {
     background: url("../images/CheckmarkCircle.svg") no-repeat right .2em;
     padding-right: 1.75rem;
+}
+
+
+/* put this in app.css / style.css */
+.help-box {
+    background: #eef5ff;
+    border-left: 4px solid #1844a3;
+    padding: 1rem;
+    margin: .5rem 0 1.5rem;
+    border-radius: 4px;
+}
+
+.help-box a {
+    color: #000;
 }
 
 footer {

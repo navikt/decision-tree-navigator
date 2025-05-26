@@ -40,13 +40,25 @@ function render() {
     const current = history[history.length - 1];
     const node = tree[current];
 
-    // Build the question
+    // Build the question & help box
     const question = document.createElement("h2");
+    const wrapper = document.createElement("div");
+
+    wrapper.className = "question-wrapper";
     question.id = "question";
     question.setAttribute("tabindex", "-1");
     question.textContent = node.q;
     if (node.end) { question.classList.add("final-result"); }
-    section.appendChild(question);
+    wrapper.appendChild(question);
+
+    if (node.help) {
+        const helpBox = document.createElement("p");
+        helpBox.className = "help-box";
+        helpBox.innerHTML = node.help;
+        wrapper.appendChild(helpBox);
+    }
+
+    section.appendChild(wrapper);
 
     // Build the button wrapper
     const btnRow = document.createElement("div");
@@ -57,7 +69,7 @@ function render() {
 
     // Put buttons in the wrapper
     if (node.end) {
-        // Restart button
+        // Restart button (primary)
         const restart = document.createElement("button");
         restart.textContent = "Start på nytt";
         restart.className = "navds-button navds-button--primary navds-button--medium";
@@ -79,17 +91,19 @@ function render() {
             };
             btnRow.appendChild(btn);
         }
-        // Back button
-        if (history.length > 1) {
-            const backBtn = document.createElement("button");
-            backBtn.textContent = "Tilbake";
-            backBtn.className = "navds-button navds-button--tertiary navds-button--medium";
-            backBtn.onclick = () => {
-                history.pop();
-                render();
-            };
-            btnRow.appendChild(backBtn);
-        }
+    }
+
+    /*  👇  Back button now lives outside the if/else so it shows up everywhere  */
+    if (history.length > 1) {
+        const backBtn = document.createElement("button");
+        backBtn.textContent = "Tilbake";
+        backBtn.className = "navds-button navds-button--tertiary navds-button--medium";
+        backBtn.onclick = () => {
+            history.pop();
+            render();
+        };
+
+        btnRow.appendChild(backBtn);
     }
 
     // Only control focus after user interaction
