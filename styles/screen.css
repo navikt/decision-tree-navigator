@@ -61,7 +61,7 @@ h2:focus {
 }
 
 #question.final-result {
-    background: url("/images/CheckmarkCircle.svg") no-repeat right .2em;
+    background: url("../images/CheckmarkCircle.svg") no-repeat right .2em;
     padding-right: 1.75rem;
 }
 
