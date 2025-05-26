@@ -16,6 +16,7 @@ body {
 
 main {
     flex: 1;
+    background: #f2f3f5;
 }
 
 .wrapper {
@@ -38,6 +39,7 @@ header .wrapper, footer .wrapper {
 
 #decisions .wrapper {
     gap: 3rem;
+    padding-bottom: 2rem;
 }
 
 #decisions .wrapper > * {
@@ -66,8 +68,6 @@ header {
 }
 
 #diagram {
-    margin-top: 1.5rem;
-    background: #f2f3f5;
     padding: 1.5rem;
 }
 
