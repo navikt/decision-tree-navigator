@@ -32,14 +32,17 @@ header .wrapper, footer .wrapper {
     align-items: center;
 }
 
+#decisions, header {
+    background: #fff;
+}
+
 #decisions .wrapper {
     gap: 3rem;
 }
 
 #decisions .wrapper > * {
-    flex: 0 0 50%;
+    flex: 1 1;
 }
-
 
 h1 {
     line-height: 1.2;
@@ -49,7 +52,11 @@ header {
     border-bottom: 1px solid black;
 }
 
-#diagram, header, footer {
+#logo {
+    margin-top: .5em;
+}
+
+#decisions, #diagram, header, footer {
     padding: 0 2rem;
 }
 
@@ -58,11 +65,19 @@ header {
 }
 
 #diagram {
-    margin-top: 3rem;
+    margin-top: 1.5rem;
+    background: #f2f3f5;
+    padding: 1.5rem;
 }
 
 h2:focus {
     outline: none
+}
+
+button.print .navds-button__icon {
+    width: 24px;
+    height: 24px;
+    background: url("../images/PrinterSmall.svg") no-repeat center center;
 }
 
 #question {

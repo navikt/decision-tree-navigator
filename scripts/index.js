@@ -1,4 +1,3 @@
-
 let tree = {};
 let history = ["start"];
 let interacted = false;
@@ -37,6 +36,7 @@ function render() {
     }
     pathSection.appendChild(ul);
 
+
     const current = history[history.length - 1];
     const node = tree[current];
 
@@ -48,7 +48,23 @@ function render() {
     question.id = "question";
     question.setAttribute("tabindex", "-1");
     question.textContent = node.q;
-    if (node.end) { question.classList.add("final-result"); }
+
+    // Make a print button
+    function makePrintButton () {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "navds-button navds-button--primary navds-button--medium print";
+        btn.innerHTML = "<span class='navds-button__icon'></span><span class='navds-label'>Skriv ut resultatet</span>";
+        btn.addEventListener("click", () => window.print());
+        return btn;
+    }
+
+    // Add checkbox and print button when finishing the flow
+    if (node.end) {
+        question.classList.add("final-result");
+        pathSection.appendChild(makePrintButton());
+    }
+
     wrapper.appendChild(question);
 
     if (node.help) {
@@ -59,6 +75,7 @@ function render() {
     }
 
     section.appendChild(wrapper);
+
 
     // Build the button wrapper
     const btnRow = document.createElement("div");
@@ -71,8 +88,8 @@ function render() {
     if (node.end) {
         // Restart button (primary)
         const restart = document.createElement("button");
-        restart.textContent = "Start på nytt";
-        restart.className = "navds-button navds-button--primary navds-button--medium";
+        restart.innerHTML = "<span class='navds-label'>Start på nytt</span>";
+        restart.className = "navds-button navds-button--secondary navds-button--medium";
         restart.onclick = () => {
             history = ["start"];
             interacted = false;
@@ -83,7 +100,8 @@ function render() {
         // Answer buttons
         for (const option of Object.values(node.options)) {
             const btn = document.createElement("button");
-            btn.textContent = option.buttonText;
+            const btnText = option.buttonText;
+            btn.innerHTML = `<span class='navds-label'>${btnText}</span>`;
             btn.className = "navds-button navds-button--primary navds-button--medium";
             btn.onclick = () => {
                 history.push(option.next);
@@ -93,10 +111,10 @@ function render() {
         }
     }
 
-    /*  👇  Back button now lives outside the if/else so it shows up everywhere  */
+    // Back button
     if (history.length > 1) {
         const backBtn = document.createElement("button");
-        backBtn.textContent = "Tilbake";
+        backBtn.innerHTML = "<span class='navds-label'>Tilbake</span>";
         backBtn.className = "navds-button navds-button--tertiary navds-button--medium";
         backBtn.onclick = () => {
             history.pop();

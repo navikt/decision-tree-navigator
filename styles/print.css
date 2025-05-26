@@ -1,0 +1,25 @@
+@media print {
+    button.print, #buttons, footer {
+        display: none !important;
+    }
+
+    body {
+        margin: 0;
+    }
+
+    header {
+        border: 0;
+    }
+
+    .help-box {
+        border: 0;
+        margin-left: 0;
+        padding-left: 0;
+    }
+
+    header, #diagram {
+        padding: 0;
+    }
+
+
+}
