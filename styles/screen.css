@@ -62,6 +62,7 @@ header {
 
 #path ul {
     padding-left: 1em;
+    margin-bottom: 1.5rem;
 }
 
 #diagram {
@@ -82,7 +83,7 @@ button.print .navds-button__icon {
 
 #question {
     display: inline-block;
-    margin-bottom: 0;
+
 }
 
 #question.final-result {
@@ -94,7 +95,7 @@ button.print .navds-button__icon {
     background: #eef5ff;
     border-left: 4px solid #1844a3;
     padding: 1rem;
-    margin: .5rem 0 1.5rem;
+    margin: 0 0 2rem;
     border-radius: 4px;
 }
 
