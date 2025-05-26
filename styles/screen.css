@@ -9,28 +9,37 @@ html, body {
     margin: 0;
 }
 
-
 body {
     display: flex;
-    flex-flow: column nowrap
+    flex-flow: column nowrap;
 }
 
 main {
     flex: 1;
 }
 
-header, footer {
+.wrapper {
     display: flex;
     flex-flow: row nowrap;
     justify-content: space-between;
-    align-items: center;
     gap: 2rem;
+    max-width: 60em;
+    margin-left: auto;
+    margin-right: auto;
 }
 
-
-footer {
-    background-color: #fff;
+header .wrapper, footer .wrapper {
+    align-items: center;
 }
+
+#decisions .wrapper {
+    gap: 3rem;
+}
+
+#decisions .wrapper > * {
+    flex: 0 0 50%;
+}
+
 
 h1 {
     line-height: 1.2;
@@ -40,7 +49,7 @@ header {
     border-bottom: 1px solid black;
 }
 
-#path, #diagram, #tree, header, footer {
+#diagram, header, footer {
     padding: 0 2rem;
 }
 
@@ -58,8 +67,7 @@ h2:focus {
 
 #question {
     display: inline-block;
-    margin: 0;
-
+    margin-bottom: 0;
 }
 
 #question.final-result {
@@ -67,8 +75,6 @@ h2:focus {
     padding-right: 1.75rem;
 }
 
-
-/* put this in app.css / style.css */
 .help-box {
     background: #eef5ff;
     border-left: 4px solid #1844a3;
@@ -85,4 +91,5 @@ footer {
     border-top: 1px solid black;
     position: sticky;
     bottom: 0;
+    background-color: #fff;
 }
