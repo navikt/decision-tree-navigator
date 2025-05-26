@@ -1,0 +1,72 @@
+@import "https://unpkg.com/@navikt/ds-css@latest/dist/index.min.css";
+
+* {
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    margin: 0;
+}
+
+
+body {
+    display: flex;
+    flex-flow: column nowrap
+}
+
+main {
+    flex: 1;
+}
+
+header, footer {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 2rem;
+}
+
+
+footer {
+    background-color: #fff;
+}
+
+h1 {
+    line-height: 1.2;
+}
+
+header {
+    border-bottom: 1px solid black;
+}
+
+#path, #diagram, #tree, header, footer {
+    padding: 0 2rem;
+}
+
+#path ul {
+    padding-left: 1em;
+}
+
+#diagram {
+    margin-top: 3rem;
+}
+
+h2:focus {
+    outline: none
+}
+#question {
+    display: inline-block;
+    margin-top: 0;
+}
+
+#question.final-result {
+    background: url("/images/CheckmarkCircle.svg") no-repeat right .2em;
+    padding-right: 1.75rem;
+}
+
+footer {
+    border-top: 1px solid black;
+    position: sticky;
+    bottom: 0;
+}

@@ -6,7 +6,7 @@ Besøk grensesnittet på [https://navikt.github.io/decision-tree-navigator/](htt
 
 
 
-## Gjör så her:
+## Gör så här:
 - Åpen index.html i en nettleser for å bruke.
 - Rediger index.html i ditt favoritt editor for å redigere.
 

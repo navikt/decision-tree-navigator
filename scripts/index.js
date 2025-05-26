@@ -45,12 +45,14 @@ function render() {
     question.id = "question";
     question.setAttribute("tabindex", "-1");
     question.textContent = node.q;
+    if (node.end) { question.classList.add("final-result"); }
     section.appendChild(question);
 
     // Build the button wrapper
     const btnRow = document.createElement("div");
     btnRow.className =
         "navds-stack navds-hstack navds-stack-gap navds-stack-direction navds-stack-wrap";
+    btnRow.id = "buttons";
     btnRow.style.setProperty("--__ac-stack-gap-xs", "var(--a-spacing-4)");
 
     // Put buttons in the wrapper
