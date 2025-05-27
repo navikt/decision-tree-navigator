@@ -1,0 +1,76 @@
+{
+    "start": {
+        "q": "Har Nav utviklet eller spesialbestilt KI-systemet?",
+        "help": "Hvis du kjøper hyllevare, kan du svare 'Nei'.",
+        "options": {
+          "yes": {
+            "next": "provider",
+            "buttonText": "Ja",
+            "label": "Du utvikler eller spesialbestiller KI-systemet."
+          },
+          "no": {
+            "next": "node2",
+            "buttonText": "Nei",
+            "label": "Du hverken utvikler eller spesialbestiller KI-systemet."
+          }
+        }
+      },
+      "node2": {
+        "q": "Gjør du trening, finjusering ('fine-tuning'), parameterendring eller annet som vesentlig endrer KI-systemet?",
+        "help": "Se Q&A på 'substantial modification'",
+        "options": {
+          "isReport": {
+            "next": "provider",
+            "buttonText": "Ja",
+            "label": "Du gjør en vesentlig endring ('substantial modification')"
+          },
+          "notReport": {
+            "next": "node3",
+            "buttonText": "Nei",
+            "label": "Du ingen vesentlig endring ('substantial modification')"
+          }
+        }
+      },   
+      "node3": {
+        "q": "Skal du bruke KI-systemet til noe annet enn det tilbyder har bestemt at KI-systemet skal brukes til?",
+        "help": "Sjekk anvisningen fra leverandøren for å forsikre deg om hva systemet kan brukes til.'",
+        "options": {
+          "isReport": {
+            "next": "provider",
+            "buttonText": "Ja",
+            "label": "Du skal bruke KI-systemet til noe annet enn det tilbyder har beskrevet ('intended purpose')"
+          },
+          "notReport": {
+            "next": "node4",
+            "buttonText": "Nei",
+            "label": "Du skal bruke KI-systemet i tråd med tilbyders anvisninger"
+          }
+        }
+      }, 
+      "node4": {
+        "q": "Skal KI-systemet tas i bruk under Navs navn og logo?",
+        "help": "En tekst som definerer hva dette betyr.",
+        "options": {
+          "isReport": {
+            "next": "provider",
+            "buttonText": "Ja",
+            "label": "KI-systemet benyttes under Navs navn og logo"
+          },
+          "notReport": {
+            "next": "deployer",
+            "buttonText": "Nei",
+            "label": "Nav har rollen som deployer av KI-systemet."
+          }
+        }
+      }, 
+      "provider": {
+        "q": "Nav har rollen som tilbyder av KI-systemet",
+        "help": "Se art.3 nr.3 i KI-forordningen for definisjonen av 'tilbyder'",
+        "end": true
+      },  
+      "deployer": {
+        "q": "Nav har rollen som deployer av KI-systemet",
+        "help": "Se art.3 nr.4 i KI-forordningen for definisjonen av 'deployer'. Du får de forpliktelsene som følger av tildyderens risikoklassifisering.",
+        "end": true
+      }
+    }

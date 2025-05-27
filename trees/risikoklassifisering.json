@@ -1,0 +1,140 @@
+{
+    "start": {
+        "q": "Skal KI-systemet anvendes på hjelpemiddelområdet?",
+        "help": "Havner vi i Annex 1 på hjelpemiddelområdet (vi blir bestiller i det minste? gjøre selv)?",
+        "options": {
+          "yes": {
+            "next": "highrisk",
+            "buttonText": "Ja",
+            "label": "KI-systemet skal anvendes på hjelpemiddelområdet."
+          },
+          "no": {
+            "next": "node2",
+            "buttonText": "Nei",
+            "label": "KI-systemet skal ikke anvendes på hjelpemiddelområdet."
+          }
+        }
+      },
+      "node2": {
+        "q": "Skal du bruke KI-systemet til oppgaver som er en del av NAVs offentlige myndighet?",
+        "help": "Presisere at dette gjelder også når systemet ikke har grensesnitt mot borgerne.",
+        "options": {
+          "isReport": {
+            "next": "profilering",
+            "buttonText": "Ja",
+            "label": "KI-systemet skal brukes til offentlig myndighetsutøvelse."
+          },
+          "notReport": {
+            "next": "node3",
+            "buttonText": "Nei",
+            "label": "KI-systemet skal ikke brukes til offentlig myndighetsutøvelse."
+          }
+        }
+      },   
+      "node3": {
+        "q": "Skal du bruke KI systemet til rekrutering og ansettelse eller for å monitorere eller evaluere Nav ansattes aktivitet/innsats?",
+        "help": "",
+        "options": {
+          "isReport": {
+            "next": "profilering",
+            "buttonText": "Ja",
+            "label": "KI-systemet skal brukes til rekruttering/ansettelse eller for å monitorere/evaluere Nav ansatte."
+          },
+          "notReport": {
+            "next": "lowrisk",
+            "buttonText": "Nei",
+            "label": "KI-systemet skal ikke brukes til rekruttering/ansettelse eller for å monitorere/evaluere Nav ansatte."
+          }
+        }
+      },
+      "profilering": {
+        "q": "Profilerer KI -systemet individer (ref. definisjon i GDPR)",
+        "help": "GDPR artikkel 4 pkt 4 definerer profilering som 'enhver form for automatisert behandling av personopplysninger som innebærer å bruke personopplysninger for å vurdere visse personlige aspekter knyttet til en fysisk person, særlig for å analysere eller forutsi aspekter som gjelder nevnte fysiske persons arbeidsprestasjoner, økonomiske situasjon, helse, personlige preferanser, interesser, pålitelighet, atferd, plassering eller bevegelser'",
+        "options": {
+          "isReport": {
+            "next": "highrisk",
+            "buttonText": "Ja",
+            "label": "KI-systemet profilerer individer."
+          },
+          "notReport": {
+            "next": "node4",
+            "buttonText": "Nei",
+            "label": "KI-systemet profilerer ikke individer."
+          }
+        }
+      }, 
+      "node4": {
+        "q": "Skal KI- systemet ha en marginal rolle, fordi den utfører kun et snevert prosessteg (art 3 6.ledd bokstav a)?",
+        "help": "Eksempler på 'snevert prosessteg' (jf. fortale 53): systemet brukes for å strukturere ustrukturert data, systemet klassifiserer innkommendedokumenter i forhåndsdefinerte kategorier, systemet brukes for å detektere duplikater blant et stort antall søknader",
+        "options": {
+          "isReport": {
+            "next": "highrisk",
+            "buttonText": "Ja",
+            "label": "KI-systemet utfører mer enn et snevert prosesssteg."
+          },
+          "notReport": {
+            "next": "node5",
+            "buttonText": "Nei",
+            "label": "KI-systemet utfører et snevert prosesssteg."
+          }
+        }
+      },
+      "node5": {
+        "q": "Skal KI-systemet brukes for å forbedre resultatet av en tidligere avsluttet menneskelig oppgave/ aktivitet?",
+        "help": "Når KI forbedrer resultatet av en aktivitet tidligere gjennomført av et menneske, utgjør bruken av KI kun et tillegg til den menneskelige aktiviteten. Eksempler på dette (jf. fortale 53) kan være: KI brukes for å forbedre språk eller uttrykksform i dokumenter forfattet av et menneske, synliggjøre hvordan en avgjørelse støtter opp under strategiske mål, visjoner eller prioriteringer. Andre eksempler: oppsummering av møte/ møtereferat",
+        "options": {
+          "isReport": {
+            "next": "highrisk",
+            "buttonText": "Ja",
+            "label": "KI-systemet brukes for å forbedre resultatet av en tidligere avsluttet menneskelig oppgave/aktivitet."
+          },
+          "notReport": {
+            "next": "node6",
+            "buttonText": "Nei",
+            "label": "KI-systemet *ikke* brukes for å forbedre resultatet av en tidligere avsluttet menneskelig oppgave/aktivitet."
+          }
+        }
+      },
+      "node6": {
+        "q": "Skal KI-systemet brukes for å gjenkjenne mønstre i avgjørelser eller gjenkjenne avvik fra tidligere praksis?",
+        "help": "",
+        "options": {
+          "isReport": {
+            "next": "highrisk",
+            "buttonText": "Ja",
+            "label": "KI-systemet brukes for å gjenkjenne mønstre i avgjørelser eller gjenkjenne avvik fra tidligere praksis"
+          },
+          "notReport": {
+            "next": "node7",
+            "buttonText": "Nei",
+            "label": "KI-systemet *skal ikke* brukes for å gjenkjenne mønstre i avgjørelser eller gjenkjenne avvik fra tidligere praksis"
+          }
+        }
+      },
+      "node7": {
+        "q": "Skal KI-systemet brukes for å forberede en avgjørelse eller vurdering på et av områdene omtalt i Billag 3? ",
+        "help": "Andre eksempler: oppsummere dokumenter som er kommet inn som underlag til en søknad, oppsummere en vurdering fra rådgivende overlege",
+        "options": {
+          "isReport": {
+            "next": "lowrisk",
+            "buttonText": "Ja",
+            "label": "KI-systemet brukes for å forberede en avgjørelse eller vurdering på et av områdene omtalt i Billag 3."
+          },
+          "notReport": {
+            "next": "highrisk",
+            "buttonText": "Nei",
+            "label": "KI-systemet *skal ikke* brukes for å forberede en avgjørelse eller vurdering på et av områdene omtalt i Billag 3"
+          }
+        }
+      },        
+      "highrisk": {
+        "q": "Høy risiko",
+        "help": "Se art.3 nr.3 i KI-forordningen for definisjonen av 'tilbyder'",
+        "end": true
+      },  
+      "lowrisk": {
+        "q": "Ikke høy risiko",
+        "help": "Se art.3 nr.4 i KI-forordningen for definisjonen av 'deployer'. Du får de forpliktelsene som følger av tildyderens risikoklassifisering.",
+        "end": true
+      }
+    }
