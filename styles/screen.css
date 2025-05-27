@@ -19,22 +19,26 @@ main {
     background: #f2f3f5;
 }
 
+#index article, .wrapper, main header {
+    max-width: 60em;
+    margin-left: auto;
+    margin-right: auto;
+}
+
 .wrapper {
     display: flex;
     flex-flow: row nowrap;
     justify-content: space-between;
     gap: 2rem;
-    max-width: 60em;
-    margin-left: auto;
-    margin-right: auto;
 }
 
 header .wrapper, footer .wrapper {
     align-items: center;
 }
 
-#decisions, header {
+#decisions, #site-header, #top-section {
     background: #fff;
+    display: flow-root;
 }
 
 #decisions .wrapper {
@@ -46,19 +50,34 @@ header .wrapper, footer .wrapper {
     flex: 1 1;
 }
 
-h1 {
-    line-height: 1.2;
-}
-
-header {
+#site-header {
     border-bottom: 1px solid black;
 }
+
+#site-header h1 {
+    font-size: 1.75em;
+}
+
+#site-header h1 a {
+    text-decoration: none;
+    color: #000;
+
+}
+
+main h1 {
+    margin-bottom: 0;
+}
+
 
 #logo {
     margin-top: .5em;
 }
 
-#decisions, #diagram, header, footer {
+h1 {
+    line-height: 1.2;
+}
+
+#decisions, #diagram {
     padding: 0 2rem;
 }
 
@@ -83,7 +102,6 @@ button.print .navds-button__icon {
 
 #question {
     display: inline-block;
-
 }
 
 #question.final-result {
@@ -113,6 +131,6 @@ footer {
 
 /* Graph styling overrides */
 .node rect, .node circle, .node ellipse, .node polygon, .node path {
-    fill: #fff!important
+    fill: #fff !important
 
 }
