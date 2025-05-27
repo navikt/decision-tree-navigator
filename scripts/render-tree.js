@@ -178,11 +178,38 @@ function mermaidSource(tree, history) {
     const visitedNodes = new Set(history);
     const current = history[history.length - 1];
 
+    function drawNode(id, txt, shape = "rect") {
+        const esc = txt.replace(/"/g, '\\"').replace(/\n/g, " ");
+        switch (shape) {
+            case "round":
+                return `${id}("${esc}")`;
+            case "circle":
+                return `${id}(("${esc}"))`;
+            case "stadium":
+                return `${id}(["${esc}"])`;
+            case "subroutine":
+                return `${id}[[${esc}]]`;
+            case "cylinder":
+                return `${id}[("${esc}")]`;
+            case "diamond":
+            case "rhombus":
+                return `${id}{${esc}}`;
+            case "hexagon":
+                return `${id}{{${esc}}}`;
+            case "asymmetric":
+                return `${id}>${esc}]`;
+            case "parallelogram":
+                return `${id}[/"${esc}"/]`;
+            case "trapezoid":
+                return `${id}[/\\"${esc}\\"\\]`;
+            default:
+                return `${id}["${esc}"]`;
+        }
+    }
+
     function visit(id) {
         const n = tree[id];
-        const txt = n.q.replace(/"/g, '\\"').replace(/\n/g, " ");
-
-        nodeLines.push(`${id}["${txt}"]`);
+        nodeLines.push(drawNode(id, n.q, n.shape));
 
         if (id === current) {
             classLines.push(`class ${id} current`);
@@ -196,7 +223,7 @@ function mermaidSource(tree, history) {
                 edgeNo += 1;
                 edgeLines.push(`${id} -->|${label}| ${opt.next}`);
 
-                // Mark edge as walked if it's part of the history
+                // highlight walked edges
                 if (history.some((h, i) => i && history[i - 1] === id && h === opt.next)) {
                     visitedEdges.add(edgeNo);
                 }
@@ -207,7 +234,6 @@ function mermaidSource(tree, history) {
 
     visit("start");
 
-    // Highlight walked edges
     if (visitedEdges.size) {
         edgeLines.push(
             `linkStyle ${[...visitedEdges].join(",")} stroke:#1844a3,stroke-width:2px;`
@@ -219,8 +245,11 @@ function mermaidSource(tree, history) {
         "classDef visited fill:#e6f0ff,stroke:#1844a3,stroke-width:2px"
     );
 
-    return `graph TD\n${nodeLines.join("\n")}\n${edgeLines.join("\n")}\n${classLines.join("\n")}`;
+    return `graph TD\n${nodeLines.join("\n")}\n${edgeLines.join(
+        "\n"
+    )}\n${classLines.join("\n")}`;
 }
+
 
 // Render the Mermaid diagram
 function drawMermaid(tree) {
@@ -229,9 +258,6 @@ function drawMermaid(tree) {
     el.removeAttribute("data-processed");
     mermaid.run({nodes: [el]});
 }
-
-// document.addEventListener("DOMContentLoaded", loadTree);
-
 
 (async () => {
 

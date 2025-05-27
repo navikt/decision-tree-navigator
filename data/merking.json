@@ -2,6 +2,7 @@
   "start": {
     "q": "Er innholdet ifm. saksbehandling?",
     "help": "Gjelder innholdet en konkret sak, beslutning eller myndighetsutøvelse?",
+    "shape": "circle",
     "options": {
       "yes": {
         "next": "doNotUseAI",
@@ -18,6 +19,7 @@
   "contentType": {
     "q": "Er innholdet en rapport?",
     "help": "Rapporter inkluderer typisk analyser, oppsummeringer eller vurderinger laget for dokumentasjon eller deling.",
+    "shape": "diamond",
     "options": {
       "isReport": {
         "next": "utvidetMerking",
@@ -34,6 +36,7 @@
   "publicContent": {
     "q": "Er innholdet tilgjengelig for allmenheten?",
     "help": "Skal innholdet publiseres på nav.no eller deles åpent med eksterne parter?",
+    "shape": "diamond",
     "options": {
       "isPublic": {
         "next": "minimalMarking",
@@ -50,6 +53,7 @@
   "realisticContent": {
     "q": "Er innholdet fotorealistisk/virkelighetstro media?",
     "help": "Omfatter innholdet bilder, video eller lyd som kan forveksles med virkelige personer, sted eller hendelser?",
+    "shape": "diamond",
     "options": {
       "isRealistic": {
         "next": "minimalMarking",
@@ -66,6 +70,7 @@
   "normativeContent": {
     "q": "Er innholdet retningsgivende eller arkiveringspliktig?",
     "help": "Retningsgivende innhold er innhold som gir føringer for arbeid. Arkiveringsplikt innebærer at dokumentet skal lagres i arkivsystem.",
+    "shape": "diamond",
     "options": {
       "isNormative": {
         "next": "decideMarkingYourself",
@@ -82,26 +87,31 @@
   "minimalMarking": {
     "q": "Bruk minimal merking.",
     "help": "Innholdet bør ha tydelig merking, men det holder med enkel informasjon om at KI er brukt.",
+    "shape": "stadium",
     "end": true
   },
   "utvidetMerking": {
     "q": "Bruk utvidet merking.",
     "help": "Innholdet krever tydelig og detaljert merking som beskriver hvordan og hvorfor KI er brukt.",
+    "shape": "stadium",
     "end": true
   },
   "decideMarkingYourself": {
     "q": "Bruk skjønn til å velge variant avhengig av kontekst og hvor omfattende innholdet er.",
-    "help": "Det finnes ingen klar anbefaling. Vurder hvilken type merking som er mest hensiktsmessig i konteksten. Se <a href='https://navno.sharepoint.com/sites/intranett-Kunstigintelligens/SitePages/Merking-av-innhold-generert-eller-bearbeidet-med-KI.aspx' target='_blank' >intranett-artikkelen om merking (åpner i en ny fane)</a> for detaljer.",
+    "help": "Det finnes ingen klar anbefaling. Vurder hvilken type merking som er mest hensiktsmessig i konteksten. Se <a href='https://navno.sharepoint.com/sites/intranett-Kunstigintelligens/SitePages/Merking-av-innhold-generert-eller-bearbeidet-med-KI.aspx' target='_blank'>intranett-artikkelen om merking</a> for detaljer.",
+    "shape": "stadium",
     "end": true
   },
   "markingNotRequired": {
     "q": "Bruk skjønn til å velge om du vil merke innholdet eller ei, og i så fall hvordan.",
     "help": "Merking er ikke nødvendig, men kan være hensiktsmessig. Vurder situasjonen.",
+    "shape": "stadium",
     "end": true
   },
   "doNotUseAI": {
     "q": "Generativ KI skal ikke brukes i forbindelse med saksbehandling.",
     "help": "For å ivareta personvern, forvaltningsrett og kvalitet skal ikke KI brukes i saker som påvirker enkeltpersoner direkte.",
+    "shape": "stadium",
     "end": true
   }
 }
