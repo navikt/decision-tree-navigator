@@ -68,14 +68,14 @@
         "help": "Se art.3 nr.3 i KI-forordningen for definisjonen av 'tilbyder'",
         "options": {
           "isReport": {
-            "next": "utvidetMerking",
-            "buttonText": "Ja",
-            "label": "Innholdet er en rapport."
+            "next": "",
+            "buttonText": "",
+            "label": ""
           },
           "notReport": {
-            "next": "publicContent",
-            "buttonText": "Nei",
-            "label": "Innholdet er ikke en rapport."
+            "next": "",
+            "buttonText": "",
+            "label": ""
           }
         }
       },  
