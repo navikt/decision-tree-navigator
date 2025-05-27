@@ -5,8 +5,13 @@
     "file": "merking.json"
   },
   {
+    "id": "provider-deployer",
+    "title": "Er jeg provider eller deployer?",
+    "file": "deployer-provider.json"
+  },
+  {
     "id": "risiko",
-    "title": "Hvilket risikonivå er KI-systemet mitt?",
-    "file": "risikoklassifisering_av_ki_systemer.json"
+    "title": "Hvilket risikonivå har KI-systemet mitt?",
+    "file": "risikoklassifisering.json"
   }
 ]
