@@ -1,7 +1,7 @@
 async function loadList () {
     const nav = document.getElementById('tree-list');
     const ul = document.createElement("ul");
-    const trees = await fetch('../data/trees.json').then(r => r.json());
+    const trees = await fetch('data/trees.json').then(r => r.json());
 
     trees.forEach(({ id, title }) => {
         const li = document.createElement('li');
