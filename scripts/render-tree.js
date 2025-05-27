@@ -2,12 +2,44 @@ let tree = {};
 let history = ["start"];
 let interacted = false;
 
+// Figure out which tree we're loading based on the URL params
+const params = new URLSearchParams(window.location.search);
+const id = params.get("id");
+
+console.log("[viewer] script loaded, id =", id);
+
+if (!id) {
+    document.body.innerHTML =
+        "<p>No <code>id</code> query-parameter was supplied.</p>";
+    throw new Error("Missing ?id=");
+}
+
+
+// Load the tree data
+let entry = {title: id, file: `${id}.json`};
+
+try {
+    const catalog = await fetch("data/trees.json").then(r => r.json());
+    const match = catalog.find(t => t.id === id);
+    if (match) entry = match;
+} catch (_) {
+}
+
+window.TREE_FILE = `data/${entry.file}`;
+window.TREE_TITLE = entry.title;
+document.title = entry.title;
+
+
 // Load decision tree from external JSON file instead of hardcoding
 async function loadTree() {
     try {
-        const response = await fetch("trees/tree.json");
+
+        const response = await fetch(window.TREE_FILE);
         if (!response.ok) throw new Error("Could not load decision tree");
+
         tree = await response.json();
+
+
         render();
     } catch (e) {
         console.error("Failed to load tree:", e);
@@ -16,6 +48,9 @@ async function loadTree() {
 }
 
 function render() {
+
+    document.getElementById("tree-name").textContent = window.TREE_TITLE;
+
     const section = document.getElementById("tree");
     const pathSection = document.getElementById("path");
 
@@ -50,7 +85,7 @@ function render() {
     question.textContent = node.q;
 
     // Make a print button
-    function makePrintButton () {
+    function makePrintButton() {
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "navds-button navds-button--primary navds-button--medium print";
@@ -195,4 +230,36 @@ function drawMermaid(tree) {
     mermaid.run({nodes: [el]});
 }
 
-document.addEventListener("DOMContentLoaded", loadTree);
+// document.addEventListener("DOMContentLoaded", loadTree);
+
+
+(async () => {
+
+    const params = new URLSearchParams(location.search);
+    const id = params.get("id");
+    if (!id) {
+        document.body.innerHTML =
+            "<p>No <code>id</code> query-parameter was supplied.</p>";
+        return;
+    }
+
+    let entry = {title: id, file: `${id}.json`};
+    try {
+        const r = await fetch("data/trees.json");
+        if (r.ok) {
+            const cat = await r.json();
+            const m = cat.find(t => t.id === id);
+            if (m) entry = m;
+        }
+    } catch (e) {
+        console.warn("No catalog – falling back to", entry.file);
+    }
+
+    window.TREE_FILE = `data/${entry.file}`;
+    window.TREE_TITLE = entry.title;
+    document.title = entry.title;
+    const h1 = document.getElementById("tree-name");
+    if (h1) h1.textContent = entry.title;
+
+    await loadTree();
+})();

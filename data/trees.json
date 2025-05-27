@@ -1,0 +1,12 @@
+[
+  {
+    "id": "merking",
+    "title": "Bør jeg merke KI-innholdet mitt?",
+    "file": "merking.json"
+  },
+  {
+    "id": "risiko",
+    "title": "Hvilket risikonivå er KI-systemet mitt?",
+    "file": "risikoklassifisering_av_ki_systemer.json"
+  }
+]

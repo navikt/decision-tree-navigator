@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <html lang="no">
 <head>
-    <title>Beslutt: ta en avgjørelse</title>
+    <title>Beslutt: Bør jeg merke KI-innholdet mitt?</title>
     <meta charset="UTF-8"/>
     <link rel="stylesheet" href="styles/screen.css"/>
     <link rel="stylesheet" href="styles/print.css" media="print">
+    <script type="module" src="scripts/render-tree.js"></script>
 </head>
 
 <body>
@@ -15,7 +16,7 @@
 
         <header>
             <div class="wrapper">
-                <h1>Beslutt: ta en avgjørelse</h1>
+                <h1 id="tree-name"></h1>
                 <div id="logo">
                     <svg xmlns="http://www.w3.org/2000/svg" width="64" height="20" fill="none" viewBox="0 0 64 20"
                          focusable="false"
@@ -28,7 +29,20 @@
             </div>
         </header>
 
-        <nav id="tree-list"></nav>
+        <section id="decisions">
+            <div class="wrapper">
+                <div id="tree"></div>
+
+                <div id="answers">
+                    <h2>Dine svar:</h2>
+                    <div id="path"></div>
+                </div>
+            </div>
+        </section>
+
+        <section id="diagram" aria-label="Beslutningsgraf">
+            <div id="mermaid-container" class="mermaid"></div>
+        </section>
 
     </article>
 
@@ -41,7 +55,14 @@
     </div>
 </footer>
 
-<script type="module" src="scripts/list-trees.js"></script>
 
+<script src="scripts/mermaid.min.js"></script>
+<script>
+    mermaid.initialize({
+        startOnLoad: false,
+        securityLevel: "strict",
+        theme: "neutral"
+    });
+</script>
 </body>
 </html>
