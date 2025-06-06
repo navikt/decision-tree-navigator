@@ -1,7 +1,9 @@
 {
     "start": {
         "q": "Har Nav utviklet eller spesialbestilt KI-systemet?",
-        "help": "Hvis du kjøper hyllevare, kan du svare 'Nei'.",
+        "help": "Et eksempel på det motsatte er der Nav kjøper hyllevare, 
+        altså et ferdigutviklet KI-system eller en GKI-modell som allerede
+        finnes på markedet hos en leverandør. I disse tilfellene kan du svare 'nei' her.",
         "options": {
           "yes": {
             "next": "provider",
