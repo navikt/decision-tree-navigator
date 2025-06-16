@@ -65,7 +65,7 @@
         }
     }, 
     "provider": {
-        "q": "Nav har rollen som tilbyder av KI-systemet",
+        "q": "Nav har rollen som provider av KI-systemet",
         "help": "Se art.3 nr.3 i KI-forordningen for definisjonen av 'tilbyder'",
         "shape": "circle",
         "end": true
