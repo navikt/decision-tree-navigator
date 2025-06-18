@@ -174,8 +174,9 @@ function mermaidSource(tree, history) {
     const classLines = [];
     let edgeNo = -1;
     const visitedEdges = new Set();
-
-    const visitedNodes = new Set(history);
+    const visitedNodes = new Set();     // for traversal
+    const historySet = new Set(history); // for styling
+    const drawnEdges = new Set();
     const current = history[history.length - 1];
 
     function drawNode(id, txt, shape = "rect") {
@@ -208,29 +209,40 @@ function mermaidSource(tree, history) {
     }
 
     function visit(id) {
+        if (visitedNodes.has(id)) return;
+        visitedNodes.add(id);
+
         const n = tree[id];
         nodeLines.push(drawNode(id, n.q, n.shape));
 
         if (id === current) {
             classLines.push(`class ${id} current`);
-        } else if (visitedNodes.has(id)) {
+        } else if (historySet.has(id)) {
             classLines.push(`class ${id} visited`);
         }
 
-        if (!n.end) {
-            Object.values(n.options).forEach(opt => {
-                const label = opt.buttonText.replace(/"/g, '\\"');
-                edgeNo += 1;
-                edgeLines.push(`${id} -->|${label}| ${opt.next}`);
 
-                // highlight walked edges
-                if (history.some((h, i) => i && history[i - 1] === id && h === opt.next)) {
-                    visitedEdges.add(edgeNo);
+        if (!n.end) {
+            for (const opt of Object.values(n.options)) {
+                const label = opt.buttonText.replace(/"/g, '\\"');
+                const edgeKey = `${id}->${opt.next}`;
+
+                if (!drawnEdges.has(edgeKey)) {
+                    edgeNo++;
+                    edgeLines.push(`${id} -->|${label}| ${opt.next}`);
+                    drawnEdges.add(edgeKey);
+
+                    // Highlight edge if it's part of the actual clicked path
+                    if (history.some((h, i) => i && history[i - 1] === id && h === opt.next)) {
+                        visitedEdges.add(edgeNo);
+                    }
                 }
+
                 visit(opt.next);
-            });
+            }
         }
     }
+
 
     visit("start");
 
