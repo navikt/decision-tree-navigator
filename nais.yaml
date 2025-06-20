@@ -1,0 +1,14 @@
+apiVersion: "nais.io/v1"
+kind: "Application"
+metadata:
+  name: "decision tree navigator"
+spec:
+  image: "{{image}}"
+  port: 80
+  replicas: 2
+  ingress:
+    - beslutt.nav.no
+  resources:
+    requests:
+      cpu: "50m"
+      memory: "64Mi"
