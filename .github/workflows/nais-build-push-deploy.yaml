@@ -1,0 +1,32 @@
+name: Build and Push Docker Image with NAIS
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build_and_push:
+    permissions:
+      contents: "read"
+      id-token: "write"
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Build and Push Docker Image
+      uses: nais/docker-build-push@v0
+      id: docker-push
+      with:
+        team: team????  | | :
+        tenant: nav
+
+    - name: Deploy
+      uses: nais/deploy/actions/deploy@v2
+      with:
+        application: decision-tree-navigator
+      env:
+        IMAGE: ${{ steps.docker-push.outputs.image }}
+        TELEMETRY: ${{ steps.docker-push.outputs.telemetry }}
