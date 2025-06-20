@@ -30,3 +30,4 @@ jobs:
       env:
         IMAGE: ${{ steps.docker-push.outputs.image }}
         TELEMETRY: ${{ steps.docker-push.outputs.telemetry }}
+        RESOURCE: nais.yaml
