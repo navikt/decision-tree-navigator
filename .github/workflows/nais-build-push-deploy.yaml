@@ -20,7 +20,7 @@ jobs:
       uses: nais/docker-build-push@v0
       id: docker-push
       with:
-        team: team????  | | :
+        team: tada
         tenant: nav
 
     - name: Deploy
