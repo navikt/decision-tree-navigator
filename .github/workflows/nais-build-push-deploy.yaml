@@ -27,9 +27,8 @@ jobs:
       uses: nais/deploy/actions/deploy@v2
       with:
         application: decision-tree-navigator
-        cluster: prod-gcp
-        namespace: tada
       env:
         IMAGE: ${{ steps.docker-push.outputs.image }}
         TELEMETRY: ${{ steps.docker-push.outputs.telemetry }}
         RESOURCE: nais.yaml
+        CLUSTER: prod-gcp
