@@ -10,8 +10,8 @@ spec:
   image: {{image}}
   port: 80
   replicas: 2
-  ingress:
-    - beslutt.nav.no
+  ingresses:
+    - https://beslutt.nav.no
   resources:
     requests:
       cpu: "50m"
