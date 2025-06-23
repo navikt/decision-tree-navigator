@@ -21,9 +21,9 @@ COPY images /srv/images
 COPY scripts /srv/scripts
 COPY styles /srv/styles
 
-RUN echo -e ':80\nroot * /srv\nfile_server' > /srv/Caddyfile
+RUN echo -e ':8080\nroot * /srv\nfile_server' > /srv/Caddyfile
 
-EXPOSE 80
+EXPOSE 8080
 USER caddyuser
 
 CMD ["/srv/caddy", "run", "--config", "/srv/Caddyfile"]
