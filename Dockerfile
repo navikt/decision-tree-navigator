@@ -1,12 +1,29 @@
-FROM caddy:alpine
+FROM alpine:latest
+ENV CADDY_VERSION="2.7.4"
 
-COPY index.html /usr/share/caddy/index.html
-COPY tree.html /usr/share/caddy/tree.html
+RUN apk add --no-cache curl tar
 
-COPY data /usr/share/caddy/data
-COPY images /usr/share/caddy/images
-COPY styles /usr/share/caddy/styles
+RUN addgroup -S caddygroup && adduser -S -G caddygroup -u 1069 caddyuser
 
-COPY scripts /usr/share/caddy/scripts
+WORKDIR /srv
+
+RUN curl -L "https://github.com/caddyserver/caddy/releases/download/v${CADDY_VERSION}/caddy_${CADDY_VERSION}_linux_amd64.tar.gz" \
+    | tar -xz -C /srv/ caddy && \
+    chmod +x /srv/caddy && \
+    chown caddyuser:caddygroup /srv/caddy
+
+RUN chown -R caddyuser:caddygroup /srv
+
+COPY index.html /srv/
+COPY tree.html /srv/
+COPY data /srv/data
+COPY images /srv/images
+COPY scripts /srv/scripts
+COPY styles /srv/styles
+
+RUN echo -e ':80\nroot * /srv\nfile_server' > /srv/Caddyfile
 
 EXPOSE 80
+USER caddyuser
+
+CMD ["/srv/caddy", "run", "--config", "/srv/Caddyfile"]
