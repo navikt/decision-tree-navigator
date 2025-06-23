@@ -18,3 +18,5 @@ spec:
   replicas:
     max: 1
     min: 1
+  liveness:
+    path: /
