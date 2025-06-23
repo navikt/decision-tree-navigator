@@ -1,14 +1,12 @@
-FROM nginx:alpine
+FROM caddy:alpine
 
-COPY index.html /usr/share/nginx/html/index.html
-COPY tree.html /usr/share/nginx/html/tree.html
+COPY index.html /usr/share/caddy/index.html
+COPY tree.html /usr/share/caddy/tree.html
 
-COPY data /usr/share/nginx/html/data
-COPY images /usr/share/nginx/html/images
-COPY styles /usr/share/nginx/html/styles
+COPY data /usr/share/caddy/data
+COPY images /usr/share/caddy/images
+COPY styles /usr/share/caddy/styles
 
-COPY scripts /usr/share/nginx/html/scripts
+COPY scripts /usr/share/caddy/scripts
 
 EXPOSE 80
-
-CMD ["nginx", "-g", "daemon off;"]
