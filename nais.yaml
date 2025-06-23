@@ -9,7 +9,6 @@ metadata:
 spec:
   image: {{image}}
   port: 80
-  replicas: 2
   ingresses:
     - https://beslutt.nav.no
   resources:
