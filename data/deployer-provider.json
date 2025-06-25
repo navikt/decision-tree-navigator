@@ -65,13 +65,13 @@
         }
     }, 
     "provider": {
-        "q": "Nav har rollen som tilbyder (provider) av KI-systemet",
+        "q": "Konklusjon: Nav har rollen som tilbyder (provider) av KI-systemet",
         "help": "Se art.3 nr.3 i KI-forordningen for definisjonen av 'provider'",
         "shape": "circle",
         "end": true
     },
     "deployer": {
-        "q": "Nav har rollen som bruker (deployer) av KI-systemet",
+        "q": "Konklusjon: Nav har rollen som bruker (deployer) av KI-systemet",
         "help": "Se art.3 nr.4 i KI-forordningen for definisjonen av 'deployer'. Du får de forpliktelsene som følger av tildyderens (provider) risikoklassifisering.",
         "shape": "circle",
         "end": true
