@@ -49,7 +49,7 @@
         }
     }, 
     "node4": {
-        "q": "Skal KI-systemet tas i bruk under Navs navn og logo?",
+        "q": "Skal KI-systemet tas i bruk under Navs eller logo?",
         "help": "",
         "options": {
             "isReport": {
