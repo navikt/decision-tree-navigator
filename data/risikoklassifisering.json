@@ -80,13 +80,13 @@
     }
   },
   "node5": {
-    "q": "Skal KI-systemet brukes for å forbedre resultatet av en tidligere avsluttet menneskelig oppgave/aktivitet?",
-    "help": "Når KI forbedrer resultatet av en aktivitet tidligere gjennomført av et menneske, utgjør bruken av KI kun et tillegg til den menneskelige aktiviteten. Eksempler på dette (jf. fortalepunkt 53) kan være: KI brukes for å forbedre språk eller uttrykksform i dokumenter forfattet av et menneske, synliggjøre hvordan en avgjørelse støtter opp under strategiske mål, visjoner eller prioriteringer. Andre eksempler er at KI-systemet lager oppsummering av møter og møtereferater",
+    "q": "Skal KI-systemet brukes for å forbedre resultatet av en tidligere utført menneskelig oppgave eller aktivitet?",
+    "help": "Når KI-systemet forbedrer resultatet av en aktivitet tidligere utført av et menneske, utgjør bruken av KI-systemet kun et tillegg til den menneskelige aktiviteten. Eksempler på dette (jf. fortalepunkt 53) kan være at KI-systemet brukes for å forbedre språk eller uttrykksform i dokumenter forfattet av et menneske, synliggjøre hvordan en avgjørelse støtter opp under strategiske mål, visjoner eller prioriteringer. Andre eksempler er at KI-systemet lager oppsummering av møtereferater",
     "options": {
       "isReport": {
         "next": "highrisk",
         "buttonText": "Ja",
-        "label": "KI-systemet brukes for å forbedre resultatet av en tidligere avsluttet menneskelig oppgave/aktivitet."
+        "label": "KI-systemet brukes for å forbedre resultatet av en tidligere utført menneskelig oppgave eller aktivitet."
       },
       "notReport": {
         "next": "node7",
