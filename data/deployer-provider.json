@@ -33,8 +33,8 @@
         }
     },
     "node3": {
-        "q": "Skal du bruke KI-systemet til noe annet enn det tilbyder (provider) har bestemt at KI-systemet kan brukes til?",
-        "help": "Du finner informasjon om hva systemet kan brukes enten i instruksjoner gitt av provider, i avtalen, salgsmateriale eller teknisk dokumentasjon.",
+        "q": "Skal du bruke KI-systemet til noe annet enn det er bestemt at KI-systemet kan brukes til?",
+        "help": "Du finner informasjon om hva systemet kan brukes til enten i instruksjoner eller teknisk dokumentasjon som følger med systemet, i avtalen eller salgsmateriale.",
         "options": {
             "isReport": {
                 "next": "provider",
