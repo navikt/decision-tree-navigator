@@ -32,7 +32,7 @@
     }
   },
   "node3": {
-    "q": "Skal du bruke KI systemet til rekrutering og ansettelse eller for å monitorere eller evaluere Nav ansattes aktivitet eller innsats?",
+    "q": "Skal du bruke KI systemet til rekruttering og ansettelse eller for å monitorere eller evaluere Nav ansattes aktivitet eller innsats?",
     "help": "",
     "options": {
       "isReport": {
@@ -64,8 +64,8 @@
     }
   },
   "node4": {
-    "q": "Skal KI- systemet kun utføre et snevert prosessteg? kun ha en marginal rolle, fordi den utfører kun et snevert prosessteg (art. 6 nr. 3 bokstav a)?",
-    "help": "Dersom KI-systemet kun utfører en marginal rolle, såkalt smalt prosessteg (narrow procedural task)anses ikkse systemet å utfjøre en høy risiko. Eksempler på 'snevert prosessteg' (se fortalepunkt 53 i KI-forordningen) er der systemet brukes for å f.eks. strukturere ustrukturert data, klassifisere innkommende dokumenter i forhåndsdefinerte kategorier, eller der systemet brukes for å detektere duplikater blant et stort antall søknader. Her må dere se på den konkrete bruken av systemet og gjøre en vurdering.",
+    "q": "Skal KI- systemet kun utgjøre et smalt prosessteg? 
+    "help": "Dersom KI-systemet kun utfører en marginal rolle, såkalt smalt prosessteg (narrow procedural taskk, se KI-forordningen art. 6 nr. 3 bokstav a)anses ikke systemet å utgjøre en høy risiko. Eksempler på 'smalt prosessteg' (se fortalepunkt 53 i KI-forordningen) er der systemet brukes for å f.eks. strukturere ustrukturert data, klassifisere innkommende dokumenter i forhåndsdefinerte kategorier, eller der systemet brukes for å detektere duplikater blant et stort antall søknader. Her må dere se på den konkrete bruken av systemet og gjøre skriftlig vurdering. Husk også at slike systemer må registreres i EU-databasen etter KI-forordningen art. 71.",
     "options": {
       "isReport": {
         "next": "highrisk",
