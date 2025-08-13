@@ -64,7 +64,7 @@
     }
   },
   "node4": {
-    "q": "Skal KI- systemet kun utgjøre et smalt prosessteg? 
+    "q": "Skal KI- systemet kun utgjøre et smalt prosessteg?",
     "help": "Dersom KI-systemet kun utfører en marginal rolle, såkalt smalt prosessteg (narrow procedural taskk, se KI-forordningen art. 6 nr. 3 bokstav a)anses ikke systemet å utgjøre en høy risiko. Eksempler på 'smalt prosessteg' (se fortalepunkt 53 i KI-forordningen) er der systemet brukes for å f.eks. strukturere ustrukturert data, klassifisere innkommende dokumenter i forhåndsdefinerte kategorier, eller der systemet brukes for å detektere duplikater blant et stort antall søknader. Her må dere se på den konkrete bruken av systemet og gjøre skriftlig vurdering. Husk også at slike systemer må registreres i EU-databasen etter KI-forordningen art. 71.",
     "options": {
       "isReport": {
