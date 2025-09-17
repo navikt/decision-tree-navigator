@@ -1,5 +1,5 @@
 FROM alpine:latest
-ENV CADDY_VERSION="2.7.4"
+ENV CADDY_VERSION="2.10.2"
 
 RUN apk add --no-cache curl tar
 
