@@ -1,7 +1,7 @@
 # decision-tree-navigator
 Et PoC på tilgjengelig brukergrensesnitt som lar deg navigere gjennom beslutningstreer.
 
-Besøk grensesnittet på [https://navikt.github.io/decision-tree-navigator/](https://navikt.github.io/decision-tree-navigator/).
+Besøk grensesnittet på [beslutt.nav.no](https://beslutt.nav.no/).
 
 
 
