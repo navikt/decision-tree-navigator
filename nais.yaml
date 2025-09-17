@@ -12,8 +12,8 @@ spec:
     - https://beslutt.nav.no
   resources:
     requests:
-      cpu: "50m"
-      memory: "64Mi"
+      cpu: "10m"
+      memory: "32Mi"
   replicas:
     max: 1
     min: 1
