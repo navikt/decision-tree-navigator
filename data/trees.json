@@ -10,11 +10,6 @@
     "file": "deployer-provider.json"
   },
   {
-    "id": "tilgjengelighetserklæring",
-    "title": "Trenger nettløsningen min en tilgjengelighetserklæring?",
-    "file": "tilgjengelighetserklæring.json"
-  },
-  {
     "id": "risiko",
     "title": "Hvilket risikonivå har KI-systemet mitt?",
     "file": "risikoklassifisering.json"
