@@ -1,4 +1,3 @@
-@import "https://unpkg.com/@navikt/ds-css@latest/dist/index.min.css";
 
 * {
     box-sizing: border-box;
@@ -122,6 +121,14 @@ button.print .navds-button__icon {
 .help-box a {
     color: #000;
 }
+
+
+.free-text-field { margin: 1rem 0; }
+.free-text-field label { display:block; font-weight:600; margin-bottom:.25rem; }
+.free-text-hint { display:block; margin:.25rem 0 .5rem; }
+.free-text-error { color: #ba3a26; margin-top: .5rem; }
+.free-text-input { width: 100%; }
+
 
 footer {
     border-top: 1px solid black;

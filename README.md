@@ -3,9 +3,6 @@ Et PoC på tilgjengelig brukergrensesnitt som lar deg navigere gjennom beslutnin
 
 Besøk grensesnittet på [beslutt.nav.no](https://beslutt.nav.no/).
 
-
-
-
 ## Gör så här:
 - Åpen index.html i en nettleser for å bruke.
 - Rediger index.html i ditt favoritt editor for å redigere.
