@@ -52,16 +52,18 @@ header .wrapper, footer .wrapper {
 
 #site-header {
     border-bottom: 1px solid black;
+    padding: 1rem;
 }
 
-#site-header h1 {
+.site-title {
     font-size: 1.75em;
-}
-
-#site-header h1 a {
     text-decoration: none;
     color: #000;
+    font-weight: bold;
+}
 
+main {
+    padding: 0 1rem;
 }
 
 main h1 {
