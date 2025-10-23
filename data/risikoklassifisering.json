@@ -4,8 +4,8 @@
     "q": "Skal KI-systemet brukes på hjelpemiddelområdet?",
     "help": "",
     "note": {
-      "label": "free-text label",
-      "hint": "Here's a hint",
+      "label": "Utdyp gjerne svaret ditt.",
+      "hint": "Her er litt tekst dersom man trenger en hint.",
       "required": true
     },
     "options": {
@@ -25,7 +25,7 @@
     "q": "Skal du bruke KI-systemet til oppgaver som er en del av NAVs utøvelse av offentlig myndighet?",
     "help": "Skal du bruke systemet til å løse Navs lovfestede oppgaver, f.eks. i saksbehandling eller ved gjennomføring av tiltak, kontroll eller oppfølging av regelverk svarer du 'ja' her. Dette gjelder selv om KI-systemet ikke har noe grensesnitt mot borgerne eller Navs brukere.",
     "note": {
-      "label": "Here's another label, this one longer.",
+      "label": "Utdyp gjerne svaret ditt.",
       "hint": "",
       "required": false
     },
@@ -46,7 +46,7 @@
     "q": "Skal du bruke KI systemet til rekruttering og ansettelse eller for å monitorere eller evaluere Nav ansattes aktivitet eller innsats?",
     "help": "",
     "note": {
-      "label": "",
+      "label": "Utdyp gjerne svaret ditt.",
       "hint": "",
       "required": false
     },
@@ -67,7 +67,7 @@
     "q": "Profilerer KI -systemet individer etter definisjonen i GDPR?",
     "help": "GDPR artikkel 4 nr. 4 definerer profilering som 'enhver form for automatisert behandling av personopplysninger som innebærer å bruke personopplysninger for å vurdere visse personlige aspekter knyttet til en fysisk person, særlig for å analysere eller forutsi aspekter som gjelder nevnte fysiske persons arbeidsprestasjoner, økonomiske situasjon, helse, personlige preferanser, interesser, pålitelighet, atferd, plassering eller bevegelser'",
     "note": {
-      "label": "",
+      "label": "Utdyp gjerne svaret ditt.",
       "hint": "",
       "required": false
     },
@@ -88,7 +88,7 @@
     "q": "Skal KI- systemet kun utgjøre et smalt prosessteg?",
     "help": "Dersom KI-systemet kun utfører en marginal rolle, såkalt smalt prosessteg (narrow procedural taskk, se KI-forordningen art. 6 nr. 3 bokstav a)anses ikke systemet å utgjøre en høy risiko. Eksempler på 'smalt prosessteg' (se fortalepunkt 53 i KI-forordningen) er der systemet brukes for å f.eks. strukturere ustrukturert data, klassifisere innkommende dokumenter i forhåndsdefinerte kategorier, eller der systemet brukes for å detektere duplikater blant et stort antall søknader. Her må dere se på den konkrete bruken av systemet og gjøre skriftlig vurdering. Husk også at slike systemer må registreres i EU-databasen etter KI-forordningen art. 71.",
     "note": {
-      "label": "",
+      "label": "Utdyp gjerne svaret ditt.",
       "hint": "",
       "required": false
     },
@@ -109,7 +109,7 @@
     "q": "Skal KI-systemet brukes for å forbedre resultatet av en tidligere utført menneskelig oppgave eller aktivitet?",
     "help": "Når KI-systemet forbedrer resultatet av en aktivitet tidligere utført av et menneske, utgjør bruken av KI-systemet kun et tillegg til den menneskelige aktiviteten. Eksempler på dette (jf. fortalepunkt 53) kan være at KI-systemet brukes for å forbedre språk eller uttrykksform i dokumenter forfattet av et menneske, synliggjøre hvordan en avgjørelse støtter opp under strategiske mål, visjoner eller prioriteringer. Andre eksempler er at KI-systemet lager oppsummering av møtereferater",
     "note": {
-      "label": "",
+      "label": "Utdyp gjerne svaret ditt.",
       "hint": "",
       "required": false
     },
@@ -130,7 +130,7 @@
     "q": "Skal KI-systemet brukes for å gjenkjenne mønstre i avgjørelser eller gjenkjenne avvik fra tidligere praksis?",
     "help": "",
     "note": {
-      "label": "",
+      "label": "Utdyp gjerne svaret ditt.",
       "hint": "",
       "required": false
     },
@@ -151,7 +151,7 @@
     "q": "Skal KI-systemet brukes for å forberede en avgjørelse eller vurdering på et av områdene omtalt i Billag 3? ",
     "help": "Andre eksempler: oppsummere dokumenter som er kommet inn som underlag til en søknad, oppsummere en vurdering fra rådgivende overlege",
     "note": {
-      "label": "",
+      "label": "Utdyp gjerne svaret ditt.",
       "hint": "",
       "required": false
     },

@@ -4,8 +4,8 @@
         "q": "Har Nav utviklet eller spesialbestilt KI-systemet?",
         "help": "Et eksempel på det motsatte er der Nav kjøper hyllevare, altså et ferdigutviklet KI-system eller en GKI-modell som allerede finnes på markedet hos en leverandør. I disse tilfellene kan du svare nei her.",
         "note": {
-            "label": "",
-            "hint": "",
+            "label": "Utdyp gjerne svaret ditt.",
+            "hint": "Her er litt hint-tekst.",
             "required": false
         },
         "options": {
@@ -25,7 +25,7 @@
         "q": "Gjør du trening, finjustering ('fine-tuning'), parameterendring eller annet som vesentlig endrer KI-systemet?",
         "help": "En vesentlig endring er en endring i et KI-system etter at det har blitt satt på markedet eller tatt i bruk, som ikke var planlagt under den opprinnelige samsvarsvurderingen (Conformity Assessment) av systemet. Denne endringen kan påvirke om KI-systemet fremdeles oppfyller kravene i KI-forordningen. Vesentlige endringer kan også endre den tiltenkte bruken av KI-systemet. For eksempel vil endringer i operativsystemet eller programvarearkitekturen som kan påvirke etterlevelse av regelverket anses som vesentlige endringer. Derimot vil endringer som var planlagt og vurdert av leverandøren i samsvarsvurderingen, som f.eks. endringer i algoritmen og ytelsen til KI-systemer som fortsetter å lære etter å ha blitt satt på markedet, ikke regnes som vesentlige endringer. Dersom Nav gjør en vesentlig endring må vi gjøre en ny samsvarsvurdering.",
         "note": {
-            "label": "",
+            "label": "Utdyp gjerne svaret ditt.",
             "hint": "",
             "required": false
         },
@@ -46,7 +46,7 @@
         "q": "Skal du bruke KI-systemet til noe annet enn det er bestemt at KI-systemet kan brukes til?",
         "help": "Du finner informasjon om hva systemet kan brukes til enten i instruksjoner eller teknisk dokumentasjon som følger med systemet, i avtalen eller salgsmateriale.",
         "note": {
-            "label": "",
+            "label": "Utdyp gjerne svaret ditt.",
             "hint": "",
             "required": false
         },
@@ -67,7 +67,7 @@
         "q": "Skal KI-systemet tas i bruk under Navs eller logo?",
         "help": "",
         "note": {
-            "label": "",
+            "label": "Utdyp gjerne svaret ditt.",
             "hint": "",
             "required": false
         },

@@ -157,7 +157,214 @@ function render() {
     question.setAttribute("tabindex", "-1");
     question.textContent = node.q;
 
-    // Build the free-text field
+
+
+    // Make a print button
+    function makePrintButton() {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "navds-button navds-button--primary navds-button--medium print";
+        btn.innerHTML = "<span class='navds-button__icon'></span><span class='navds-label'>Skriv ut resultatet</span>";
+        btn.addEventListener("click", () => window.print());
+        return btn;
+    }
+
+    // Add checkbox and print button when finishing the flow
+    if (node.end) {
+        question.classList.add("final-result");
+        pathSection.appendChild(makePrintButton());
+    }
+
+    wrapper.appendChild(question);
+
+    if (typeof node.help === "string" && node.help.trim() !== "") {
+        const helpBox = document.createElement("p");
+        helpBox.className = "help-box";
+        helpBox.innerHTML = node.help;
+        wrapper.appendChild(helpBox);
+    }
+
+    section.appendChild(wrapper);
+
+
+    // Build the button wrapper
+    const btnRow = document.createElement("div");
+    btnRow.className =
+        "navds-stack navds-hstack navds-stack-gap navds-stack-direction navds-stack-wrap";
+    btnRow.id = "buttons";
+    btnRow.style.setProperty("--__ac-stack-gap-xs", "var(--a-spacing-4)");
+
+    // Put buttons in the wrapper
+    if (node.end) {
+        // Restart button (primary)
+        const restart = document.createElement("button");
+        restart.innerHTML = "<span class='navds-label'>Start på nytt</span>";
+        restart.className = "navds-button navds-button--secondary navds-button--medium";
+        restart.onclick = () => {
+            pathHistory = ["start"];
+            interacted = false;
+            localStorage.removeItem(NOTES_KEY(treeId));
+            notes = {};
+            render();
+        };
+        btnRow.appendChild(restart);
+    } else {
+        // Answer options as radio buttons + Next action (stable ordering)
+        const optionEntries = (node.options && typeof node.options === "object") ? Object.entries(node.options) : [];
+        optionEntries.sort((a, b) => {
+            const oa = a[1] && typeof a[1].order === "number" ? a[1].order : Number.POSITIVE_INFINITY;
+            const ob = b[1] && typeof b[1].order === "number" ? b[1].order : Number.POSITIVE_INFINITY;
+            if (oa !== ob) return oa - ob;
+            // fallback: stable by key name
+            return String(a[0]).localeCompare(String(b[0]));
+        });
+
+        if (optionEntries.length === 0) {
+            const msg = document.createElement("div");
+            msg.className = "free-text-hint";
+            msg.textContent = "Ingen valg tilgjengelig for denne noden.";
+            wrapper.appendChild(msg);
+        } else {
+            // Create radio group
+            const fieldset = document.createElement("fieldset");
+            fieldset.className = "options-group";
+            fieldset.setAttribute("role", "radiogroup");
+            const legend = document.createElement("legend");
+            const legendId = `legend-${current}`;
+            legend.id = legendId;
+            legend.textContent = "Velg et alternativ";
+            fieldset.setAttribute("aria-labelledby", legendId);
+            fieldset.appendChild(legend);
+
+            let selectedNext = "";
+            const groupName = `opt-${current}`;
+            const optErrId = `opt-err-${current}`;
+
+            optionEntries.forEach(([key, option], idx) => {
+                if (!option) return;
+                const id = `${groupName}-${idx}`;
+                const radioWrap = document.createElement("div");
+                radioWrap.className = "option-item";
+
+                const input = document.createElement("input");
+                input.type = "radio";
+                input.name = groupName;
+                input.id = id;
+                input.value = key;
+                input.addEventListener("change", () => {
+                    selectedNext = option.next;
+                    // Clear any previous error state on selection
+                    const errEl = fieldset.querySelector(`#${optErrId}`);
+                    if (errEl) {
+                        errEl.remove();
+                    }
+                    fieldset.removeAttribute("aria-invalid");
+                    const prev = fieldset.getAttribute("aria-describedby") || "";
+                    const list = prev.split(" ").filter(x => x && x !== optErrId);
+                    if (list.length) fieldset.setAttribute("aria-describedby", list.join(" "));
+                    else fieldset.removeAttribute("aria-describedby");
+                });
+
+                const label = document.createElement("label");
+                label.setAttribute("for", id);
+                label.textContent = option.buttonText || key;
+
+                radioWrap.appendChild(input);
+                radioWrap.appendChild(label);
+                fieldset.appendChild(radioWrap);
+            });
+
+            wrapper.appendChild(fieldset);
+
+            // Create Next button
+            const nextBtn = document.createElement("button");
+            nextBtn.type = "button";
+            nextBtn.innerHTML = "<span class='navds-label'>Neste</span>";
+            nextBtn.className = "navds-button navds-button--primary navds-button--medium";
+            nextBtn.addEventListener("click", () => {
+                // Require an option selection; show accessible error on the radio group
+                if (!selectedNext) {
+                    if (!fieldset.querySelector(`#${optErrId}`)) {
+                        const err = document.createElement("div");
+                        err.className = "options-error";
+                        err.id = optErrId;
+                        err.setAttribute("role", "alert");
+                        err.textContent = "Velg et alternativ.";
+                        fieldset.appendChild(err);
+                    }
+                    fieldset.setAttribute("aria-invalid", "true");
+                    const prev = fieldset.getAttribute("aria-describedby") || "";
+                    const list = prev.split(" ").filter(Boolean);
+                    if (!list.includes(optErrId)) list.push(optErrId);
+                    fieldset.setAttribute("aria-describedby", list.join(" "));
+                    // Focus the first radio for convenience
+                    const firstRadio = fieldset.querySelector(`input[type="radio"][name="${groupName}"]`);
+                    if (firstRadio) firstRadio.focus();
+                    return;
+                }
+
+                // If note is required, enforce before proceeding
+                if (node.note?.required) {
+                    const val = getNote(current);
+                    if (!val.trim()) {
+                        // Show error and focus
+                        const fieldWrap = section.querySelector(".free-text-field");
+                        if (fieldWrap && !fieldWrap.querySelector(".free-text-error")) {
+                            const errId = `err-${current}`;
+                            const err = document.createElement("div");
+                            err.className = "free-text-error";
+                            err.id = errId;
+                            err.setAttribute("role", "alert");
+                            err.textContent = "Dette feltet er obligatorisk.";
+                            fieldWrap.appendChild(err);
+                        }
+                        const input = section.querySelector(`#note-${current}`);
+                        if (input) {
+                            input.setAttribute("aria-invalid", "true");
+                            const prevDescribed = input.getAttribute("aria-describedby") || "";
+                            let list = prevDescribed.split(" ").filter(Boolean);
+                            const errId = `err-${current}`;
+                            const maxId = `maxlen-${current}`;
+                            if (!list.includes(errId)) {
+                                list.push(errId);
+                            }
+                            // Ensure the max-length note id is always last in the list
+                            list = list.filter(x => x !== maxId);
+                            list.push(maxId);
+                            input.setAttribute("aria-describedby", list.join(" "));
+                            input.focus();
+                        }
+                        return;
+                    }
+                }
+                pathHistory.push(selectedNext);
+                render();
+            });
+
+            btnRow.appendChild(nextBtn);
+        }
+
+
+    }
+
+    // Back button
+    if (pathHistory.length > 1) {
+        const backBtn = document.createElement("button");
+        backBtn.innerHTML = "<span class='navds-label'>Tilbake</span>";
+        backBtn.className = "navds-button navds-button--tertiary navds-button--medium";
+        backBtn.onclick = () => {
+            pathHistory.pop();
+            render();
+        };
+
+        btnRow.appendChild(backBtn);
+    }
+
+    // Only control focus after user interaction
+    if (interacted) question.focus();
+    interacted = true;
+
+    // Place the free-text field between the fieldset (options) and the buttons
     if (node.note && node.note.label && node.note.label.trim() !== "") {
         const {label, hint, required} = node.note;
         const fieldId = `note-${current}`;
@@ -220,138 +427,6 @@ function render() {
 
         wrapper.appendChild(fieldWrap);
     }
-
-
-    // Make a print button
-    function makePrintButton() {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "navds-button navds-button--primary navds-button--medium print";
-        btn.innerHTML = "<span class='navds-button__icon'></span><span class='navds-label'>Skriv ut resultatet</span>";
-        btn.addEventListener("click", () => window.print());
-        return btn;
-    }
-
-    // Add checkbox and print button when finishing the flow
-    if (node.end) {
-        question.classList.add("final-result");
-        pathSection.appendChild(makePrintButton());
-    }
-
-    wrapper.appendChild(question);
-
-    if (typeof node.help === "string" && node.help.trim() !== "") {
-        const helpBox = document.createElement("p");
-        helpBox.className = "help-box";
-        helpBox.innerHTML = node.help;
-        wrapper.appendChild(helpBox);
-    }
-
-    section.appendChild(wrapper);
-
-
-    // Build the button wrapper
-    const btnRow = document.createElement("div");
-    btnRow.className =
-        "navds-stack navds-hstack navds-stack-gap navds-stack-direction navds-stack-wrap";
-    btnRow.id = "buttons";
-    btnRow.style.setProperty("--__ac-stack-gap-xs", "var(--a-spacing-4)");
-
-    // Put buttons in the wrapper
-    if (node.end) {
-        // Restart button (primary)
-        const restart = document.createElement("button");
-        restart.innerHTML = "<span class='navds-label'>Start på nytt</span>";
-        restart.className = "navds-button navds-button--secondary navds-button--medium";
-        restart.onclick = () => {
-            pathHistory = ["start"];
-            interacted = false;
-            localStorage.removeItem(NOTES_KEY(treeId));
-            notes = {};
-            render();
-        };
-        btnRow.appendChild(restart);
-    } else {
-        // Answer buttons (stable ordering)
-        const optionEntries = (node.options && typeof node.options === "object") ? Object.entries(node.options) : [];
-        optionEntries.sort((a, b) => {
-            const oa = a[1] && typeof a[1].order === "number" ? a[1].order : Number.POSITIVE_INFINITY;
-            const ob = b[1] && typeof b[1].order === "number" ? b[1].order : Number.POSITIVE_INFINITY;
-            if (oa !== ob) return oa - ob;
-            // fallback: stable by key name
-            return String(a[0]).localeCompare(String(b[0]));
-        });
-        if (optionEntries.length === 0) {
-            const msg = document.createElement("div");
-            msg.className = "free-text-hint";
-            msg.textContent = "Ingen valg tilgjengelig for denne noden.";
-            wrapper.appendChild(msg);
-        }
-        for (const [, option] of optionEntries) {
-            const btn = document.createElement("button");
-            const btnText = option.buttonText;
-            btn.innerHTML = `<span class='navds-label'>${btnText}</span>`;
-            btn.className = "navds-button navds-button--primary navds-button--medium";
-            btn.onclick = () => {
-                // If note is required, enforce before proceeding
-                if (node.note?.required) {
-                    const val = getNote(current);
-                    if (!val.trim()) {
-                        // Show error and focus
-                        const fieldWrap = section.querySelector(".free-text-field");
-                        if (fieldWrap && !fieldWrap.querySelector(".free-text-error")) {
-                            const errId = `err-${current}`;
-                            const err = document.createElement("div");
-                            err.className = "free-text-error";
-                            err.id = errId;
-                            err.setAttribute("role", "alert");
-                            err.textContent = "Dette feltet er obligatorisk.";
-                            fieldWrap.appendChild(err);
-                        }
-                        const input = section.querySelector(`#note-${current}`);
-                        if (input) {
-                            input.setAttribute("aria-invalid", "true");
-                            const prev = input.getAttribute("aria-describedby") || "";
-                            let list = prev.split(" ").filter(Boolean);
-                            const errId = `err-${current}`;
-                            const maxId = `maxlen-${current}`;
-                            if (!list.includes(errId)) {
-                                list.push(errId);
-                            }
-                            // Ensure the max-length note id is always last in the list
-                            list = list.filter(x => x !== maxId);
-                            list.push(maxId);
-                            input.setAttribute("aria-describedby", list.join(" "));
-                            input.focus();
-                        }
-                        return;
-                    }
-                }
-                pathHistory.push(option.next);
-                render();
-            };
-            btnRow.appendChild(btn);
-        }
-
-
-    }
-
-    // Back button
-    if (pathHistory.length > 1) {
-        const backBtn = document.createElement("button");
-        backBtn.innerHTML = "<span class='navds-label'>Tilbake</span>";
-        backBtn.className = "navds-button navds-button--tertiary navds-button--medium";
-        backBtn.onclick = () => {
-            pathHistory.pop();
-            render();
-        };
-
-        btnRow.appendChild(backBtn);
-    }
-
-    // Only control focus after user interaction
-    if (interacted) question.focus();
-    interacted = true;
 
     section.appendChild(btnRow);
     drawMermaid(tree);
