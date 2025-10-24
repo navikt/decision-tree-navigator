@@ -225,16 +225,20 @@ function render() {
             msg.textContent = "Ingen valg tilgjengelig for denne noden.";
             wrapper.appendChild(msg);
         } else {
-            // Create radio group
+            // Create radio group (Aksel styling)
             const fieldset = document.createElement("fieldset");
-            fieldset.className = "options-group";
+            fieldset.className = "navds-fieldset";
             fieldset.setAttribute("role", "radiogroup");
             const legend = document.createElement("legend");
             const legendId = `legend-${current}`;
             legend.id = legendId;
+            legend.className = "navds-fieldset__legend navds-label";
             legend.textContent = "Velg et alternativ";
             fieldset.setAttribute("aria-labelledby", legendId);
             fieldset.appendChild(legend);
+            const groupEl = document.createElement("div");
+            groupEl.className = "navds-radio-buttons";
+            fieldset.appendChild(groupEl);
 
             let selectedNext = "";
             const groupName = `opt-${current}`;
@@ -244,10 +248,11 @@ function render() {
                 if (!option) return;
                 const id = `${groupName}-${idx}`;
                 const radioWrap = document.createElement("div");
-                radioWrap.className = "option-item";
+                radioWrap.className = "navds-radio";
 
                 const input = document.createElement("input");
                 input.type = "radio";
+                input.className = "navds-radio__input";
                 input.name = groupName;
                 input.id = id;
                 input.value = key;
@@ -266,12 +271,13 @@ function render() {
                 });
 
                 const label = document.createElement("label");
+                label.className = "navds-radio__label";
                 label.setAttribute("for", id);
                 label.textContent = option.buttonText || key;
 
                 radioWrap.appendChild(input);
                 radioWrap.appendChild(label);
-                fieldset.appendChild(radioWrap);
+                groupEl.appendChild(radioWrap);
             });
 
             wrapper.appendChild(fieldset);
@@ -285,11 +291,24 @@ function render() {
                 // Require an option selection; show accessible error on the radio group
                 if (!selectedNext) {
                     if (!fieldset.querySelector(`#${optErrId}`)) {
-                        const err = document.createElement("div");
-                        err.className = "options-error";
+                        const err = document.createElement("p");
+                        err.className = "navds-error-message navds-label navds-error-message--show-icon";
                         err.id = optErrId;
-                        err.setAttribute("role", "alert");
-                        err.textContent = "Velg et alternativ.";
+
+                        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                        svg.setAttribute("viewBox", "0 0 17 16");
+                        svg.setAttribute("fill", "none");
+                        svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
+                        svg.setAttribute("focusable", "false");
+                        svg.setAttribute("aria-hidden", "true");
+                        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                        path.setAttribute("fill-rule", "evenodd");
+                        path.setAttribute("clip-rule", "evenodd");
+                        path.setAttribute("d", "M3.49209 11.534L8.11398 2.7594C8.48895 2.04752 9.50833 2.04743 9.88343 2.75924L14.5073 11.5339C14.8582 12.1998 14.3753 13 13.6226 13H4.37685C3.6242 13 3.14132 12.1999 3.49209 11.534ZM9.74855 10.495C9.74855 10.9092 9.41276 11.245 8.99855 11.245C8.58433 11.245 8.24855 10.9092 8.24855 10.495C8.24855 10.0808 8.58433 9.74497 8.99855 9.74497C9.41276 9.74497 9.74855 10.0808 9.74855 10.495ZM9.49988 5.49997C9.49988 5.22383 9.27602 4.99997 8.99988 4.99997C8.72373 4.99997 8.49988 5.22383 8.49988 5.49997V7.99997C8.49988 8.27611 8.72373 8.49997 8.99988 8.49997C9.27602 8.49997 9.49988 8.27611 9.49988 7.99997V5.49997Z");
+                        path.setAttribute("fill", "currentColor");
+                        svg.appendChild(path);
+                        err.appendChild(svg);
+                        err.appendChild(document.createTextNode("Du må velge et alternativ før du kan gå videre."));
                         fieldset.appendChild(err);
                     }
                     fieldset.setAttribute("aria-invalid", "true");
@@ -314,7 +333,6 @@ function render() {
                             const err = document.createElement("div");
                             err.className = "free-text-error";
                             err.id = errId;
-                            err.setAttribute("role", "alert");
                             err.textContent = "Dette feltet er obligatorisk.";
                             fieldWrap.appendChild(err);
                         }

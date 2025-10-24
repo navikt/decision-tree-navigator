@@ -13,6 +13,7 @@ async function loadList () {
             const li = document.createElement('li');
             const a = document.createElement('a');
             a.textContent = title;
+            a.classList.add('navds-link');
             const url = new URL('tree.html', window.location.href);
             url.searchParams.set('id', id);
             a.href = url.toString();
