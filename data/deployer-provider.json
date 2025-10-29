@@ -81,18 +81,18 @@
             "notReport": {
                 "next": "deployer",
                 "buttonText": "Nei",
-                "label": "Nav har rollen som bruker (deployer) av KI-systemet."
+                "label": "KI-systemet benyttes ikke under Navs navn og logo."
             }
         }
     }, 
     "provider": {
-        "q": "Konklusjon: Nav har rollen som tilbyder (provider) av KI-systemet",
+        "q": "Nav har rollen som tilbyder (provider) av KI-systemet",
         "help": "Se art.3 nr.3 i KI-forordningen for definisjonen av 'provider'",
         "shape": "circle",
         "end": true
     },
     "deployer": {
-        "q": "Konklusjon: Nav har rollen som bruker (deployer) av KI-systemet",
+        "q": "Nav har rollen som bruker (deployer) av KI-systemet",
         "help": "Se art.3 nr.4 i KI-forordningen for definisjonen av 'deployer'. Se i Støtte til etterlevelse hvilke krav som gjelder, avhengig av KI-systemets risikoklassifisering.",
         "shape": "circle",
         "end": true

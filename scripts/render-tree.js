@@ -105,7 +105,7 @@ function render() {
     pathSection.innerHTML = "";
     section.innerHTML = "";
 
-    // Build the path
+    // Build the path the user has taken through the tree as an unordered list
     const ul = document.createElement("ul");
     for (let i = 1; i < pathHistory.length; i++) {
         const prevId = pathHistory[i - 1];
@@ -137,13 +137,15 @@ function render() {
             ul.appendChild(li);
         }
     }
+
     pathSection.appendChild(ul);
+
 
     const current = pathHistory[pathHistory.length - 1];
     const node = tree[current];
 
     if (!node) {
-        section.innerHTML = "<p role=\"alert\">Fant ikke noden i treet. Dataene kan være ugyldige.</p>";
+        section.innerHTML = "<p>Fant ikke noden i treet. Dataene kan være ugyldige.</p>";
         // Clear diagram to avoid stale content
         const diagramEl = document.getElementById("mermaid-container");
         if (diagramEl) {
@@ -152,6 +154,18 @@ function render() {
         }
         return;
     }
+
+    // Check if we're at an end node and add a "Konklusjon" section
+    if (node.end) {
+        const conclusionHeading = document.createElement("h2");
+        conclusionHeading.textContent = "Konklusjon";
+        pathSection.appendChild(conclusionHeading);
+
+        const conclusionParagraph = document.createElement("p");
+        conclusionParagraph.textContent = node.q || "Ingen konklusjon angitt.";
+        pathSection.appendChild(conclusionParagraph);
+    }
+
 
     // Build the question & help box
     const question = document.createElement("h2");
