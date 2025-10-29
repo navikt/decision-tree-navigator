@@ -5,8 +5,8 @@
     "help": "",
     "note": {
       "label": "Utdyp gjerne svaret ditt.",
-      "hint": "Her er litt tekst dersom man trenger en hint.",
-      "required": true
+      "hint": "",
+      "required": false
     },
     "options": {
       "yes": {
@@ -43,7 +43,7 @@
     }
   },
   "node3": {
-    "q": "Skal du bruke KI systemet til rekruttering og ansettelse eller for å monitorere eller evaluere Nav ansattes aktivitet eller innsats?",
+    "q": "Skal du bruke KI systemet til rekruttering og ansettelse eller for å monitorere eller evaluere Nav-ansattes aktivitet eller innsats?",
     "help": "",
     "note": {
       "label": "Utdyp gjerne svaret ditt.",
@@ -54,12 +54,12 @@
       "isReport": {
         "next": "profilering",
         "buttonText": "Ja",
-        "label": "KI-systemet skal brukes til rekruttering/ansettelse eller for å monitorere/evaluere Nav ansatte."
+        "label": "KI-systemet skal brukes til rekruttering/ansettelse eller for å monitorere/evaluere Nav-ansatte."
       },
       "notReport": {
         "next": "lowrisk",
         "buttonText": "Nei",
-        "label": "KI-systemet skal ikke brukes til rekruttering/ansettelse eller for å monitorere/evaluere Nav ansatte."
+        "label": "KI-systemet skal ikke brukes til rekruttering/ansettelse eller for å monitorere/evaluere Nav-ansatte."
       }
     }
   },
@@ -86,7 +86,7 @@
   },
   "node4": {
     "q": "Skal KI- systemet kun utgjøre et smalt prosessteg?",
-    "help": "Dersom KI-systemet kun utfører en marginal rolle, såkalt smalt prosessteg (narrow procedural taskk, se KI-forordningen art. 6 nr. 3 bokstav a)anses ikke systemet å utgjøre en høy risiko. Eksempler på 'smalt prosessteg' (se fortalepunkt 53 i KI-forordningen) er der systemet brukes for å f.eks. strukturere ustrukturert data, klassifisere innkommende dokumenter i forhåndsdefinerte kategorier, eller der systemet brukes for å detektere duplikater blant et stort antall søknader. Her må dere se på den konkrete bruken av systemet og gjøre skriftlig vurdering. Husk også at slike systemer må registreres i EU-databasen etter KI-forordningen art. 71.",
+    "help": "Dersom KI-systemet kun utfører en marginal oppgave, et såkalt smalt prosessteg (narrow procedural task, se KI-forordningen art. 6 nr. 3 bokstav a) anses ikke systemet å utgjøre en høy risiko. Eksempler på 'smalt prosessteg' (se fortalepunkt 53 i KI-forordningen) er der systemet brukes for å f.eks. strukturere ustrukturert data, klassifisere innkommende dokumenter i forhåndsdefinerte kategorier, eller der systemet brukes for å detektere duplikater blant et stort antall søknader. Her må dere se på den konkrete bruken av systemet og gjøre skriftlig vurdering. Husk også at slike systemer må registreres i EU-databasen etter KI-forordningen art. 71.",
     "note": {
       "label": "Utdyp gjerne svaret ditt.",
       "hint": "",
@@ -94,14 +94,14 @@
     },
     "options": {
       "isReport": {
-        "next": "highrisk",
+        "next": "lowrisk",
         "buttonText": "Ja",
-        "label": "KI-systemet utfører mer enn et snevert prosesssteg."
+        "label": "KI-systemet utfører kun et smalt prosesssteg."
       },
       "notReport": {
         "next": "node5",
         "buttonText": "Nei",
-        "label": "KI-systemet utfører kun et snevert prosesssteg."
+        "label": "KI-systemet utfører mer enn et smalt prosesssteg."
       }
     }
   },
@@ -115,14 +115,14 @@
     },
     "options": {
       "isReport": {
-        "next": "highrisk",
+        "next": "lowrisk",
         "buttonText": "Ja",
         "label": "KI-systemet brukes for å forbedre resultatet av en tidligere utført menneskelig oppgave eller aktivitet."
       },
       "notReport": {
         "next": "node7",
         "buttonText": "Nei",
-        "label": "KI-systemet *ikke* brukes for å forbedre resultatet av en tidligere avsluttet menneskelig oppgave/aktivitet."
+        "label": "KI-systemet brukes *ikke* for å forbedre resultatet av en tidligere avsluttet menneskelig oppgave/aktivitet."
       }
     }
   },
@@ -149,7 +149,9 @@
   },
   "node7": {
     "q": "Skal KI-systemet brukes for å forberede en avgjørelse eller vurdering på et av områdene omtalt i Billag 3? ",
-    "help": "Andre eksempler: oppsummere dokumenter som er kommet inn som underlag til en søknad, oppsummere en vurdering fra rådgivende overlege",
+    "help": Se KI-forordningen art. 6 nr. 3 bokstav d. 
+    Noen eksempler på dette kan være løsninger for filhåndtering, med funksjoner som søk og gjenfinning, indeksering, tekst eller taleprosessering, og kobling av dokumenter med andre kilder. Andre eksempler er 
+KI systemer brukt for å oversette originaldokumenter, oppsummere dokumenter som er kommet inn som underlag til en søknad, eller til å oppsummere en vurdering fra rådgivende overlege",
     "note": {
       "label": "Utdyp gjerne svaret ditt.",
       "hint": "",
