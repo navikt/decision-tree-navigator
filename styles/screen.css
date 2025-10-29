@@ -97,6 +97,8 @@ footer {
 }
 
 
+
+
 #path ul {
     padding-left: 1em;
     margin-bottom: 2rem;
@@ -127,6 +129,18 @@ button.print .navds-button__icon {
     padding-right: 1.75rem;
 }
 
+.question-wrapper > * {
+    margin-bottom: 1.5rem;
+}
+
+.navds-textarea__input {
+    width: 100%;
+    resize: both;
+}
+
+.navds-form-field {
+    justify-items: unset;
+}
 
 
 /* Graph styling overrides */

@@ -41,13 +41,11 @@ function createErrorSummary(wrapperEl, items) {
     const box = document.createElement("div");
     box.className = "navds-error-summary";
     box.id = "error-summary";
-    box.setAttribute("role", "alert");
-    box.setAttribute("aria-live", "polite");
     box.tabIndex = -1;
 
     const heading = document.createElement("div");
     heading.className = "navds-error-summary__heading navds-heading";
-    heading.textContent = "Det er feil i skjemaet";
+    heading.textContent = "Du må rette disse feilene før du kan fortsette:";
     box.appendChild(heading);
 
     const list = document.createElement("ul");
@@ -111,7 +109,6 @@ function showOptionError(fieldset, groupName, optErrId) {
         }
     });
 
-    // error container under radio list
     let errContainer = fieldset.querySelector(`#${optErrId}`);
     if (!errContainer) {
         errContainer = document.createElement("div");
@@ -167,11 +164,10 @@ function showNoteError(current, section) {
     taWrap.classList.add("navds-textarea--error");
 
     if (!fieldWrap.querySelector(`#${NOTE_ERR_ID}`)) {
-        const msg = makeAkselErrorMessage(NOTE_ERR_ID, "Dette feltet er obligatorisk.");
+        const msg = makeAkselErrorMessage(NOTE_ERR_ID, "Du må begrunne svaret ditt.");
         fieldWrap.insertBefore(msg, taWrap.nextSibling);
     }
 
-    // ARIA only; no focus shift here
     input.setAttribute("aria-invalid", "true");
     const maxId = `maxlen-${current}`;
     const prev = input.getAttribute("aria-describedby") || "";
@@ -397,7 +393,6 @@ function render() {
 
             let selectedNext = "";
             const groupName = `opt-${current}`;
-// Use Aksel-like id for fieldset error container
             const optErrId = `fieldset-error-${current}`;
 
             optionEntries.forEach(([key, option], idx) => {
@@ -415,8 +410,6 @@ function render() {
 
                 input.addEventListener("change", () => {
                     selectedNext = option.next;
-
-                    // --- Clear group error state on selection
                     clearOptionError(fieldset, optErrId);
                 });
 
@@ -443,21 +436,19 @@ function render() {
             nextBtn.addEventListener("click", () => {
                 const errors = [];
 
-                // Textarea required
-                if (node.note?.required && !getNote(current).trim()) {
-                    showNoteError(current, section);
-                    errors.push({
-                        text: "Fyll ut den obligatoriske begrunnelsen.",
-                        href: `#note-${current}`,
-                    });
-                }
-
-                // Radio required
                 if (!selectedNext) {
                     showOptionError(fieldset, groupName, optErrId);
                     errors.push({
-                        text: "Velg et alternativ.",
+                        text: "Du må velge et alternativ.",
                         href: `#legend-${current}`,
+                    });
+                }
+
+                if (node.note?.required && !getNote(current).trim()) {
+                    showNoteError(current, section); // inline
+                    errors.push({
+                        text: "Du må begrunne svaret ditt.",
+                        href: `#note-${current}`,
                     });
                 }
 
@@ -471,7 +462,6 @@ function render() {
                 pathHistory.push(selectedNext);
                 render();
             });
-
 
             btnRow.appendChild(nextBtn);
         }
@@ -505,7 +495,7 @@ function render() {
 
         // Wrapper for textarea stuff
         const fieldWrap = document.createElement("div");
-        fieldWrap.className = "navds-form-field free-text-field";
+        fieldWrap.className = "navds-form-field";
 
         const lab = document.createElement("label");
         lab.setAttribute("for", fieldId);
@@ -531,6 +521,7 @@ function render() {
         input.id = fieldId;
         input.maxLength = MAX_NOTE_LEN;
         input.value = getNote(current);
+        input.setAttribute("rows", "6");
         const described = [];
         if (hint) described.push(hintId);
         described.push(maxId);
@@ -540,7 +531,7 @@ function render() {
         taWrap.appendChild(input);
         fieldWrap.appendChild(taWrap);
 
-// clear note-error on input
+        // clear note-error on input
         const NOTE_ERR_ID = `note-err-${current}`;
         input.addEventListener("input", () => {
             setNote(current, input.value);
