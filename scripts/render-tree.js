@@ -53,25 +53,18 @@ function createErrorSummary(wrapperEl, items) {
     const list = document.createElement("ul");
     list.className = "navds-error-summary__list";
 
-    items.forEach(({ text, go }) => {
+    items.forEach(({ text, href }) => {
         const li = document.createElement("li");
         const a = document.createElement("a");
-        a.href = "#";
         a.className = "navds-link";
+        a.href = href;
         a.textContent = text;
-        a.addEventListener("click", (e) => {
-            e.preventDefault();
-            go?.();
-        });
         li.appendChild(a);
         list.appendChild(li);
     });
 
     box.appendChild(list);
-
-    const first = wrapperEl.firstChild;
-    wrapperEl.insertBefore(box, first);
-
+    wrapperEl.insertBefore(box, wrapperEl.firstChild);
     box.focus();
 }
 
@@ -392,10 +385,10 @@ function render() {
 
             const legend = document.createElement("legend");
             const legendId = `legend-${current}`;
+            legend.setAttribute("tabindex", "-1")
             legend.id = legendId;
             legend.className = "navds-fieldset__legend navds-label";
             legend.textContent = "Velg et alternativ (obligatorisk)";
-            fieldset.setAttribute("aria-labelledby", legendId);
             fieldset.appendChild(legend);
 
             const groupEl = document.createElement("div");
@@ -450,36 +443,29 @@ function render() {
             nextBtn.addEventListener("click", () => {
                 const errors = [];
 
-                // Textarea required?
+                // Textarea required
                 if (node.note?.required && !getNote(current).trim()) {
-                    showNoteError(current, section); // inline
+                    showNoteError(current, section);
                     errors.push({
                         text: "Fyll ut den obligatoriske begrunnelsen.",
-                        go: () => document.getElementById(`note-${current}`)?.focus()
+                        href: `#note-${current}`,
                     });
                 }
 
-                // Radios selected?
+                // Radio required
                 if (!selectedNext) {
-                    showOptionError(fieldset, groupName, optErrId); // inline
+                    showOptionError(fieldset, groupName, optErrId);
                     errors.push({
                         text: "Velg et alternativ.",
-                        go: () => {
-                            const legend = fieldset.querySelector("legend");
-                            if (legend) {
-                                legend.setAttribute("tabindex", "-1");
-                                legend.focus();
-                            }
-                        }
+                        href: `#legend-${current}`,
                     });
                 }
 
                 if (errors.length) {
-                    createErrorSummary(wrapper, errors); // summary is the *only* focus change
+                    createErrorSummary(wrapper, errors);
                     return;
                 } else {
                     clearErrorSummary(wrapper);
-                    fieldset.querySelector("legend")?.removeAttribute("tabindex");
                 }
 
                 pathHistory.push(selectedNext);
