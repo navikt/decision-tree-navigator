@@ -30,6 +30,161 @@ function normalizeTreeOptions(treeObj) {
     }
 }
 
+function clearErrorSummary(wrapperEl) {
+    const old = wrapperEl.querySelector("#error-summary");
+    if (old) old.remove();
+}
+
+function createErrorSummary(wrapperEl, items) {
+    clearErrorSummary(wrapperEl);
+
+    const box = document.createElement("div");
+    box.className = "navds-error-summary";
+    box.id = "error-summary";
+    box.setAttribute("role", "alert");
+    box.setAttribute("aria-live", "polite");
+    box.tabIndex = -1;
+
+    const heading = document.createElement("div");
+    heading.className = "navds-error-summary__heading navds-heading";
+    heading.textContent = "Det er feil i skjemaet";
+    box.appendChild(heading);
+
+    const list = document.createElement("ul");
+    list.className = "navds-error-summary__list";
+
+    items.forEach(({ text, go }) => {
+        const li = document.createElement("li");
+        const a = document.createElement("a");
+        a.href = "#";
+        a.className = "navds-link";
+        a.textContent = text;
+        a.addEventListener("click", (e) => {
+            e.preventDefault();
+            go?.();
+        });
+        li.appendChild(a);
+        list.appendChild(li);
+    });
+
+    box.appendChild(list);
+
+    const first = wrapperEl.firstChild;
+    wrapperEl.insertBefore(box, first);
+
+    box.focus();
+}
+
+function makeAkselErrorMessage(id, text) {
+    const p = document.createElement("p");
+    p.className = "navds-error-message navds-label navds-error-message--show-icon";
+    p.id = id;
+
+    const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    svg.setAttribute("viewBox", "0 0 17 16");
+    svg.setAttribute("fill", "none");
+    svg.setAttribute("aria-hidden", "true");
+    svg.setAttribute("focusable", "false");
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("fill-rule", "evenodd");
+    path.setAttribute("clip-rule", "evenodd");
+    path.setAttribute("d", "M3.49209 11.534L8.11398 2.7594C8.48895 2.04752 9.50833 2.04743 9.88343 2.75924L14.5073 11.5339C14.8582 12.1998 14.3753 13 13.6226 13H4.37685C3.6242 13 3.14132 12.1999 3.49209 11.534ZM9.74855 10.495C9.74855 10.9092 9.41276 11.245 8.99855 11.245C8.58433 11.245 8.24855 10.9092 8.24855 10.495C8.24855 10.0808 8.58433 9.74497 8.99855 9.74497C9.41276 9.74497 9.74855 10.0808 9.74855 10.495ZM9.49988 5.49997C9.49988 5.22383 9.27602 4.99997 8.99988 4.99997C8.72373 4.99997 8.49988 5.22383 8.49988 5.49997V7.99997C8.49988 8.27611 8.72373 8.49997 8.99988 8.49997C9.27602 8.49997 9.49988 8.27611 9.49988 7.99997Z");
+    path.setAttribute("fill", "currentColor");
+    svg.appendChild(path);
+
+    p.appendChild(svg);
+    p.appendChild(document.createTextNode(text));
+    return p;
+}
+
+// Inline error message for radio buttons
+function showOptionError(fieldset, groupName, optErrId) {
+    fieldset.classList.add(
+        "navds-radio-group", "navds-radio-group--medium",
+        "navds-fieldset", "navds-fieldset--medium", "navds-fieldset--error"
+    );
+    fieldset.setAttribute("aria-invalid", "true");
+
+    const radios = fieldset.querySelectorAll(".navds-radio");
+    radios.forEach((wrap) => {
+        wrap.classList.add("navds-radio--error");
+        wrap.setAttribute("data-color", "danger");
+        const input = wrap.querySelector('input[type="radio"]');
+        if (input) {
+            const prev = input.getAttribute("aria-describedby") || "";
+            const list = prev.split(" ").filter(Boolean);
+            if (!list.includes(optErrId)) list.push(optErrId);
+            input.setAttribute("aria-describedby", list.join(" "));
+        }
+    });
+
+    // error container under radio list
+    let errContainer = fieldset.querySelector(`#${optErrId}`);
+    if (!errContainer) {
+        errContainer = document.createElement("div");
+        errContainer.id = optErrId;
+        errContainer.className = "navds-fieldset__error";
+        errContainer.setAttribute("aria-live", "polite");
+        errContainer.setAttribute("aria-relevant", "additions removals");
+
+        const p = makeAkselErrorMessage(`${optErrId}-msg`, "Du må velge et alternativ.");
+        errContainer.appendChild(p);
+
+        const radioList = fieldset.querySelector(".navds-radio-buttons");
+        if (radioList && radioList.parentNode === fieldset) {
+            fieldset.insertBefore(errContainer, radioList.nextSibling);
+        } else {
+            fieldset.appendChild(errContainer);
+        }
+    }
+}
+
+function clearOptionError(fieldset, optErrId) {
+    fieldset.classList.remove("navds-fieldset--error");
+    fieldset.removeAttribute("aria-invalid");
+
+    const container = fieldset.querySelector(`#${optErrId}`);
+    if (container) container.remove();
+
+    const radios = fieldset.querySelectorAll(".navds-radio");
+    radios.forEach((wrap) => {
+        wrap.classList.remove("navds-radio--error");
+        wrap.removeAttribute("data-color");
+        const input = wrap.querySelector('input[type="radio"]');
+        if (input) {
+            const prev = input.getAttribute("aria-describedby") || "";
+            const list = prev.split(" ").filter((x) => x && x !== optErrId);
+            if (list.length) input.setAttribute("aria-describedby", list.join(" "));
+            else input.removeAttribute("aria-describedby");
+        }
+    });
+}
+
+// Inline error message for textarea
+function showNoteError(current, section) {
+    const input = section.querySelector(`#note-${current}`);
+    if (!input) return;
+
+    const taWrap = section.querySelector(`#ta-wrap-${current}`);
+    const fieldWrap = input.closest(".navds-form-field");
+    if (!taWrap || !fieldWrap) return;
+
+    const NOTE_ERR_ID = `note-err-${current}`;
+
+    taWrap.classList.add("navds-textarea--error");
+
+    if (!fieldWrap.querySelector(`#${NOTE_ERR_ID}`)) {
+        const msg = makeAkselErrorMessage(NOTE_ERR_ID, "Dette feltet er obligatorisk.");
+        fieldWrap.insertBefore(msg, taWrap.nextSibling);
+    }
+
+    // ARIA only; no focus shift here
+    input.setAttribute("aria-invalid", "true");
+    const maxId = `maxlen-${current}`;
+    const prev = input.getAttribute("aria-describedby") || "";
+    const base = prev.split(" ").filter(Boolean).filter(x => x !== NOTE_ERR_ID && x !== maxId);
+    input.setAttribute("aria-describedby", [NOTE_ERR_ID, ...base, maxId].join(" "));
+}
 
 let treeId = "";
 let notes = {};
@@ -46,7 +201,7 @@ async function init() {
     }
 
     // Resolve catalog entry
-    let entry = { title: treeId, file: `${treeId}.json` };
+    let entry = {title: treeId, file: `${treeId}.json`};
 
     try {
         const catalog = await fetch("data/trees.json").then(r => r.json());
@@ -67,7 +222,6 @@ async function init() {
 
     await loadTree();
 }
-
 
 async function loadTree() {
     try {
@@ -155,9 +309,9 @@ function render() {
         return;
     }
 
-    // Check if we're at an end node and add a "Konklusjon" section
+    // Check if we're at an end node and if so add a "Konklusjon" section
     if (node.end) {
-        const conclusionHeading = document.createElement("h2");
+        const conclusionHeading = document.createElement("h3");
         conclusionHeading.textContent = "Konklusjon";
         pathSection.appendChild(conclusionHeading);
 
@@ -166,8 +320,6 @@ function render() {
         pathSection.appendChild(conclusionParagraph);
     }
 
-
-    // Build the question & help box
     const question = document.createElement("h2");
     const wrapper = document.createElement("div");
 
@@ -176,9 +328,6 @@ function render() {
     question.setAttribute("tabindex", "-1");
     question.textContent = node.q;
 
-
-
-    // Make a print button
     function makePrintButton() {
         const btn = document.createElement("button");
         btn.type = "button";
@@ -188,7 +337,6 @@ function render() {
         return btn;
     }
 
-    // Add checkbox and print button when finishing the flow
     if (node.end) {
         question.classList.add("final-result");
         pathSection.appendChild(makePrintButton());
@@ -198,7 +346,6 @@ function render() {
 
     if (typeof node.help === "string" && node.help.trim() !== "") {
         const helpBox = document.createElement("p");
-        helpBox.className = "help-box";
         helpBox.innerHTML = node.help;
         wrapper.appendChild(helpBox);
     }
@@ -206,7 +353,7 @@ function render() {
     section.appendChild(wrapper);
 
 
-    // Build the button wrapper
+    // Build the nav buttons
     const btnRow = document.createElement("div");
     btnRow.className =
         "navds-stack navds-hstack navds-stack-gap navds-stack-direction navds-stack-wrap";
@@ -233,35 +380,38 @@ function render() {
 
         if (optionEntries.length === 0) {
             const msg = document.createElement("div");
-            msg.className = "free-text-hint";
+            msg.className = "navds-hint-text";
             msg.textContent = "Ingen valg tilgjengelig for denne noden.";
             wrapper.appendChild(msg);
 
         } else {
 
             const fieldset = document.createElement("fieldset");
-            fieldset.className = "navds-fieldset";
+            fieldset.className = "navds-radio-group navds-radio-group--medium navds-fieldset navds-fieldset--medium";
             fieldset.setAttribute("role", "radiogroup");
+
             const legend = document.createElement("legend");
             const legendId = `legend-${current}`;
             legend.id = legendId;
             legend.className = "navds-fieldset__legend navds-label";
-            legend.textContent = "Velg et alternativ";
+            legend.textContent = "Velg et alternativ (obligatorisk)";
             fieldset.setAttribute("aria-labelledby", legendId);
             fieldset.appendChild(legend);
+
             const groupEl = document.createElement("div");
             groupEl.className = "navds-radio-buttons";
             fieldset.appendChild(groupEl);
 
             let selectedNext = "";
             const groupName = `opt-${current}`;
-            const optErrId = `opt-err-${current}`;
+// Use Aksel-like id for fieldset error container
+            const optErrId = `fieldset-error-${current}`;
 
             optionEntries.forEach(([key, option], idx) => {
                 if (!option) return;
                 const id = `${groupName}-${idx}`;
                 const radioWrap = document.createElement("div");
-                radioWrap.className = "navds-radio";
+                radioWrap.className = "navds-radio navds-radio--medium";
 
                 const input = document.createElement("input");
                 input.type = "radio";
@@ -269,24 +419,18 @@ function render() {
                 input.name = groupName;
                 input.id = id;
                 input.value = key;
+
                 input.addEventListener("change", () => {
                     selectedNext = option.next;
-                    // Clear any previous error state on selection
-                    const errEl = fieldset.querySelector(`#${optErrId}`);
-                    if (errEl) {
-                        errEl.remove();
-                    }
-                    fieldset.removeAttribute("aria-invalid");
-                    const prev = fieldset.getAttribute("aria-describedby") || "";
-                    const list = prev.split(" ").filter(x => x && x !== optErrId);
-                    if (list.length) fieldset.setAttribute("aria-describedby", list.join(" "));
-                    else fieldset.removeAttribute("aria-describedby");
+
+                    // --- Clear group error state on selection
+                    clearOptionError(fieldset, optErrId);
                 });
 
                 const label = document.createElement("label");
                 label.className = "navds-radio__label";
                 label.setAttribute("for", id);
-                label.textContent = option.buttonText || key;
+                label.innerHTML = `<span class="navds-radio__content"><span class="navds-body-short navds-body-short--medium">${option.buttonText || key}</span></span>`;
 
                 radioWrap.appendChild(input);
                 radioWrap.appendChild(label);
@@ -295,82 +439,53 @@ function render() {
 
             wrapper.appendChild(fieldset);
 
+
             // Create Next button
             const nextBtn = document.createElement("button");
             nextBtn.type = "button";
-            nextBtn.innerHTML = "<span class='navds-label'>Neste</span>";
-            nextBtn.className = "navds-button navds-button--primary navds-button--medium";
+            nextBtn.innerHTML = "<span class='navds-label'>Neste steg</span>";
+            nextBtn.className = "navds-responsive navds-responsive__above--sm navds-button navds-button--primary navds-button--medium";
+            nextBtn.setAttribute("data-variant", "primary");
+
             nextBtn.addEventListener("click", () => {
-                // Require an option selection; show accessible error on the radio group
+                const errors = [];
+
+                // Textarea required?
+                if (node.note?.required && !getNote(current).trim()) {
+                    showNoteError(current, section); // inline
+                    errors.push({
+                        text: "Fyll ut den obligatoriske begrunnelsen.",
+                        go: () => document.getElementById(`note-${current}`)?.focus()
+                    });
+                }
+
+                // Radios selected?
                 if (!selectedNext) {
-                    if (!fieldset.querySelector(`#${optErrId}`)) {
-                        const err = document.createElement("p");
-                        err.className = "navds-error-message navds-label navds-error-message--show-icon";
-                        err.id = optErrId;
-
-                        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-                        svg.setAttribute("viewBox", "0 0 17 16");
-                        svg.setAttribute("fill", "none");
-                        svg.setAttribute("xmlns", "http://www.w3.org/2000/svg");
-                        svg.setAttribute("focusable", "false");
-                        svg.setAttribute("aria-hidden", "true");
-                        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                        path.setAttribute("fill-rule", "evenodd");
-                        path.setAttribute("clip-rule", "evenodd");
-                        path.setAttribute("d", "M3.49209 11.534L8.11398 2.7594C8.48895 2.04752 9.50833 2.04743 9.88343 2.75924L14.5073 11.5339C14.8582 12.1998 14.3753 13 13.6226 13H4.37685C3.6242 13 3.14132 12.1999 3.49209 11.534ZM9.74855 10.495C9.74855 10.9092 9.41276 11.245 8.99855 11.245C8.58433 11.245 8.24855 10.9092 8.24855 10.495C8.24855 10.0808 8.58433 9.74497 8.99855 9.74497C9.41276 9.74497 9.74855 10.0808 9.74855 10.495ZM9.49988 5.49997C9.49988 5.22383 9.27602 4.99997 8.99988 4.99997C8.72373 4.99997 8.49988 5.22383 8.49988 5.49997V7.99997C8.49988 8.27611 8.72373 8.49997 8.99988 8.49997C9.27602 8.49997 9.49988 8.27611 9.49988 7.99997V5.49997Z");
-                        path.setAttribute("fill", "currentColor");
-                        svg.appendChild(path);
-                        err.appendChild(svg);
-                        err.appendChild(document.createTextNode("Du må velge et alternativ før du kan gå videre."));
-                        fieldset.appendChild(err);
-                    }
-                    fieldset.setAttribute("aria-invalid", "true");
-                    const prev = fieldset.getAttribute("aria-describedby") || "";
-                    const list = prev.split(" ").filter(Boolean);
-                    if (!list.includes(optErrId)) list.push(optErrId);
-                    fieldset.setAttribute("aria-describedby", list.join(" "));
-                    // Focus the first radio for convenience
-                    const firstRadio = fieldset.querySelector(`input[type="radio"][name="${groupName}"]`);
-                    if (firstRadio) firstRadio.focus();
-                    return;
-                }
-
-                // If note is required, enforce before proceeding
-                if (node.note?.required) {
-                    const val = getNote(current);
-                    if (!val.trim()) {
-                        // Show error and focus
-                        const fieldWrap = section.querySelector(".free-text-field");
-                        if (fieldWrap && !fieldWrap.querySelector(".free-text-error")) {
-                            const errId = `err-${current}`;
-                            const err = document.createElement("div");
-                            err.className = "free-text-error";
-                            err.id = errId;
-                            err.textContent = "Dette feltet er obligatorisk.";
-                            fieldWrap.appendChild(err);
-                        }
-                        const input = section.querySelector(`#note-${current}`);
-                        if (input) {
-                            input.setAttribute("aria-invalid", "true");
-                            const prevDescribed = input.getAttribute("aria-describedby") || "";
-                            let list = prevDescribed.split(" ").filter(Boolean);
-                            const errId = `err-${current}`;
-                            const maxId = `maxlen-${current}`;
-                            if (!list.includes(errId)) {
-                                list.push(errId);
+                    showOptionError(fieldset, groupName, optErrId); // inline
+                    errors.push({
+                        text: "Velg et alternativ.",
+                        go: () => {
+                            const legend = fieldset.querySelector("legend");
+                            if (legend) {
+                                legend.setAttribute("tabindex", "-1");
+                                legend.focus();
                             }
-                            // Ensure the max-length note id is always last in the list
-                            list = list.filter(x => x !== maxId);
-                            list.push(maxId);
-                            input.setAttribute("aria-describedby", list.join(" "));
-                            input.focus();
                         }
-                        return;
-                    }
+                    });
                 }
+
+                if (errors.length) {
+                    createErrorSummary(wrapper, errors); // summary is the *only* focus change
+                    return;
+                } else {
+                    clearErrorSummary(wrapper);
+                    fieldset.querySelector("legend")?.removeAttribute("tabindex");
+                }
+
                 pathHistory.push(selectedNext);
                 render();
             });
+
 
             btnRow.appendChild(nextBtn);
         }
@@ -395,63 +510,70 @@ function render() {
     if (interacted) question.focus();
     interacted = true;
 
-    // Place the free-text field between the fieldset (options) and the buttons
+    // Free-text field between the radio-fieldset and the nav buttons
     if (node.note && node.note.label && node.note.label.trim() !== "") {
         const {label, hint, required} = node.note;
         const fieldId = `note-${current}`;
         const hintId = `hint-${current}`;
         const maxId = `maxlen-${current}`;
 
+        // Wrapper for textarea stuff
         const fieldWrap = document.createElement("div");
-        fieldWrap.className = "free-text-field";
+        fieldWrap.className = "navds-form-field free-text-field";
 
         const lab = document.createElement("label");
         lab.setAttribute("for", fieldId);
-        lab.textContent = label;
-        if (required) lab.textContent += " (påkrevd)";
+        lab.className = "navds-label";
+        lab.textContent = label + (required ? " (obligatorisk)" : " (valgfritt)");
         fieldWrap.appendChild(lab);
 
         if (hint) {
             const hintEl = document.createElement("div");
-            hintEl.className = "free-text-hint";
+            hintEl.className = "navds-hint-text";
             hintEl.id = hintId;
             hintEl.textContent = hint;
             fieldWrap.appendChild(hintEl);
         }
 
+        // ⚠️ This wrapper is what we’ll toggle with --error and insert the error message after
+        const taWrap = document.createElement("div");
+        taWrap.className = "navds-textarea";
+        taWrap.id = `ta-wrap-${current}`;
+
         const input = document.createElement("textarea");
-        input.className = "free-text-input";
+        input.className = "navds-textarea__input";
         input.id = fieldId;
         input.maxLength = MAX_NOTE_LEN;
         input.value = getNote(current);
-        // aria-describedby: include hint first (if any), then max length note at the end
         const described = [];
         if (hint) described.push(hintId);
         described.push(maxId);
-        if (described.length) input.setAttribute("aria-describedby", described.join(" "));
-        if (required) {
-            input.required = true;
-            input.setAttribute("aria-required", "true");
-        }
+        input.setAttribute("aria-describedby", described.join(" "));
+        if (required) input.required = true;
 
+        taWrap.appendChild(input);
+        fieldWrap.appendChild(taWrap);
+
+// clear note-error on input
+        const NOTE_ERR_ID = `note-err-${current}`;
         input.addEventListener("input", () => {
             setNote(current, input.value);
-            const err = fieldWrap.querySelector(".free-text-error");
+            const err = fieldWrap.querySelector(`#${NOTE_ERR_ID}`);
             if (err && input.value.trim()) {
-                const errId = err.id;
                 err.remove();
                 input.removeAttribute("aria-invalid");
+                taWrap.classList.remove("navds-textarea--error");
+
                 const prev = input.getAttribute("aria-describedby") || "";
-                const list = prev.split(" ").filter(x => x && x !== errId);
-                if (list.length) input.setAttribute("aria-describedby", list.join(" "));
-                else input.removeAttribute("aria-describedby");
+                const list = prev.split(" ").filter(x => x && x !== NOTE_ERR_ID);
+                input.setAttribute("aria-describedby", list.join(" "));
             }
         });
 
-        fieldWrap.appendChild(input);
-        // Add the visible max length note under the text field
+
+        // Max-length note
         const maxNote = document.createElement("div");
-        maxNote.className = "free-text-maxlen";
+        maxNote.className = "navds-hint-text";
         maxNote.id = maxId;
         maxNote.textContent = `Maks ${MAX_NOTE_LEN} tegn.`;
         fieldWrap.appendChild(maxNote);

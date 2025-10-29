@@ -37,10 +37,10 @@ header .wrapper, footer .wrapper {
     gap: 2rem;
 }
 
-h1 {
-    margin-bottom: 0;
-    line-height: 1.2;
+#tree-page header {
+    background: #94a2bc13;
 }
+
 
 footer {
     border-top: 1px solid black;
@@ -76,13 +76,8 @@ footer {
     display: grid;
     gap: 2rem;
     grid-template-areas:
-    "header"
     "tree"
     "answers";
-}
-
-#top-section > header {
-    grid-area: header;
 }
 
 #tree {
@@ -97,7 +92,6 @@ footer {
     #top-section {
         grid-template-columns: minmax(29rem, 1fr) 2fr;
         grid-template-areas:
-      "header header"
       "tree answers";
     }
 }
@@ -133,68 +127,6 @@ button.print .navds-button__icon {
     padding-right: 1.75rem;
 }
 
-.help-box {
-    background: #eef5ff;
-    border-left: 4px solid #1844a3;
-    padding: 1rem;
-    margin: 0 0 2rem;
-    border-radius: 4px;
-}
-
-.help-box a {
-    color: #000;
-}
-
-
-.free-text-field {
-    margin: 1rem 0;
-}
-
-.free-text-field label {
-    display: block;
-    font-weight: 600;
-    margin-bottom: .25rem;
-}
-
-.free-text-hint {
-    display: block;
-    margin: .25rem 0 .5rem;
-}
-
-.free-text-error {
-    color: #ba3a26;
-    margin-top: .5rem;
-}
-
-.options-error {
-    color: #ba3a26;
-    margin-top: .5rem;
-}
-
-.free-text-input {
-    width: 100%;
-    height: 6em;
-}
-
-
-.options-group {
-    margin: 1rem 0;
-    padding: .5rem 1rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-.options-group legend {
-    font-weight: 600;
-}
-
-.option-item {
-    margin: .25rem 0;
-}
-
-.option-item input {
-    margin-right: .5rem;
-}
 
 
 /* Graph styling overrides */
