@@ -10,11 +10,24 @@ function getNote(nodeId) {
 }
 
 function setNote(nodeId, value) {
-    // Trim and bound note length before saving
     const trimmed = (value ?? "").trim();
-    const bounded = trimmed.length > MAX_NOTE_LEN ? trimmed.slice(0, MAX_NOTE_LEN) : trimmed;
-    notes[nodeId] = bounded;
+    notes[nodeId] = trimmed.length > MAX_NOTE_LEN ? trimmed.slice(0, MAX_NOTE_LEN) : trimmed;
     localStorage.setItem(NOTES_KEY(treeId), JSON.stringify(notes));
+}
+
+function normalizeTreeOptions(treeObj) {
+    const sortPairs = (optionsObj) =>
+        Object.entries(optionsObj || {}).sort((a, b) => {
+            const oa = (a[1] && typeof a[1].order === "number") ? a[1].order : Number.POSITIVE_INFINITY;
+            const ob = (b[1] && typeof b[1].order === "number") ? b[1].order : Number.POSITIVE_INFINITY;
+            return oa !== ob ? oa - ob : String(a[0]).localeCompare(String(b[0]));
+        });
+
+    for (const node of Object.values(treeObj)) {
+        if (node && node.options && typeof node.options === "object" && !Array.isArray(node.options)) {
+            node.options = sortPairs(node.options);
+        }
+    }
 }
 
 
@@ -25,14 +38,6 @@ async function init() {
     // Figure out which tree we're loading based on the URL params
     const params = new URLSearchParams(window.location.search);
     treeId = params.get("id");
-
-    const host = location.hostname || "";
-    const fullHost = location.host || ""; // may include port
-    const isLocalhost = host === "localhost" || host === "127.0.0.1" || host === "::1" || fullHost.startsWith("localhost:") || fullHost.startsWith("127.0.0.1:") || fullHost.startsWith("[::1]:");
-    const isPrivateNet = /^192\.168\./.test(host) || /^10\./.test(host) || /^172\.(1[6-9]|2\d|3[0-1])\./.test(host);
-    const isMdns = host.endsWith(".local");
-    const __DEV__ = isLocalhost || isPrivateNet || isMdns || location.protocol === "file:";
-    if (__DEV__) console.debug("[viewer] script loaded, id =", treeId);
 
     if (!treeId) {
         document.body.innerHTML =
@@ -64,7 +69,6 @@ async function init() {
 }
 
 
-// Load decision tree from external JSON file instead of hardcoding
 async function loadTree() {
     try {
 
@@ -72,13 +76,13 @@ async function loadTree() {
         if (!response.ok) throw new Error("Could not load decision tree");
 
         tree = await response.json();
-
-
+        normalizeTreeOptions(tree);
         render();
+
     } catch (e) {
         console.error("Failed to load tree:", e);
         const treeEl = document.getElementById("tree");
-        if (treeEl) treeEl.innerHTML = "<p role=\"alert\">Kunne ikke laste beslutningstreet.</p>";
+        if (treeEl) treeEl.innerHTML = "<p>Kunne ikke laste beslutningstreet.</p>";
         const diagramEl = document.getElementById("mermaid-container");
         if (diagramEl) {
             diagramEl.textContent = "";
@@ -89,7 +93,11 @@ async function loadTree() {
 
 function render() {
 
-    document.getElementById("tree-name").textContent = window.TREE_TITLE;
+    const headerEl = document.getElementById("tree-name");
+    if (headerEl) {
+        const customTitle = (tree && typeof tree.title === "string") ? tree.title.trim() : "";
+        headerEl.textContent = customTitle || window.TREE_TITLE;
+    }
 
     const section = document.getElementById("tree");
     const pathSection = document.getElementById("path");
@@ -98,32 +106,29 @@ function render() {
     section.innerHTML = "";
 
     // Build the path
-
     const ul = document.createElement("ul");
     for (let i = 1; i < pathHistory.length; i++) {
         const prevId = pathHistory[i - 1];
         const prevNode = tree[prevId];
         if (!prevNode) continue;
         const nextKey = pathHistory[i];
+
         let option;
-        if (prevNode.options && typeof prevNode.options === "object") {
-            option = Object.values(prevNode.options).find(opt => opt && opt.next === nextKey);
+
+        if (Array.isArray(prevNode.options)) {
+            const hit = prevNode.options.find(([, opt]) => opt && opt.next === nextKey);
+            option = hit && hit[1];
         }
+
         if (option && option.label) {
             const li = document.createElement("li");
             li.textContent = option.label;
 
             // If the previous node had a note, render it under the label
             if (prevNode.note) {
-                const {label} = prevNode.note;
                 const txt = getNote(prevId);
                 if (txt && txt.trim()) {
                     const noteP = document.createElement("p");
-                    noteP.style.margin = ".25rem 0 0";
-                    const strong = document.createElement("strong");
-                    strong.textContent = `${label}:`;
-                    noteP.appendChild(strong);
-                    noteP.appendChild(document.createTextNode(" "));
                     noteP.appendChild(document.createTextNode(txt));
                     li.appendChild(noteP);
                 }
@@ -209,23 +214,17 @@ function render() {
         };
         btnRow.appendChild(restart);
     } else {
-        // Answer options as radio buttons + Next action (stable ordering)
-        const optionEntries = (node.options && typeof node.options === "object") ? Object.entries(node.options) : [];
-        optionEntries.sort((a, b) => {
-            const oa = a[1] && typeof a[1].order === "number" ? a[1].order : Number.POSITIVE_INFINITY;
-            const ob = b[1] && typeof b[1].order === "number" ? b[1].order : Number.POSITIVE_INFINITY;
-            if (oa !== ob) return oa - ob;
-            // fallback: stable by key name
-            return String(a[0]).localeCompare(String(b[0]));
-        });
+
+        const optionEntries = Array.isArray(node.options) ? node.options : [];
 
         if (optionEntries.length === 0) {
             const msg = document.createElement("div");
             msg.className = "free-text-hint";
             msg.textContent = "Ingen valg tilgjengelig for denne noden.";
             wrapper.appendChild(msg);
+
         } else {
-            // Create radio group (Aksel styling)
+
             const fieldset = document.createElement("fieldset");
             fieldset.className = "navds-fieldset";
             fieldset.setAttribute("role", "radiogroup");
@@ -507,13 +506,7 @@ function mermaidSource(tree, pathHistory) {
 
 
         if (!n.end && n.options) {
-            const optionEntries = Object.entries(n.options);
-            optionEntries.sort((a, b) => {
-                const oa = a[1] && typeof a[1].order === "number" ? a[1].order : Number.POSITIVE_INFINITY;
-                const ob = b[1] && typeof b[1].order === "number" ? b[1].order : Number.POSITIVE_INFINITY;
-                if (oa !== ob) return oa - ob;
-                return String(a[0]).localeCompare(String(b[0]));
-            });
+            const optionEntries = Array.isArray(n.options) ? n.options : [];
             for (const [, opt] of optionEntries) {
                 if (!opt) continue;
                 const label = (opt.buttonText || "").replace(/"/g, '\\"');
@@ -535,7 +528,6 @@ function mermaidSource(tree, pathHistory) {
         }
     }
 
-
     visit("start");
 
     if (visitedEdges.size) {
@@ -553,7 +545,6 @@ function mermaidSource(tree, pathHistory) {
         "\n"
     )}\n${classLines.join("\n")}`;
 }
-
 
 // Render the Mermaid diagram
 function drawMermaid(tree) {

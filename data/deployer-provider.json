@@ -1,11 +1,12 @@
 
 {
+    "title": "Er vi leverandør eller idriftsetter?",
     "start": {
         "q": "Har Nav utviklet eller spesialbestilt KI-systemet?",
         "help": "Et eksempel på det motsatte er der Nav kjøper hyllevare, altså et ferdigutviklet KI-system eller en GKI-modell som allerede finnes på markedet hos en leverandør. I disse tilfellene kan du svare nei her.",
         "note": {
             "label": "Utdyp gjerne svaret ditt.",
-            "hint": "Her er litt hint-tekst.",
+            "hint": "",
             "required": false
         },
         "options": {

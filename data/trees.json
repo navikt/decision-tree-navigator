@@ -1,17 +1,17 @@
 [
   {
-    "id": "merking",
-    "title": "Bør jeg merke KI-innholdet mitt?",
-    "file": "merking.json"
+    "id": "risiko",
+    "title": "Risiko ifm. KI-forordningen: Hvilket risikonivå har KI-systemet mitt?",
+    "file": "risikoklassifisering.json"
   },
   {
     "id": "provider-deployer",
-    "title": "Er jeg provider eller deployer?",
+    "title": "Rolle ifm. KI-forordningen: Er vi leverandør eller idriftsetter?",
     "file": "deployer-provider.json"
   },
   {
-    "id": "risiko",
-    "title": "Hvilket risikonivå har KI-systemet mitt?",
-    "file": "risikoklassifisering.json"
+    "id": "merking",
+    "title": "Bør jeg merke KI-innholdet mitt?",
+    "file": "merking.json"
   }
 ]
