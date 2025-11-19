@@ -27,6 +27,11 @@ function setNote(nodeId, value) {
     localStorage.setItem(NOTES_KEY(treeId), JSON.stringify(notes));
 }
 
+
+// Normalize each node’s options into a sorted array of [key, option] pairs.
+// Sorting rule: by option.order (if present), otherwise alphabetically.
+// This makes iteration/rendering deterministic while still letting the JSON
+// use object syntax for human readability.
 function normalizeTreeOptions(treeObj) {
     const sortPairs = (optionsObj) =>
         Object.entries(optionsObj || {}).sort((a, b) => {
@@ -326,37 +331,73 @@ function render() {
         attemptedSubmit = false;
     }
 
-    // 1) Bygg stien bare hvis vi ikke er i intro-modus
-    if (!introMode) {
+    // 1) Bygg "Dine svar": bruk valgt alternativ sin label + notat,
+    // og kun for ferdig besvarte steg (alle unntatt siste i pathHistory).
+    const completedIds = pathHistory.slice(0, -1); // alle tidligere steg
+
+    // Lag et oppslagskart: nodeId -> valgt alternativ-objekt
+    const chosenForNode = {};
+    for (let i = 0; i < pathHistory.length - 1; i++) {
+        const nodeId = pathHistory[i];
+        const nextId = pathHistory[i + 1];
+        const n = tree[nodeId];
+        if (!n || !Array.isArray(n.options)) continue;
+
+        const match = n.options.find(([, opt]) => opt && opt.next === nextId);
+        if (match) {
+            const [, opt] = match;
+            chosenForNode[nodeId] = opt;
+        }
+    }
+
+    if (!introMode && completedIds.length > 0) {
         const pathList = document.createElement("ul");
         pathList.className = "navds-list navds-list--unordered";
 
-        pathHistory.forEach((nodeId, idx) => {
+        completedIds.forEach((nodeId) => {
             const n = tree[nodeId];
             if (!n) return;
+
+            const opt = chosenForNode[nodeId];
+            const labelText = opt && opt.label ? opt.label : "";
+            const noteText = (getNote(nodeId) || "").trim();
+
+            // Ikke vis noe hvis vi verken har label fra JSON eller notat
+            if (!labelText && !noteText) return;
+
             const li = document.createElement("li");
             li.className = "navds-list__item";
 
-            const txt = [];
-            if (n.q) txt.push(n.q);
-            if (idx < pathHistory.length - 1 && Array.isArray(n.options)) {
-                // finn valgt alternativ (helt valgfritt å vise)
-                const nextId = pathHistory[idx + 1];
-                const opt = n.options.find(([, o]) => o && o.next === nextId);
-                if (opt) {
-                    const [, o] = opt;
-                    txt.push(`→ ${o.buttonText || ""}`.trim());
-                }
+            // Hovedtekst: label fra JSON (valgt alternativ)
+            if (labelText) {
+                const labelContainer = document.createElement("div");
+                labelContainer.className = "navds-label";
+                labelContainer.textContent = labelText;
+                li.appendChild(labelContainer);
             }
-            li.textContent = txt.join(" ");
+
+            // Notat: vis bare hvis det faktisk finnes
+            if (noteText) {
+                const noteContainer = document.createElement("div");
+                noteContainer.className = "navds-body-long";
+                noteContainer.textContent = labelText ? `${noteText}` : noteText;
+                if (labelText) {
+                    li.appendChild(document.createTextNode(" "));
+                }
+                li.appendChild(noteContainer);
+            }
+
             pathList.appendChild(li);
         });
 
-        pathSection.appendChild(pathList);
+        if (pathList.children.length > 0) {
+            pathSection.appendChild(pathList);
+        }
     }
 
+
+
     // Skjul hele svar-seksjonen i intro-modus
-// Skjul hele svar-seksjonen i intro-modus
     const answersEl = document.getElementById("answers");
     if (answersEl) {
         answersEl.style.display = introMode ? "none" : "";
@@ -365,7 +406,6 @@ function render() {
         const oldPrint = answersEl.querySelector("#answers-print-btn");
         if (oldPrint) oldPrint.remove();
     }
-
 
     if (!node) {
         const err = document.createElement("p");

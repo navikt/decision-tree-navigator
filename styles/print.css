@@ -1,5 +1,5 @@
 @media print {
-    button.print, #buttons, footer {
+    button.print, #buttons, footer, .question-wrapper.final-result {
         display: none !important;
     }
 
@@ -19,15 +19,5 @@
 
     #decisions, header, #diagram {
         padding: 0;
-    }
-
-
-
-
-}
-
-@media print {
-    #tree-intro.print-only {
-        display: block !important;
     }
 }
