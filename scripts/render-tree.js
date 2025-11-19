@@ -361,14 +361,17 @@ function render() {
             const optFrag = cloneTemplate("radio-option-template");
             const wrap = optFrag.querySelector(".navds-radio");
             const input = optFrag.querySelector("input");
+            const labelEl = optFrag.querySelector("label.navds-radio__label");
             const labelSpan = optFrag.querySelector(".navds-body-short");
 
-            if (!wrap || !input || !labelSpan) return;
+            if (!wrap || !input || !labelEl || !labelSpan) return;
 
             const id = `${groupName}-${idx}`;
             input.id = id;
             input.name = groupName;
             input.value = key;
+
+            labelEl.htmlFor = id;
 
             labelSpan.innerHTML = opt.buttonText || key;
 
