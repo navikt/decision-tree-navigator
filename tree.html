@@ -1,4 +1,13 @@
 <!DOCTYPE html>
+<!--
+  Decision Tree Navigator — Tree runner page (tree.html)
+  Purpose:
+  - Hosts the runner UI for a single decision tree (scripts/render-tree.js)
+  - Shows an intro screen (title + intro text + Start) before the first question
+  - Renders questions/answers and a full Mermaid visualization of the tree
+  Notes:
+  - IDs and template structure are referenced by render-tree.js — keep them stable
+-->
 <html lang="no">
 <head>
     <title>Beslutt: Bør jeg merke KI-innholdet mitt?</title>
@@ -11,6 +20,7 @@
 
 <body>
 
+<!-- Page header (site chrome): product title + logo link -->
 <header id="site-header">
     <div class="wrapper">
         <a class="site-title navds-link" href="index.html">Beslutt: ta en avgjørelse</a>
@@ -26,6 +36,7 @@
     </div>
 </header>
 
+<!-- Main content: tree runner page -->
 <main id="tree-page">
     <article>
         <header>
@@ -34,7 +45,7 @@
                      class="navds-stack navds-vstack navds-stack-gap navds-stack-direction">
                     <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 72 72"
                          aria-hidden="true"
-                         style="--__ac-r-w-xs:64px;--__ac-r-w-lg:96px;--__ac-r-h-xs:64px;--__ac-r-h-lg:96px;--__ac-r-position-xs:relative;--__ac-r-position-lg:absolute;--__ac-bleed-margin-inline-lg:calc(-1 * var(--a-spacing-32))"
+                         style="--__ac-r-w-xs:64px;--__ac-r-w-lg:96px;--__ac-r-h-xs:64px;--__ac-r-h-lg:96px;--__ac-r-position-xs:relative;--__ac-r-position-lg:absolute;--__ac-bleed-margin-inline-lg:calc(-1 * var(--a-spacing-32))" fill="none"
                          class="navds-r-w navds-r-h navds-r-position navds-box navds-bleed">
                         <rect x="23.25" y="22.5" width="26.25" height="9" fill="#CCE2F0"></rect>
                         <rect x="23.25" y="36.75" width="26.25" height="9" fill="#CCE2F0"></rect>
@@ -63,6 +74,7 @@
                         <rect x="41.25" y="33" width="29.25" height="37.5" stroke="#262626" stroke-width="2.25"
                               stroke-linecap="round" stroke-linejoin="round"></rect>
                     </svg>
+                    <!-- Tree header: H1 (tree title), H2 (current step title), and optional intro text -->
                     <div style="--__ac-stack-gap-xs:var(--a-spacing-1);--__ac-stack-direction-xs:column"
                          class="navds-stack navds-vstack navds-stack-gap navds-stack-direction">
                         <h1 id="tree-name"

@@ -24,7 +24,7 @@
     "note": {
       "label": "Begrunn svaret ditt",
       "hint": "",
-      "required": true
+      "required": false
     }
   },
   "node2": {

@@ -1,3 +1,24 @@
+/*
+  Decision Tree Navigator — UI runtime (render-tree.js)
+  ----------------------------------------------------
+  Responsibilities:
+  - Load a tree JSON by id from the URL (?id=...)
+  - Maintain lightweight navigation state (pathHistory) and notes per node
+  - Render three modes:
+    1) Intro screen: H1 styled like H2, optional intro text, Start button, full diagram
+    2) Question pages: Step title, help text, options, optional note field, Next/Back
+    3) Final result page: includes intro text for print only
+  - Validation policy (lean):
+    - No errors before the first Next click on a node
+    - After Next, show inline + summary errors
+    - Radio error clears on selection; textarea error clears on input
+    - Error summary disappears only when no errors remain
+  Accessibility:
+  - Keeps semantic H1, focuses error summary only on first show after Next
+  - Adds/clears aria-invalid and aria-describedby for fields when errors toggle
+*/
+
+// Tree data and navigation state
 let tree = {};
 let pathHistory = ["start"];
 let interacted = false;
@@ -8,6 +29,7 @@ const NOTES_KEY = (treeId) => `beslutt:${treeId}:notes`;
 const MAX_NOTE_LEN = 1000;
 
 // Set up HTML template rendering
+// Clone a <template> by id and return its DocumentFragment
 function cloneTemplate(id) {
     const tmpl = document.getElementById(id);
     if (!tmpl) {
@@ -17,6 +39,7 @@ function cloneTemplate(id) {
     return tmpl.content.cloneNode(true);
 }
 
+// Read persisted note for a node (empty string if none)
 function getNote(nodeId) {
     return notes[nodeId] || "";
 }
@@ -47,6 +70,7 @@ function normalizeTreeOptions(treeObj) {
     }
 }
 
+// Remove existing error summary box (if any)
 function clearErrorSummary(wrapperEl) {
     const old = wrapperEl.querySelector("#error-summary");
     if (old) old.remove();
@@ -246,6 +270,7 @@ function clearNoteError(current, section) {
 let treeId = "";
 let notes = {};
 
+// Bootstrap: resolve tree id from URL, set title, load persisted notes, then fetch the tree
 async function init() {
     // Figure out which tree we're loading based on the URL params
     const params = new URLSearchParams(window.location.search);
@@ -280,6 +305,7 @@ async function init() {
     await loadTree();
 }
 
+// Fetch the tree JSON, normalize it, then render the UI
 async function loadTree() {
     try {
 
@@ -302,6 +328,7 @@ async function loadTree() {
     }
 }
 
+// Render the entire page for the current node
 function render() {
     const headerEl = document.getElementById("tree-name");
     if (headerEl) {
@@ -879,6 +906,8 @@ function mermaidSource(tree, pathHistory) {
     const historySet = new Set(pathHistory); // for styling
     const drawnEdges = new Set();
     const current = pathHistory[pathHistory.length - 1];
+    // On the intro page (before any interaction), do not highlight the first node
+    const isIntroDiagram = (pathHistory.length === 1 && !interacted);
 
     function drawNode(id, txt, shape = "rect") {
         const esc = txt.replace(/"/g, '\\"').replace(/\n/g, " ");
@@ -917,9 +946,10 @@ function mermaidSource(tree, pathHistory) {
         if (!n) return;
         nodeLines.push(drawNode(id, n.q, n.shape));
 
-        if (id === current) {
+        // Highlight current and visited nodes, except on the intro page where the start node should not be highlighted
+        if (id === current && !(isIntroDiagram && id === "start")) {
             classLines.push(`class ${id} current`);
-        } else if (historySet.has(id)) {
+        } else if (historySet.has(id) && !(isIntroDiagram && id === "start")) {
             classLines.push(`class ${id} visited`);
         }
 
