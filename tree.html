@@ -3,7 +3,7 @@
 <head>
     <title>Beslutt: Bør jeg merke KI-innholdet mitt?</title>
     <meta charset="UTF-8"/>
-    <link rel="stylesheet" href="https://unpkg.com/@navikt/ds-css@latest/dist/index.min.css"/>
+    <link rel="stylesheet" href="styles/navikt-ds-index.min.css"/>
     <link rel="stylesheet" href="styles/screen.css"/>
     <link rel="stylesheet" href="styles/print.css" media="print">
     <script type="module" src="scripts/render-tree.js"></script>
@@ -50,6 +50,60 @@
 
     </article>
 </main>
+
+<template id="question-template">
+    <div class="question-wrapper">
+        <h2 class="navds-heading navds-heading--small question-text" tabindex="-1"></h2>
+
+        <div class="navds-body-long question-help"></div>
+
+        <div class="note-container"></div>
+
+        <div class="navds-stack navds-hstack navds-stack-gap navds-stack-direction navds-stack-wrap buttons"></div>
+    </div>
+</template>
+
+<template id="radio-group-template">
+    <fieldset class="navds-radio-group navds-radio-group--medium navds-fieldset navds-fieldset--medium">
+        <legend class="navds-fieldset__legend navds-label"></legend>
+        <div class="navds-radio-buttons"></div>
+    </fieldset>
+</template>
+
+<template id="radio-option-template">
+    <div class="navds-radio navds-radio--medium">
+        <input type="radio" class="navds-radio__input">
+        <label class="navds-radio__label">
+            <span class="navds-radio__content">
+                <span class="navds-body-short navds-body-short--medium"></span>
+            </span>
+        </label>
+    </div>
+</template>
+
+<template id="note-template">
+    <div class="navds-form-field">
+        <label class="navds-label"></label>
+        <div class="navds-hint-text hint"></div>
+        <div class="navds-textarea">
+            <textarea class="navds-textarea__input" rows="6"></textarea>
+        </div>
+        <div class="navds-hint-text maxlen"></div>
+    </div>
+</template>
+
+<template id="error-summary-template">
+    <div class="navds-error-summary" id="error-summary" tabindex="-1">
+        <div class="navds-error-summary__heading navds-heading">
+            Du må rette disse feilene før du kan fortsette:
+        </div>
+        <ul class="navds-error-summary__list"></ul>
+    </div>
+</template>
+
+
+
+
 
 <footer>
     <div class="wrapper">
