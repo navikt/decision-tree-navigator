@@ -333,10 +333,8 @@ function render() {
 
     wrapper.appendChild(question);
 
-    // Make the help section, if the content exists in the json.
     if (typeof node.help === "string" && node.help.trim() !== "") {
-        const helpBox = document.createElement("div");
-        helpBox.className = "help-text navds-body-long";
+        const helpBox = document.createElement("p");
         helpBox.innerHTML = node.help;
         wrapper.appendChild(helpBox);
     }
