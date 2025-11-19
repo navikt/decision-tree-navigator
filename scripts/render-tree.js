@@ -1,6 +1,8 @@
 let tree = {};
 let pathHistory = ["start"];
 let interacted = false;
+let attemptedSubmit = false; // becomes true after user clicks Next on a node
+let lastRenderedNodeId = null; // track node to reset attemptedSubmit when node changes
 
 const NOTES_KEY = (treeId) => `beslutt:${treeId}:notes`;
 const MAX_NOTE_LEN = 1000;
@@ -45,7 +47,7 @@ function clearErrorSummary(wrapperEl) {
     if (old) old.remove();
 }
 
-function createErrorSummary(wrapperEl, items) {
+function createErrorSummary(wrapperEl, items, { focus = true } = {}) {
     clearErrorSummary(wrapperEl);
 
     const box = document.createElement("div");
@@ -72,9 +74,19 @@ function createErrorSummary(wrapperEl, items) {
     });
 
     box.appendChild(list);
-    wrapperEl.insertBefore(box, wrapperEl.firstChild);
-    box.focus();
+
+    const buttons = wrapperEl.querySelector(".buttons");
+    if (buttons && buttons.parentNode === wrapperEl) {
+        wrapperEl.insertBefore(box, buttons);
+    } else {
+        wrapperEl.insertBefore(box, wrapperEl.firstChild);
+    }
+
+    if (focus) {
+        box.focus();
+    }
 }
+
 
 function makeAkselErrorMessage(id, text) {
     const p = document.createElement("p");
@@ -181,9 +193,50 @@ function showNoteError(current, section) {
     input.setAttribute("aria-invalid", "true");
     const maxId = `maxlen-${current}`;
     const prev = input.getAttribute("aria-describedby") || "";
-    const base = prev.split(" ").filter(Boolean).filter(x => x !== NOTE_ERR_ID && x !== maxId);
-    input.setAttribute("aria-describedby", [NOTE_ERR_ID, ...base, maxId].join(" "));
+    const base = prev
+        .split(" ")
+        .filter(Boolean)
+        .filter((x) => x !== NOTE_ERR_ID && x !== maxId);
+
+    input.setAttribute(
+        "aria-describedby",
+        [NOTE_ERR_ID, ...base, maxId].join(" ")
+    );
 }
+
+function clearNoteError(current, section) {
+    const input = section.querySelector(`#note-${current}`);
+    if (!input) return;
+
+    const taWrap = section.querySelector(`#ta-wrap-${current}`);
+    const fieldWrap = input.closest(".navds-form-field");
+    const NOTE_ERR_ID = `note-err-${current}`;
+
+    if (taWrap) {
+        taWrap.classList.remove("navds-textarea--error");
+    }
+
+    if (fieldWrap) {
+        const msg = fieldWrap.querySelector(`#${NOTE_ERR_ID}`);
+        if (msg) msg.remove();
+    }
+
+    input.removeAttribute("aria-invalid");
+
+    const prev = input.getAttribute("aria-describedby") || "";
+    if (prev) {
+        const list = prev
+            .split(" ")
+            .filter((x) => x && x !== NOTE_ERR_ID);
+
+        if (list.length) {
+            input.setAttribute("aria-describedby", list.join(" "));
+        } else {
+            input.removeAttribute("aria-describedby");
+        }
+    }
+}
+
 
 let treeId = "";
 let notes = {};
@@ -268,6 +321,11 @@ function render() {
     const node = tree[current];
     const introMode = (current === "start" && !interacted);
 
+    // Reset validation-attempt flag when node changes
+    if (current !== lastRenderedNodeId) {
+        attemptedSubmit = false;
+    }
+
     // 1) Bygg stien bare hvis vi ikke er i intro-modus
     if (!introMode) {
         const pathList = document.createElement("ul");
@@ -298,10 +356,16 @@ function render() {
     }
 
     // Skjul hele svar-seksjonen i intro-modus
+// Skjul hele svar-seksjonen i intro-modus
     const answersEl = document.getElementById("answers");
     if (answersEl) {
         answersEl.style.display = introMode ? "none" : "";
+
+        // Fjern eventuell gammel print-knapp
+        const oldPrint = answersEl.querySelector("#answers-print-btn");
+        if (oldPrint) oldPrint.remove();
     }
+
 
     if (!node) {
         const err = document.createElement("p");
@@ -311,17 +375,16 @@ function render() {
         return;
     }
 
-    // Start page tweaks: H1 styling and intro text
+    // Intro page tweaks: H1 styling and intro text
     const h1El = document.getElementById("tree-name");
     const h2El = document.getElementById("step-name");
     const introEl = document.getElementById("tree-intro");
 
+    // Styling of H1 & H2 depend on whether we're on the intro page or the question page
     if (h1El) {
-        // On intro page (before first interaction), make H1 look like H2.
         if (introMode) {
             h1El.className = h2El ? h2El.className : "navds-heading navds-heading--xlarge";
         } else {
-            // After the start page, enforce the normal H1 styling as requested.
             h1El.className = "normalFontWeight-0-1-4 navds-heading navds-heading--xsmall navds-typo--color-subtle";
         }
     }
@@ -430,9 +493,12 @@ function render() {
 
             input.addEventListener("change", () => {
                 selectedNext = opt.next;
+
                 if (typeof clearOptionError === "function") {
                     clearOptionError(fieldset, optErrId);
                 }
+
+                updateErrorSummary(wrapper);
             });
 
             radioContainer.appendChild(optFrag);
@@ -454,6 +520,11 @@ function render() {
         const fieldId = `note-${current}`;
         const hintId = `hint-${current}`;
         const maxId = `maxlen-${current}`;
+
+        const taWrap = noteFrag.querySelector(".navds-textarea");
+        if (taWrap) {
+            taWrap.id = `ta-wrap-${current}`;
+        }
 
         if (labelEl) {
             labelEl.setAttribute("for", fieldId);
@@ -483,9 +554,15 @@ function render() {
             }
             if (required) textarea.required = true;
 
+
             textarea.addEventListener("input", () => {
                 setNote(current, textarea.value);
-                // hvis du har egen clearNoteError, kall den her
+
+                if (typeof clearNoteError === "function") {
+                    clearNoteError(current, wrapper);
+                }
+
+                updateErrorSummary(wrapper);
             });
         }
 
@@ -499,7 +576,60 @@ function render() {
         }
     }
 
-    // 6) Knapper (bruk gjerne eksisterende hjelpefunksjoner, bare endre signatur hvis nødvendig)
+
+    function updateErrorSummary(wrapper) {
+        // Do not show any summary before user attempts to go Next
+        if (!attemptedSubmit) return;
+
+        const errors = [];
+
+        // 1) Radio selected?
+        if (!selectedNext && !node.end) {
+            errors.push({
+                text: "Velg et alternativ.",
+                href: `#legend-${current}`,
+            });
+        }
+
+        // 2) Note required?
+        const noteConfig = node.note;
+        const noteIsRequired =
+            noteConfig && noteConfig.label && noteConfig.required;
+
+        if (noteIsRequired) {
+            const textarea = wrapper.querySelector(`#note-${current}`);
+            const value = textarea ? textarea.value.trim() : "";
+            if (!value) {
+                errors.push({
+                    text: "Skriv en begrunnelse for svaret ditt.",
+                    href: `#note-${current}`,
+                });
+            }
+        }
+
+        clearErrorSummary(wrapper);
+
+        if (errors.length > 0) {
+            createErrorSummary(wrapper, errors, { focus: false });
+        }
+        // If no errors remain, the summary stays cleared (disappears)
+    }
+
+    function resetTreeState() {
+        // Clear all stored notes for this tree
+        notes = {};
+        if (treeId) {
+            localStorage.removeItem(NOTES_KEY(treeId));
+        }
+
+        // Reset navigation state
+        pathHistory = ["start"];
+        interacted = false;
+        attemptedSubmit = false;
+        lastRenderedNodeId = null;
+    }
+
+    // Knapper
     function makeNextButton() {
         const btn = document.createElement("button");
         btn.type = "button";
@@ -509,19 +639,57 @@ function render() {
         btn.addEventListener("click", (e) => {
             e.preventDefault();
             interacted = true;
+            attemptedSubmit = true;
 
             if (node.end) return;
 
+            // Fjern eventuell gammel summary
+            clearErrorSummary(wrapper);
+
+            const errors = [];
+
+            // 1) Radio må være valgt
             if (!selectedNext) {
                 if (fieldset && typeof showOptionError === "function") {
                     const groupName = `opt-${current}`;
                     const optErrId = `fieldset-error-${current}`;
                     showOptionError(fieldset, groupName, optErrId);
                 }
-                // og error summary hvis du har det fra før
+
+                errors.push({
+                    text: "Velg et alternativ.",
+                    href: `#legend-${current}`,
+                });
+            }
+
+            // 2) Notatfelt hvis det er påkrevd
+            const noteConfig = node.note;
+            const noteIsRequired =
+                noteConfig && noteConfig.label && noteConfig.required;
+
+            if (noteIsRequired) {
+                const textarea = wrapper.querySelector(`#note-${current}`);
+                const value = textarea ? textarea.value.trim() : "";
+
+                if (!value) {
+                    if (typeof showNoteError === "function") {
+                        showNoteError(current, wrapper);
+                    }
+
+                    errors.push({
+                        text: "Skriv en begrunnelse for svaret ditt.",
+                        href: `#note-${current}`,
+                    });
+                }
+            }
+
+            // 3) Hvis vi har feil, vis summary rett over knappene
+            if (errors.length > 0) {
+                createErrorSummary(wrapper, errors, { focus: true });
                 return;
             }
 
+            // Alt ok, gå videre
             pathHistory.push(selectedNext);
             render();
         });
@@ -566,15 +734,87 @@ function render() {
         return btn;
     }
 
+    function makeRestartButton() {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "navds-button navds-button--tertiary navds-button--medium navds-button--icon navds-button--icon-left";
+        btn.innerHTML =
+            "<span class='navds-button__icon' aria-hidden='true'>↺</span>" +
+            "<span class='navds-label'>Slett data og start på nytt</span>";
+
+        btn.addEventListener("click", (e) => {
+            e.preventDefault();
+            resetTreeState();
+            render();
+            // Flytt fokus til topp etter restart
+            const h1 = document.getElementById("tree-name");
+            if (h1) {
+                h1.setAttribute("tabindex", "-1");
+                h1.focus();
+                h1.addEventListener("blur", () => h1.removeAttribute("tabindex"), { once: true });
+            }
+        });
+
+        return btn;
+    }
+
+    function makeHomeButton() {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "navds-button navds-button--tertiary navds-button--medium navds-button--icon navds-button--icon-left";
+        btn.innerHTML =
+            "<span class='navds-button__icon' aria-hidden='true'>🗑</span>" +
+            "<span class='navds-label'>Slett data og gå til forsiden</span>";
+
+        btn.addEventListener("click", (e) => {
+            e.preventDefault();
+            resetTreeState();
+            window.location.href = "index.html";
+        });
+
+        return btn;
+    }
+
+    function makePrintButton() {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.id = "answers-print-btn";
+        btn.className =
+            "navds-button navds-button--primary navds-button--medium print";
+        btn.innerHTML =
+            "<span class='navds-button__icon' aria-hidden='true'></span>" +
+            "<span class='navds-label'>Skriv ut</span>";
+
+        btn.addEventListener("click", (e) => {
+            e.preventDefault();
+            window.print();
+        });
+
+        return btn;
+    }
+
+
+    if (!introMode && pathHistory.length > 1) {
+        buttonsEl.appendChild(makeBackButton());
+    }
+
     if (introMode) {
         buttonsEl.appendChild(makeStartButton());
     } else if (node.end) {
         buttonsEl.appendChild(makeRestartButton());
+        buttonsEl.appendChild(makeHomeButton());
     } else {
         buttonsEl.appendChild(makeNextButton());
     }
-    if (!introMode && pathHistory.length > 1) {
-        buttonsEl.appendChild(makeBackButton());
+
+
+    // På resultatsiden: vis "Skriv ut"-knapp nederst under "Dine svar"
+    if (node.end) {
+        const answersEl = document.getElementById("answers");
+        if (answersEl) {
+            const printBtn = makePrintButton();
+            answersEl.appendChild(printBtn);
+        }
     }
 
     // 7) Legg inn spørsmålet i seksjonen
@@ -582,6 +822,9 @@ function render() {
 
     // 8) Tegn mermaid-grafen som før
     drawMermaid(tree);
+
+    // Remember which node we just rendered to manage validation state per node
+    lastRenderedNodeId = current;
 }
 
 
