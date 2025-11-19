@@ -1,5 +1,6 @@
 {
   "title": "Er vi leverandør eller idriftsetter?",
+  "intro-text": "Dette treet avklarer hvilken rolle Nav får etter forordningen: leverandør (provider) eller idriftsetter (deployer). Det ser på hvor løsningen kommer fra, hva slags endringer Nav gjør, hvilken bruk som er planlagt, og om systemet fremstår som Navs eget produkt. Resultatet avgjør hvilke plikter som gjelder.",
   "start": {
     "step-title": "Egenutvikling vs. hyllevare",
     "q": "Har Nav utviklet eller spesialbestilt KI-systemet?",

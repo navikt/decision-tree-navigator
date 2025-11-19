@@ -25,3 +25,9 @@
 
 
 }
+
+@media print {
+    #tree-intro.print-only {
+        display: block !important;
+    }
+}

@@ -15,7 +15,6 @@ function cloneTemplate(id) {
     return tmpl.content.cloneNode(true);
 }
 
-
 function getNote(nodeId) {
     return notes[nodeId] || "";
 }
@@ -264,36 +263,45 @@ function render() {
     section.innerHTML = "";
     pathSection.innerHTML = "";
 
-    // 1) Bygg stien (kan være enklere enn du har i dag; tilpass om du vil)
-    const pathList = document.createElement("ul");
-    pathList.className = "navds-list navds-list--unordered";
-
-    pathHistory.forEach((nodeId, idx) => {
-        const n = tree[nodeId];
-        if (!n) return;
-        const li = document.createElement("li");
-        li.className = "navds-list__item";
-
-        const txt = [];
-        if (n.q) txt.push(n.q);
-        if (idx < pathHistory.length - 1 && Array.isArray(n.options)) {
-            // finn valgt alternativ (helt valgfritt å vise)
-            const nextId = pathHistory[idx + 1];
-            const opt = n.options.find(([, o]) => o && o.next === nextId);
-            if (opt) {
-                const [, o] = opt;
-                txt.push(`→ ${o.buttonText || ""}`.trim());
-            }
-        }
-        li.textContent = txt.join(" ");
-        pathList.appendChild(li);
-    });
-
-    pathSection.appendChild(pathList);
-
-    // 2) Finn gjeldende node
+    // 2) Finn gjeldende node og sjekk om vi er i intro-modus (startside før første interaksjon)
     const current = pathHistory[pathHistory.length - 1];
     const node = tree[current];
+    const introMode = (current === "start" && !interacted);
+
+    // 1) Bygg stien bare hvis vi ikke er i intro-modus
+    if (!introMode) {
+        const pathList = document.createElement("ul");
+        pathList.className = "navds-list navds-list--unordered";
+
+        pathHistory.forEach((nodeId, idx) => {
+            const n = tree[nodeId];
+            if (!n) return;
+            const li = document.createElement("li");
+            li.className = "navds-list__item";
+
+            const txt = [];
+            if (n.q) txt.push(n.q);
+            if (idx < pathHistory.length - 1 && Array.isArray(n.options)) {
+                // finn valgt alternativ (helt valgfritt å vise)
+                const nextId = pathHistory[idx + 1];
+                const opt = n.options.find(([, o]) => o && o.next === nextId);
+                if (opt) {
+                    const [, o] = opt;
+                    txt.push(`→ ${o.buttonText || ""}`.trim());
+                }
+            }
+            li.textContent = txt.join(" ");
+            pathList.appendChild(li);
+        });
+
+        pathSection.appendChild(pathList);
+    }
+
+    // Skjul hele svar-seksjonen i intro-modus
+    const answersEl = document.getElementById("answers");
+    if (answersEl) {
+        answersEl.style.display = introMode ? "none" : "";
+    }
 
     if (!node) {
         const err = document.createElement("p");
@@ -301,6 +309,49 @@ function render() {
         err.textContent = "Fant ikke dette steget i beslutningstreet.";
         section.appendChild(err);
         return;
+    }
+
+    // Start page tweaks: H1 styling and intro text
+    const h1El = document.getElementById("tree-name");
+    const h2El = document.getElementById("step-name");
+    const introEl = document.getElementById("tree-intro");
+
+    if (h1El) {
+        // On intro page (before first interaction), make H1 look like H2.
+        if (introMode) {
+            h1El.className = h2El ? h2El.className : "navds-heading navds-heading--xlarge";
+        } else {
+            // After the start page, enforce the normal H1 styling as requested.
+            h1El.className = "normalFontWeight-0-1-4 navds-heading navds-heading--xsmall navds-typo--color-subtle";
+        }
+    }
+
+    if (introEl) {
+        const introText = (typeof tree["intro"] === "string" && tree["intro"].trim())
+            ? tree["intro"].trim()
+            : (typeof tree["intro-text"] === "string" ? tree["intro-text"].trim() : "");
+
+        // Show intro text only on the intro page (before first interaction)
+        if (introMode) {
+            introEl.textContent = introText || "";
+            introEl.style.display = introText ? "" : "none";
+            introEl.classList.remove("print-only");
+        } else if (node.end) {
+            // On the final page, keep the intro hidden on screen but include it in the DOM
+            // so that print styles can reveal it in the printout.
+            introEl.textContent = introText || "";
+            introEl.style.display = "none";
+            if (introText) {
+                introEl.classList.add("print-only");
+            } else {
+                introEl.classList.remove("print-only");
+            }
+        } else {
+            // Hide and clear on all question pages
+            introEl.textContent = "";
+            introEl.style.display = "none";
+            introEl.classList.remove("print-only");
+        }
     }
 
 // 3) Bygg spørsmåls-UI fra template
@@ -321,15 +372,17 @@ function render() {
     if (stepNameHeader) {
         const rawStepTitle = (node && typeof node["step-title"] === "string") ? node["step-title"].trim() : "";
         const questionText = (node && typeof node.q === "string") ? node.q.trim() : "";
-        stepNameHeader.textContent = rawStepTitle || questionText || "";
+        stepNameHeader.textContent = introMode ? "" : (rawStepTitle || questionText || "");
+        stepNameHeader.style.display = introMode ? "none" : "";
+        stepNameHeader.setAttribute("aria-hidden", introMode ? "true" : "false");
     }
 
     if (node.end) {
         wrapper.classList.add("final-result");
     }
 
-
-    if (typeof node.help === "string" && node.help.trim()) {
+    // På intro-siden viser vi ikke hjelpetekst
+    if (!introMode && typeof node.help === "string" && node.help.trim()) {
         // hjelp-tekst kan være HTML
         helpEl.innerHTML = node.help;
     } else {
@@ -340,7 +393,7 @@ function render() {
     let fieldset = null;
     let selectedNext = null;
 
-    if (!node.end && Array.isArray(node.options) && node.options.length > 0) {
+    if (!introMode && !node.end && Array.isArray(node.options) && node.options.length > 0) {
         const fieldsetFrag = cloneTemplate("radio-group-template");
         fieldset = fieldsetFrag.querySelector("fieldset");
         const legend = fieldsetFrag.querySelector("legend");
@@ -389,7 +442,7 @@ function render() {
     }
 
     // 5) Generate the free-text field from the template
-    if (node.note && node.note.label) {
+    if (!introMode && node.note && node.note.label) {
         const { label, hint, required } = node.note;
         const noteFrag = cloneTemplate("note-template");
         const fieldWrap = noteFrag.querySelector(".navds-form-field");
@@ -476,6 +529,26 @@ function render() {
         return btn;
     }
 
+    function makeStartButton() {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "navds-button navds-button--primary navds-button--medium";
+        btn.innerHTML = "<span class='navds-label'>Start</span>";
+        btn.addEventListener("click", (e) => {
+            e.preventDefault();
+            interacted = true;
+            render();
+            // Flytt fokus til stegtittel for kontekst
+            const h2 = document.getElementById("step-name");
+            if (h2) {
+                h2.setAttribute("tabindex", "-1");
+                h2.focus();
+                h2.addEventListener("blur", () => h2.removeAttribute("tabindex"), { once: true });
+            }
+        });
+        return btn;
+    }
+
     function makeBackButton() {
         const btn = document.createElement("button");
         btn.type = "button";
@@ -493,31 +566,14 @@ function render() {
         return btn;
     }
 
-    function makeRestartButton() {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "navds-button navds-button--primary navds-button--medium";
-        btn.innerHTML = "<span class='navds-label'>Start på nytt</span>";
-
-        btn.addEventListener("click", (e) => {
-            e.preventDefault();
-            pathHistory = ["start"];
-            interacted = false;
-            // nullstill notater for dette treet hvis du vil
-            localStorage.removeItem(NOTES_KEY(treeId));
-            notes = {};
-            render();
-        });
-
-        return btn;
-    }
-
-    if (node.end) {
+    if (introMode) {
+        buttonsEl.appendChild(makeStartButton());
+    } else if (node.end) {
         buttonsEl.appendChild(makeRestartButton());
     } else {
         buttonsEl.appendChild(makeNextButton());
     }
-    if (pathHistory.length > 1) {
+    if (!introMode && pathHistory.length > 1) {
         buttonsEl.appendChild(makeBackButton());
     }
 

@@ -1,7 +1,8 @@
 {
   "title": "Merking av KI-generert innhold",
+  "intro-text": "Dette treet hjelper deg å avgjøre om og hvordan KI-generert innhold bør merkes. Det går gjennom kontekst (saksbehandling, rapporter, offentlig vs. internt innhold), graden av realisme, og om innholdet er retningsgivende eller arkivpliktig. Målet er å gi en konsekvent, risikobasert praksis for merking.",
   "start": {
-    "step-title": "Innhold brukt i saksbehandling",
+    "step-title": "Innhold brukt i forbindelse Navs myndighetsutøvelse",
     "q": "Er innholdet ifm. saksbehandling?",
     "help": "Gjelder innholdet en konkret sak, beslutning eller myndighetsutøvelse?",
     "read-more": {

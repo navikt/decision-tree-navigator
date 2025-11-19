@@ -1,5 +1,6 @@
 {
   "title": "Hvilket risikonivå har KI-systemet mitt?",
+  "intro-text": "Dette treet hjelper deg å avgjøre om et KI-system faller innenfor «høy risiko» etter KI-forordningen. Det leder deg gjennom faktiske bruksområder (hjelpemiddelområdet, myndighetsutøvelse, ansatt-oppfølging, profilering, smale prosessteg osv.) slik at du ender med en klassifisering som kan brukes i etterlevelsesløsningen når KI-forordningen trer i kraft.",
   "start": {
     "step-title": "Bruk på hjelpemiddelområdet",
     "q": "Skal KI-systemet brukes på hjelpemiddelområdet?",
