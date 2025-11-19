@@ -303,25 +303,31 @@ function render() {
         return;
     }
 
-    // 3) Bygg spørsmåls-UI fra template
+// 3) Bygg spørsmåls-UI fra template
     const questionFrag = cloneTemplate("question-template");
     const wrapper = questionFrag.querySelector(".question-wrapper");
-    const questionEl = questionFrag.querySelector(".question-text");
     const helpEl = questionFrag.querySelector(".question-help");
     const noteContainer = questionFrag.querySelector(".note-container");
     const buttonsEl = questionFrag.querySelector(".buttons");
 
-    if (!wrapper || !questionEl || !buttonsEl) {
+    if (!wrapper || !buttonsEl) {
         console.error("Template question-template mangler forventede elementer");
         section.appendChild(questionFrag);
         return;
     }
 
-    questionEl.textContent = node.q || "";
+// Set the page header (h2#step-name) from node["step-title"] when provided; otherwise fall back to the question text
+    const stepNameHeader = document.getElementById("step-name");
+    if (stepNameHeader) {
+        const rawStepTitle = (node && typeof node["step-title"] === "string") ? node["step-title"].trim() : "";
+        const questionText = (node && typeof node.q === "string") ? node.q.trim() : "";
+        stepNameHeader.textContent = rawStepTitle || questionText || "";
+    }
 
     if (node.end) {
-        questionEl.classList.add("final-result");
+        wrapper.classList.add("final-result");
     }
+
 
     if (typeof node.help === "string" && node.help.trim()) {
         // hjelp-tekst kan være HTML
@@ -345,7 +351,9 @@ function render() {
 
         if (legend) {
             legend.id = `legend-${current}`;
-            legend.textContent = "Velg et alternativ (obligatorisk)";
+            const baseText = (node && typeof node.q === "string") ? node.q.trim() : "";
+            const requiredText = " (obligatorisk)";
+            legend.textContent = (baseText || "Velg et alternativ") + requiredText;
         }
 
         node.options.forEach(([key, opt], idx) => {
@@ -362,7 +370,6 @@ function render() {
             input.name = groupName;
             input.value = key;
 
-            // buttonText kan inneholde enkel HTML
             labelSpan.innerHTML = opt.buttonText || key;
 
             input.addEventListener("change", () => {
@@ -375,10 +382,10 @@ function render() {
             radioContainer.appendChild(optFrag);
         });
 
-        wrapper.appendChild(fieldsetFrag);
+        wrapper.insertBefore(fieldsetFrag, noteContainer);
     }
 
-    // 5) Notat-felt fra template
+    // 5) Generate the free-text field from the template
     if (node.note && node.note.label) {
         const { label, hint, required } = node.note;
         const noteFrag = cloneTemplate("note-template");

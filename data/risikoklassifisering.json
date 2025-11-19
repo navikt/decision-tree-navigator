@@ -1,13 +1,12 @@
-
 {
   "title": "Hvilket risikonivå har KI-systemet mitt?",
   "start": {
+    "step-title": "Bruk på hjelpemiddelområdet",
     "q": "Skal KI-systemet brukes på hjelpemiddelområdet?",
     "help": "",
-    "note": {
-      "label": "Begrunn svaret ditt",
-      "hint": "",
-      "required": false
+    "read-more": {
+      "read-more-about": "",
+      "read-more-text": ""
     },
     "options": {
       "yes": {
@@ -20,15 +19,20 @@
         "buttonText": "Nei",
         "label": "KI-systemet skal ikke brukes på hjelpemiddelområdet."
       }
-    }
-  },
-  "node2": {
-    "q": "Skal du bruke KI-systemet til oppgaver som er en del av NAVs utøvelse av offentlig myndighet?",
-    "help": "Skal du bruke systemet til å løse Navs lovfestede oppgaver, f.eks. i saksbehandling eller ved gjennomføring av tiltak, kontroll eller oppfølging av regelverk svarer du 'ja' her. Dette gjelder selv om KI-systemet ikke har noe grensesnitt mot borgerne eller Navs brukere.",
+    },
     "note": {
       "label": "Begrunn svaret ditt",
       "hint": "",
       "required": false
+    }
+  },
+  "node2": {
+    "step-title": "Offentlig myndighetsutøvelse",
+    "q": "Skal du bruke KI-systemet til oppgaver som er en del av NAVs utøvelse av offentlig myndighet?",
+    "help": "Skal du bruke systemet til å løse Navs lovfestede oppgaver, f.eks. i saksbehandling eller ved gjennomføring av tiltak, kontroll eller oppfølging av regelverk svarer du 'ja' her. Dette gjelder selv om KI-systemet ikke har noe grensesnitt mot borgerne eller Navs brukere.",
+    "read-more": {
+      "read-more-about": "",
+      "read-more-text": ""
     },
     "options": {
       "isReport": {
@@ -41,15 +45,20 @@
         "buttonText": "Nei",
         "label": "KI-systemet skal ikke brukes til offentlig myndighetsutøvelse."
       }
-    }
-  },
-  "node3": {
-    "q": "Skal du bruke KI systemet til rekruttering og ansettelse eller for å monitorere eller evaluere Nav-ansattes aktivitet eller innsats?",
-    "help": "",
+    },
     "note": {
       "label": "Begrunn svaret ditt",
       "hint": "",
       "required": false
+    }
+  },
+  "node3": {
+    "step-title": "Rekruttering og oppfølging av ansatte",
+    "q": "Skal du bruke KI systemet til rekruttering og ansettelse eller for å monitorere eller evaluere Nav-ansattes aktivitet eller innsats?",
+    "help": "",
+    "read-more": {
+      "read-more-about": "",
+      "read-more-text": ""
     },
     "options": {
       "isReport": {
@@ -62,15 +71,20 @@
         "buttonText": "Nei",
         "label": "KI-systemet skal ikke brukes til rekruttering/ansettelse eller for å monitorere/evaluere Nav-ansatte."
       }
-    }
-  },
-  "profilering": {
-    "q": "Profilerer KI -systemet individer etter definisjonen i GDPR?",
-    "help": "GDPR artikkel 4 nr. 4 definerer profilering som 'enhver form for automatisert behandling av personopplysninger som innebærer å bruke personopplysninger for å vurdere visse personlige aspekter knyttet til en fysisk person, særlig for å analysere eller forutsi aspekter som gjelder nevnte fysiske persons arbeidsprestasjoner, økonomiske situasjon, helse, personlige preferanser, interesser, pålitelighet, atferd, plassering eller bevegelser'",
+    },
     "note": {
       "label": "Begrunn svaret ditt",
       "hint": "",
       "required": false
+    }
+  },
+  "profilering": {
+    "step-title": "Profilering av individer",
+    "q": "Profilerer KI -systemet individer etter definisjonen i GDPR?",
+    "help": "GDPR artikkel 4 nr. 4 definerer profilering som 'enhver form for automatisert behandling av personopplysninger som innebærer å bruke personopplysninger for å vurdere visse personlige aspekter knyttet til en fysisk person, særlig for å analysere eller forutsi aspekter som gjelder nevnte fysiske persons arbeidsprestasjoner, økonomiske situasjon, helse, personlige preferanser, interesser, pålitelighet, atferd, plassering eller bevegelser'",
+    "read-more": {
+      "read-more-about": "",
+      "read-more-text": ""
     },
     "options": {
       "isReport": {
@@ -83,15 +97,20 @@
         "buttonText": "Nei",
         "label": "KI-systemet profilerer ikke individer."
       }
-    }
-  },
-  "node4": {
-    "q": "Skal KI- systemet kun utgjøre et smalt prosessteg?",
-    "help": "Dersom KI-systemet kun utfører en marginal oppgave, et såkalt smalt prosessteg (narrow procedural task, se KI-forordningen art. 6 nr. 3 bokstav a) anses ikke systemet å utgjøre en høy risiko. Eksempler på 'smalt prosessteg' (se fortalepunkt 53 i KI-forordningen) er der systemet brukes for å f.eks. strukturere ustrukturert data, klassifisere innkommende dokumenter i forhåndsdefinerte kategorier, eller der systemet brukes for å detektere duplikater blant et stort antall søknader. Her må dere se på den konkrete bruken av systemet og gjøre skriftlig vurdering. Husk også at slike systemer må registreres i EU-databasen etter KI-forordningen art. 71.",
+    },
     "note": {
       "label": "Begrunn svaret ditt",
       "hint": "",
       "required": false
+    }
+  },
+  "node4": {
+    "step-title": "KI som avgrenset prosesssteg",
+    "q": "Skal KI- systemet kun utgjøre et smalt prosessteg?",
+    "help": "Dersom KI-systemet kun utfører en marginal oppgave, et såkalt smalt prosessteg (narrow procedural task, se KI-forordningen art. 6 nr. 3 bokstav a) anses ikke systemet å utgjøre en høy risiko. Eksempler på 'smalt prosessteg' (se fortalepunkt 53 i KI-forordningen) er der systemet brukes for å f.eks. strukturere ustrukturert data, klassifisere innkommende dokumenter i forhåndsdefinerte kategorier, eller der systemet brukes for å detektere duplikater blant et stort antall søknader. Her må dere se på den konkrete bruken av systemet og gjøre skriftlig vurdering. Husk også at slike systemer må registreres i EU-databasen etter KI-forordningen art. 71.",
+    "read-more": {
+      "read-more-about": "",
+      "read-more-text": ""
     },
     "options": {
       "isReport": {
@@ -104,15 +123,20 @@
         "buttonText": "Nei",
         "label": "KI-systemet utfører mer enn et smalt prosesssteg."
       }
-    }
-  },
-  "node5": {
-    "q": "Skal KI-systemet brukes for å forbedre resultatet av en tidligere utført menneskelig oppgave eller aktivitet?",
-    "help": "Når KI-systemet forbedrer resultatet av en aktivitet tidligere utført av et menneske, utgjør bruken av KI-systemet kun et tillegg til den menneskelige aktiviteten. Eksempler på dette (jf. fortalepunkt 53) kan være at KI-systemet brukes for å forbedre språk eller uttrykksform i dokumenter forfattet av et menneske, synliggjøre hvordan en avgjørelse støtter opp under strategiske mål, visjoner eller prioriteringer. Andre eksempler er at KI-systemet lager oppsummering av møtereferater",
+    },
     "note": {
       "label": "Begrunn svaret ditt",
       "hint": "",
       "required": false
+    }
+  },
+  "node5": {
+    "step-title": "KI som tillegg til tidligere menneskelig aktivitet",
+    "q": "Skal KI-systemet brukes for å forbedre resultatet av en tidligere utført menneskelig oppgave eller aktivitet?",
+    "help": "Når KI-systemet forbedrer resultatet av en aktivitet tidligere utført av et menneske, utgjør bruken av KI-systemet kun et tillegg til den menneskelige aktiviteten. Eksempler på dette (jf. fortalepunkt 53) kan være at KI-systemet brukes for å forbedre språk eller uttrykksform i dokumenter forfattet av et menneske, synliggjøre hvordan en avgjørelse støtter opp under strategiske mål, visjoner eller prioriteringer. Andre eksempler er at KI-systemet lager oppsummering av møtereferater",
+    "read-more": {
+      "read-more-about": "",
+      "read-more-text": ""
     },
     "options": {
       "isReport": {
@@ -125,15 +149,20 @@
         "buttonText": "Nei",
         "label": "KI-systemet brukes *ikke* for å forbedre resultatet av en tidligere avsluttet menneskelig oppgave/aktivitet."
       }
-    }
-  },
-  "node6": {
-    "q": "Skal KI-systemet brukes for å gjenkjenne mønstre i avgjørelser eller gjenkjenne avvik fra tidligere praksis?",
-    "help": "",
+    },
     "note": {
       "label": "Begrunn svaret ditt",
       "hint": "",
       "required": false
+    }
+  },
+  "node6": {
+    "step-title": "Mønstergjenkjenning i praksis og vedtak",
+    "q": "Skal KI-systemet brukes for å gjenkjenne mønstre i avgjørelser eller gjenkjenne avvik fra tidligere praksis?",
+    "help": "",
+    "read-more": {
+      "read-more-about": "",
+      "read-more-text": ""
     },
     "options": {
       "isReport": {
@@ -146,15 +175,20 @@
         "buttonText": "Nei",
         "label": "KI-systemet *skal ikke* brukes for å gjenkjenne mønstre i avgjørelser eller gjenkjenne avvik fra tidligere praksis"
       }
-    }
-  },
-  "node7": {
-    "q": "Skal KI-systemet brukes for å forberede en avgjørelse eller vurdering på et av områdene omtalt i Billag 3? ",
-    "help": "Se KI-forordningen art. 6 nr. 3 bokstav d. Noen eksempler på dette kan være løsninger for filhåndtering, med funksjoner som søk og gjenfinning, indeksering, tekst eller taleprosessering, og kobling av dokumenter med andre kilder. Andre eksempler er KI systemer brukt for å oversette originaldokumenter, oppsummere dokumenter som er kommet inn som underlag til en søknad, eller til å oppsummere en vurdering fra rådgivende overlege",
+    },
     "note": {
       "label": "Begrunn svaret ditt",
       "hint": "",
       "required": false
+    }
+  },
+  "node7": {
+    "step-title": "Forberedelse av avgjørelser",
+    "q": "Skal KI-systemet brukes for å forberede en avgjørelse eller vurdering på et av områdene omtalt i Billag 3? ",
+    "help": "Se KI-forordningen art. 6 nr. 3 bokstav d. Noen eksempler på dette kan være løsninger for filhåndtering, med funksjoner som søk og gjenfinning, indeksering, tekst eller taleprosessering, og kobling av dokumenter med andre kilder. Andre eksempler er KI systemer brukt for å oversette originaldokumenter, oppsummere dokumenter som er kommet inn som underlag til en søknad, eller til å oppsummere en vurdering fra rådgivende overlege",
+    "read-more": {
+      "read-more-about": "",
+      "read-more-text": ""
     },
     "options": {
       "isReport": {
@@ -167,16 +201,25 @@
         "buttonText": "Nei",
         "label": "KI-systemet *skal ikke* brukes for å forberede en avgjørelse eller vurdering på et av områdene omtalt i Billag 3"
       }
+    },
+    "note": {
+      "label": "Begrunn svaret ditt",
+      "hint": "",
+      "required": false
     }
   },
   "highrisk": {
-    "q": "Høy risiko",
-    "help": "Se art.3 nr.3 i KI-forordningen for definisjonen av 'tilbyder'",
+    "step-title": "Høy risiko",
+    "q": "KI-systemet klassifiseres som høy-risiko.",
+    "help": "",
+    "shape": "stadium",
     "end": true
   },
   "lowrisk": {
-    "q": "Ikke høy risiko",
+    "step-title": "Ikke høy risiko",
+    "q": "KI-systemet klassifiseres ikke som høy risiko.",
     "help": "",
+    "shape": "stadium",
     "end": true
   }
 }
