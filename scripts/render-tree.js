@@ -28,6 +28,8 @@ let selectedByNode = {};
 
 const NOTES_KEY = (treeId) => `beslutt:${treeId}:notes`;
 const MAX_NOTE_LEN = 1000;
+const selectedByNode = {};
+
 
 
 // Set up HTML template rendering
@@ -450,6 +452,8 @@ function render() {
     const helpEl = questionFrag.querySelector(".question-help");
     const noteContainer = questionFrag.querySelector(".note-container");
     const buttonsEl = questionFrag.querySelector(".buttons");
+    const destructiveButtonsEl = questionFrag.querySelector(".destructive-buttons");
+
 
 // Set the page header (h2#step-name) from node["step-title"] when provided; otherwise fall back to the question text
     if (stepNameHeader) {
@@ -494,7 +498,6 @@ function render() {
 
         node.options.forEach(([key, opt], idx) => {
             const optFrag = cloneTemplate("radio-option-template");
-            const wrap = optFrag.querySelector(".navds-radio");
             const input = optFrag.querySelector("input");
             const labelEl = optFrag.querySelector("label.navds-radio__label");
             const labelSpan = optFrag.querySelector(".navds-body-short");
@@ -530,7 +533,6 @@ function render() {
     if (!introMode && node.note && node.note.label) {
         const {label, hint, required} = node.note;
         const noteFrag = cloneTemplate("note-template");
-        const fieldWrap = noteFrag.querySelector(".navds-form-field");
         const labelEl = noteFrag.querySelector("label");
         const hintEl = noteFrag.querySelector(".hint");
         const textarea = noteFrag.querySelector("textarea");
@@ -630,6 +632,11 @@ function render() {
             localStorage.removeItem(NOTES_KEY(treeId));
         }
 
+        // Clear stored radio selections
+        for (const key in selectedByNode) {
+            delete selectedByNode[key];
+        }
+
         // Reset navigation state
         pathHistory = ["start"];
         interacted = false;
@@ -637,6 +644,7 @@ function render() {
         lastRenderedNodeId = null;
         selectedByNode = {};
     }
+
 
     // Knapper
     function makeNextButton() {
@@ -708,8 +716,15 @@ function render() {
     function makeStartButton() {
         const btn = document.createElement("button");
         btn.type = "button";
-        btn.className = "navds-button navds-button--primary navds-button--medium";
-        btn.innerHTML = "<span class='navds-label'>Start</span>";
+        btn.className = "navds-button navds-button--primary navds-button--medium navds-button--icon navds-button--icon-right";
+
+        btn.innerHTML =
+            "<span class='navds-label'>Start</span>" +
+            "<span class='navds-button__icon' aria-hidden='true'>" +
+            "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">" +
+            "<path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M8.61965 6.3536C8.84869 6.21883 9.13193 6.21533 9.36423 6.34438L18.3642 11.3444C18.6023 11.4767 18.75 11.7276 18.75 12C18.75 12.2724 18.6023 12.5233 18.3642 12.6556L9.36423 17.6556C9.13193 17.7847 8.84869 17.7812 8.61965 17.6464C8.39062 17.5116 8.25 17.2657 8.25 17V7C8.25 6.73426 8.39062 6.48836 8.61965 6.3536ZM9.75 8.27464V15.7254L16.4557 12L9.75 8.27464Z\" fill=\"currentColor\"/>" +
+            "</svg>" +
+            "</span>";
         btn.addEventListener("click", (e) => {
             e.preventDefault();
             interacted = true;
@@ -803,8 +818,8 @@ function render() {
     if (introMode) {
         buttonsEl.appendChild(makeStartButton());
     } else if (node.end) {
-        buttonsEl.appendChild(makeRestartButton());
-        buttonsEl.appendChild(makeHomeButton());
+        destructiveButtonsEl.appendChild(makeRestartButton());
+        destructiveButtonsEl.appendChild(makeHomeButton());
     } else {
         buttonsEl.appendChild(makeNextButton());
     }
