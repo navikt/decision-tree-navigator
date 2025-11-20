@@ -28,8 +28,6 @@ let selectedByNode = {};
 
 const NOTES_KEY = (treeId) => `beslutt:${treeId}:notes`;
 const MAX_NOTE_LEN = 1000;
-const selectedByNode = {};
-
 
 
 // Set up HTML template rendering
