@@ -38,7 +38,7 @@ header .wrapper, footer .wrapper {
 }
 
 #tree-page header {
-    background: #94a2bc13;
+    margin-top: 2em;
 }
 
 
@@ -96,8 +96,9 @@ footer {
     }
 }
 
-
-
+#tree-page header {
+    margin-top: 2em;
+}
 
 #path ul {
     padding-left: 1em;
@@ -112,6 +113,23 @@ footer {
 
 h2:focus {
     outline: none
+}
+
+#tree-name.normalFontWeight-0-1-4 {
+    font-weight: 400 !important;
+}
+
+.buttons {
+    --__ac-stack-gap-xs: var(--a-spacing-3);
+}
+
+
+.destructive-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: var(--a-spacing-3);
+    margin-top: var(--a-spacing-4);
+    align-items: flex-start;
 }
 
 button.print .navds-button__icon {

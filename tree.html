@@ -1,9 +1,18 @@
 <!DOCTYPE html>
+<!--
+  Decision Tree Navigator — Tree runner page (tree.html)
+  Purpose:
+  - Hosts the runner UI for a single decision tree (scripts/render-tree.js)
+  - Shows an intro screen (title + intro text + Start) before the first question
+  - Renders questions/answers and a full Mermaid visualization of the tree
+  Notes:
+  - IDs and template structure are referenced by render-tree.js — keep them stable
+-->
 <html lang="no">
 <head>
     <title>Beslutt: Bør jeg merke KI-innholdet mitt?</title>
     <meta charset="UTF-8"/>
-    <link rel="stylesheet" href="https://unpkg.com/@navikt/ds-css@latest/dist/index.min.css"/>
+    <link rel="stylesheet" href="styles/navikt-ds-index.min.css"/>
     <link rel="stylesheet" href="styles/screen.css"/>
     <link rel="stylesheet" href="styles/print.css" media="print">
     <script type="module" src="scripts/render-tree.js"></script>
@@ -11,6 +20,7 @@
 
 <body>
 
+<!-- Page header (site chrome): product title + logo link -->
 <header id="site-header">
     <div class="wrapper">
         <a class="site-title navds-link" href="index.html">Beslutt: ta en avgjørelse</a>
@@ -26,13 +36,57 @@
     </div>
 </header>
 
+<!-- Main content: tree runner page -->
 <main id="tree-page">
     <article>
         <header>
             <div class="wrapper">
-                <h1 id="tree-name" class="navds-heading navds-heading--medium"></h1>
+                <div style="--__ac-stack-gap-xs:var(--a-spacing-3);--__ac-stack-direction-xs:column"
+                     class="navds-stack navds-vstack navds-stack-gap navds-stack-direction">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="96" height="96" viewBox="0 0 72 72"
+                         aria-hidden="true"
+                         style="--__ac-r-w-xs:64px;--__ac-r-w-lg:96px;--__ac-r-h-xs:64px;--__ac-r-h-lg:96px;--__ac-r-position-xs:relative;--__ac-r-position-lg:absolute;--__ac-bleed-margin-inline-lg:calc(-1 * var(--a-spacing-32))"
+                         fill="none"
+                         class="navds-r-w navds-r-h navds-r-position navds-box navds-bleed">
+                        <rect x="23.25" y="22.5" width="26.25" height="9" fill="#CCE2F0"></rect>
+                        <rect x="23.25" y="36.75" width="26.25" height="9" fill="#CCE2F0"></rect>
+                        <circle cx="36.75" cy="34.5" r="21" fill="#CCE2F0"></circle>
+                        <path d="M23.7672 5.508L30.1202 11.8434M1.5 33.75H34.5M26.4706 2.81211L10.5882 18.6506L9 26.5699L16.9412 24.986L32.8235 9.14751C34.5778 7.39804 34.5778 4.56158 32.8235 2.81211C31.0692 1.06263 28.2249 1.06263 26.4706 2.81211Z"
+                              stroke="#23262A" stroke-width="2.25" stroke-linecap="round"
+                              stroke-linejoin="round"></path>
+                        <path d="M56.25 44.25L63.75 44.25" stroke="#262626" stroke-width="2.25" stroke-linecap="round"
+                              stroke-linejoin="round"></path>
+                        <path d="M56.25 52.5L63.75 52.5" stroke="#262626" stroke-width="2.25" stroke-linecap="round"
+                              stroke-linejoin="round"></path>
+                        <path d="M56.25 60.75L63.75 60.75" stroke="#262626" stroke-width="2.25" stroke-linecap="round"
+                              stroke-linejoin="round"></path>
+                        <path d="M48 52.5L51 52.5" stroke="#262626" stroke-width="2.25" stroke-linecap="round"
+                              stroke-linejoin="round"></path>
+                        <path d="M48 52.5L51 52.5" stroke="#262626" stroke-width="2.25" stroke-linecap="round"
+                              stroke-linejoin="round"></path>
+                        <path d="M48 44.25L51 44.25" stroke="#262626" stroke-width="2.25" stroke-linecap="round"
+                              stroke-linejoin="round"></path>
+                        <path d="M48 44.25L51 44.25" stroke="#262626" stroke-width="2.25" stroke-linecap="round"
+                              stroke-linejoin="round"></path>
+                        <path d="M48 60.75L51 60.75" stroke="#262626" stroke-width="2.25" stroke-linecap="round"
+                              stroke-linejoin="round"></path>
+                        <path d="M48 60.75L51 60.75" stroke="#262626" stroke-width="2.25" stroke-linecap="round"
+                              stroke-linejoin="round"></path>
+                        <rect x="41.25" y="33" width="29.25" height="37.5" stroke="#262626" stroke-width="2.25"
+                              stroke-linecap="round" stroke-linejoin="round"></rect>
+                    </svg>
+                    <!-- Tree header: H1 (tree title), H2 (current step title), and optional intro text -->
+                    <div style="--__ac-stack-gap-xs:var(--a-spacing-1);--__ac-stack-direction-xs:column"
+                         class="navds-stack navds-vstack navds-stack-gap navds-stack-direction">
+                        <h1 id="tree-name"
+                            class="normalFontWeight-0-1-4 navds-heading navds-heading--xsmall navds-typo--color-subtle"></h1>
+                        <h2 id="step-name" class="navds-heading navds-heading--xlarge"></h2>
+                        <div id="tree-intro" class="navds-body-long" aria-live="polite"></div>
+                    </div>
+                </div>
             </div>
         </header>
+
 
         <div id="top-section" class="wrapper">
 
@@ -50,6 +104,54 @@
 
     </article>
 </main>
+
+<template id="question-template">
+    <div class="question-wrapper">
+        <div class="navds-body-long question-help"></div>
+        <div class="note-container"></div>
+        <div class="navds-stack navds-hstack navds-stack-gap navds-stack-direction navds-stack-wrap buttons"></div>
+        <div class="destructive-buttons navds-stack"></div>
+    </div>
+</template>
+
+<template id="radio-group-template">
+    <fieldset class="navds-radio-group navds-radio-group--medium navds-fieldset navds-fieldset--medium">
+        <legend class="navds-fieldset__legend navds-label"></legend>
+        <div class="navds-radio-buttons"></div>
+    </fieldset>
+</template>
+
+<template id="radio-option-template">
+    <div class="navds-radio navds-radio--medium">
+        <input type="radio" class="navds-radio__input">
+        <label class="navds-radio__label">
+            <span class="navds-radio__content">
+                <span class="navds-body-short navds-body-short--medium"></span>
+            </span>
+        </label>
+    </div>
+</template>
+
+<template id="note-template">
+    <div class="navds-form-field">
+        <label class="navds-label" for="explanation"></label>
+        <div class="navds-hint-text hint"></div>
+        <div class="navds-textarea">
+            <textarea class="navds-textarea__input" rows="6" id="explanation"></textarea>
+        </div>
+        <div class="navds-hint-text maxlen"></div>
+    </div>
+</template>
+
+<template id="error-summary-template">
+    <div class="navds-error-summary" id="error-summary" tabindex="-1">
+        <div class="navds-error-summary__heading navds-heading">
+            Du må rette disse feilene før du kan fortsette:
+        </div>
+        <ul class="navds-error-summary__list"></ul>
+    </div>
+</template>
+
 
 <footer>
     <div class="wrapper">

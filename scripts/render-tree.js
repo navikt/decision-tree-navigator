@@ -1,10 +1,40 @@
+/*
+  Decision Tree Navigator — UI runtime (render-tree.js)
+  ----------------------------------------------------
+  Responsibilities:
+  - Load a tree JSON by id from the URL (?id=...)
+  - Maintain lightweight navigation state (pathHistory) and notes per node
+  - Render three modes:
+    1) Intro screen: H1 styled like H2, optional intro text, Start button, full diagram
+    2) Question pages: Step title, help text, options, optional note field, Next/Back
+    3) Final result page: includes intro text for print only
+  - Validation policy (lean):
+    - No errors before the first Next click on a node
+    - After Next, show inline + summary errors
+    - Radio error clears on selection; textarea error clears on input
+    - Error summary disappears only when no errors remain
+  Accessibility:
+  - Keeps semantic H1, focuses error summary only on first show after Next
+  - Adds/clears aria-invalid and aria-describedby for fields when errors toggle
+*/
+
+// Tree data and navigation state
 let tree = {};
 let pathHistory = ["start"];
 let interacted = false;
+let attemptedSubmit = false; // becomes true after user clicks Next on a node
+let lastRenderedNodeId = null; // track node to reset attemptedSubmit when node changes
 
 const NOTES_KEY = (treeId) => `beslutt:${treeId}:notes`;
 const MAX_NOTE_LEN = 1000;
 
+// Set up HTML template rendering
+// Clone a <template> by id and return its DocumentFragment
+function cloneTemplate(id) {
+    return document.getElementById(id).content.cloneNode(true);
+}
+
+// Read persisted note for a node (empty string if none)
 function getNote(nodeId) {
     return notes[nodeId] || "";
 }
@@ -15,13 +45,17 @@ function setNote(nodeId, value) {
     localStorage.setItem(NOTES_KEY(treeId), JSON.stringify(notes));
 }
 
+
+// Normalize each node’s options into a sorted array of [key, option] pairs.
+// Sorting rule: by option.order (if present), otherwise alphabetically.
+// This makes iteration/rendering deterministic while still letting the JSON
+// use object syntax for human readability.
 function normalizeTreeOptions(treeObj) {
-    const sortPairs = (optionsObj) =>
-        Object.entries(optionsObj || {}).sort((a, b) => {
-            const oa = (a[1] && typeof a[1].order === "number") ? a[1].order : Number.POSITIVE_INFINITY;
-            const ob = (b[1] && typeof b[1].order === "number") ? b[1].order : Number.POSITIVE_INFINITY;
-            return oa !== ob ? oa - ob : String(a[0]).localeCompare(String(b[0]));
-        });
+    const sortPairs = (optionsObj) => Object.entries(optionsObj || {}).sort((a, b) => {
+        const oa = (a[1] && typeof a[1].order === "number") ? a[1].order : Number.POSITIVE_INFINITY;
+        const ob = (b[1] && typeof b[1].order === "number") ? b[1].order : Number.POSITIVE_INFINITY;
+        return oa !== ob ? oa - ob : String(a[0]).localeCompare(String(b[0]));
+    });
 
     for (const node of Object.values(treeObj)) {
         if (node && node.options && typeof node.options === "object" && !Array.isArray(node.options)) {
@@ -30,12 +64,13 @@ function normalizeTreeOptions(treeObj) {
     }
 }
 
+// Remove existing error summary box (if any)
 function clearErrorSummary(wrapperEl) {
     const old = wrapperEl.querySelector("#error-summary");
     if (old) old.remove();
 }
 
-function createErrorSummary(wrapperEl, items) {
+function createErrorSummary(wrapperEl, items, {focus = true} = {}) {
     clearErrorSummary(wrapperEl);
 
     const box = document.createElement("div");
@@ -51,7 +86,7 @@ function createErrorSummary(wrapperEl, items) {
     const list = document.createElement("ul");
     list.className = "navds-error-summary__list";
 
-    items.forEach(({ text, href }) => {
+    items.forEach(({text, href}) => {
         const li = document.createElement("li");
         const a = document.createElement("a");
         a.className = "navds-link";
@@ -62,9 +97,19 @@ function createErrorSummary(wrapperEl, items) {
     });
 
     box.appendChild(list);
-    wrapperEl.insertBefore(box, wrapperEl.firstChild);
-    box.focus();
+
+    const buttons = wrapperEl.querySelector(".buttons");
+    if (buttons && buttons.parentNode === wrapperEl) {
+        wrapperEl.insertBefore(box, buttons);
+    } else {
+        wrapperEl.insertBefore(box, wrapperEl.firstChild);
+    }
+
+    if (focus) {
+        box.focus();
+    }
 }
+
 
 function makeAkselErrorMessage(id, text) {
     const p = document.createElement("p");
@@ -90,10 +135,7 @@ function makeAkselErrorMessage(id, text) {
 
 // Inline error message for radio buttons
 function showOptionError(fieldset, groupName, optErrId) {
-    fieldset.classList.add(
-        "navds-radio-group", "navds-radio-group--medium",
-        "navds-fieldset", "navds-fieldset--medium", "navds-fieldset--error"
-    );
+    fieldset.classList.add("navds-radio-group", "navds-radio-group--medium", "navds-fieldset", "navds-fieldset--medium", "navds-fieldset--error");
     fieldset.setAttribute("aria-invalid", "true");
 
     const radios = fieldset.querySelectorAll(".navds-radio");
@@ -144,8 +186,7 @@ function clearOptionError(fieldset, optErrId) {
         if (input) {
             const prev = input.getAttribute("aria-describedby") || "";
             const list = prev.split(" ").filter((x) => x && x !== optErrId);
-            if (list.length) input.setAttribute("aria-describedby", list.join(" "));
-            else input.removeAttribute("aria-describedby");
+            if (list.length) input.setAttribute("aria-describedby", list.join(" ")); else input.removeAttribute("aria-describedby");
         }
     });
 }
@@ -171,396 +212,619 @@ function showNoteError(current, section) {
     input.setAttribute("aria-invalid", "true");
     const maxId = `maxlen-${current}`;
     const prev = input.getAttribute("aria-describedby") || "";
-    const base = prev.split(" ").filter(Boolean).filter(x => x !== NOTE_ERR_ID && x !== maxId);
+    const base = prev
+        .split(" ")
+        .filter(Boolean)
+        .filter((x) => x !== NOTE_ERR_ID && x !== maxId);
+
     input.setAttribute("aria-describedby", [NOTE_ERR_ID, ...base, maxId].join(" "));
 }
+
+function clearNoteError(current, section) {
+    const input = section.querySelector(`#note-${current}`);
+    if (!input) return;
+
+    const taWrap = section.querySelector(`#ta-wrap-${current}`);
+    const fieldWrap = input.closest(".navds-form-field");
+    const NOTE_ERR_ID = `note-err-${current}`;
+
+    if (taWrap) {
+        taWrap.classList.remove("navds-textarea--error");
+    }
+
+    if (fieldWrap) {
+        const msg = fieldWrap.querySelector(`#${NOTE_ERR_ID}`);
+        if (msg) msg.remove();
+    }
+
+    input.removeAttribute("aria-invalid");
+
+    const prev = input.getAttribute("aria-describedby") || "";
+    if (prev) {
+        const list = prev
+            .split(" ")
+            .filter((x) => x && x !== NOTE_ERR_ID);
+
+        if (list.length) {
+            input.setAttribute("aria-describedby", list.join(" "));
+        } else {
+            input.removeAttribute("aria-describedby");
+        }
+    }
+}
+
 
 let treeId = "";
 let notes = {};
 
+// Bootstrap: resolve tree id from URL, set title, load persisted notes, then fetch the tree
 async function init() {
-    // Figure out which tree we're loading based on the URL params
     const params = new URLSearchParams(window.location.search);
     treeId = params.get("id");
-
     if (!treeId) {
-        document.body.innerHTML =
-            "<p>No <code>id</code> query-parameter was supplied.</p>";
-        throw new Error("Missing ?id=");
+        document.body.innerHTML = "<p>Mangler <code>?id=</code> i URL-en.</p>";
+        return;
     }
 
-    // Resolve catalog entry
     let entry = {title: treeId, file: `${treeId}.json`};
 
     try {
         const catalog = await fetch("data/trees.json").then(r => r.json());
         const match = catalog.find(t => t.id === treeId);
         if (match) entry = match;
-    } catch (_) {
-        console.warn("No catalog – falling back to", entry.file);
+    } catch {
+        // still fall back silently
     }
 
     window.TREE_FILE = `data/${entry.file}`;
     window.TREE_TITLE = entry.title;
+
     document.title = entry.title;
-    const h1 = document.getElementById("tree-name");
-    if (h1) h1.textContent = entry.title;
+    document.getElementById("tree-name").textContent = entry.title;
 
-    // Initialize notes from storage after we know the tree id
     notes = JSON.parse(localStorage.getItem(NOTES_KEY(treeId)) || "{}");
-
     await loadTree();
 }
 
+
+// Fetch the tree JSON, normalize it, then render the UI
 async function loadTree() {
     try {
-
         const response = await fetch(window.TREE_FILE);
-        if (!response.ok) throw new Error("Could not load decision tree");
-
         tree = await response.json();
         normalizeTreeOptions(tree);
         render();
-
     } catch (e) {
         console.error("Failed to load tree:", e);
-        const treeEl = document.getElementById("tree");
-        if (treeEl) treeEl.innerHTML = "<p>Kunne ikke laste beslutningstreet.</p>";
+        document.getElementById("tree").innerHTML = "<p>Kunne ikke laste beslutningstreet.</p>";
         const diagramEl = document.getElementById("mermaid-container");
-        if (diagramEl) {
-            diagramEl.textContent = "";
-            diagramEl.removeAttribute("data-processed");
-        }
+        diagramEl.textContent = "";
+        diagramEl.removeAttribute("data-processed");
     }
+
 }
 
+// Render the entire page for the current node
 function render() {
-
     const headerEl = document.getElementById("tree-name");
-    if (headerEl) {
-        const customTitle = (tree && typeof tree.title === "string") ? tree.title.trim() : "";
-        headerEl.textContent = customTitle || window.TREE_TITLE;
-    }
+    const stepNameHeader = document.getElementById("step-name");
+    const introEl = document.getElementById("tree-intro");
+
+    const customTitle = (tree && typeof tree.title === "string") ? tree.title.trim() : "";
+    headerEl.textContent = customTitle || window.TREE_TITLE;
+
 
     const section = document.getElementById("tree");
     const pathSection = document.getElementById("path");
 
-    pathSection.innerHTML = "";
+    // Reset view
     section.innerHTML = "";
+    pathSection.innerHTML = "";
 
-    // Build the path the user has taken through the tree as an unordered list
-    const ul = document.createElement("ul");
-    for (let i = 1; i < pathHistory.length; i++) {
-        const prevId = pathHistory[i - 1];
-        const prevNode = tree[prevId];
-        if (!prevNode) continue;
-        const nextKey = pathHistory[i];
+    // 2) Finn gjeldende node og sjekk om vi er i intro-modus (startside før første interaksjon)
+    const current = pathHistory[pathHistory.length - 1];
+    const node = tree[current];
+    const introMode = (current === "start" && !interacted);
 
-        let option;
+    // Reset validation-attempt flag when node changes
+    if (current !== lastRenderedNodeId) {
+        attemptedSubmit = false;
+    }
 
-        if (Array.isArray(prevNode.options)) {
-            const hit = prevNode.options.find(([, opt]) => opt && opt.next === nextKey);
-            option = hit && hit[1];
-        }
+    // 1) Bygg "Dine svar": bruk valgt alternativ sin label + notat,
+    // og kun for ferdig besvarte steg (alle unntatt siste i pathHistory).
+    const completedIds = pathHistory.slice(0, -1); // alle tidligere steg
 
-        if (option && option.label) {
-            const li = document.createElement("li");
-            li.textContent = option.label;
+    // Lag et oppslagskart: nodeId -> valgt alternativ-objekt
+    const chosenForNode = {};
+    for (let i = 0; i < pathHistory.length - 1; i++) {
+        const nodeId = pathHistory[i];
+        const nextId = pathHistory[i + 1];
+        const n = tree[nodeId];
 
-            // If the previous node had a note, render it under the label
-            if (prevNode.note) {
-                const txt = getNote(prevId);
-                if (txt && txt.trim()) {
-                    const noteP = document.createElement("p");
-                    noteP.appendChild(document.createTextNode(txt));
-                    li.appendChild(noteP);
-                }
-            }
-
-            ul.appendChild(li);
+        const match = n.options.find(([, opt]) => opt && opt.next === nextId);
+        if (match) {
+            const [, opt] = match;
+            chosenForNode[nodeId] = opt;
         }
     }
 
-    pathSection.appendChild(ul);
+    if (!introMode && completedIds.length > 0) {
+        const pathList = document.createElement("ul");
+        pathList.className = "navds-list navds-list--unordered";
+
+        completedIds.forEach((nodeId) => {
+            const opt = chosenForNode[nodeId];
+            const labelText = opt && opt.label ? opt.label : "";
+            const noteText = (getNote(nodeId) || "").trim();
+
+            // Ikke vis noe hvis vi verken har label fra JSON eller notat
+            if (!labelText && !noteText) return;
+
+            const li = document.createElement("li");
+            li.className = "navds-list__item";
+
+            // Hovedtekst: label fra JSON (valgt alternativ)
+            if (labelText) {
+                const labelContainer = document.createElement("div");
+                labelContainer.className = "navds-label";
+                labelContainer.textContent = labelText;
+                li.appendChild(labelContainer);
+            }
+
+            // Notat: vis bare hvis det faktisk finnes
+            if (noteText) {
+                const noteContainer = document.createElement("div");
+                noteContainer.className = "navds-body-long";
+                noteContainer.textContent = noteText;
+                li.appendChild(noteContainer);
+            }
+
+            pathList.appendChild(li);
+        });
+
+        if (pathList.children.length > 0) {
+            pathSection.appendChild(pathList);
+        }
+    }
 
 
-    const current = pathHistory[pathHistory.length - 1];
-    const node = tree[current];
+    // Skjul hele svar-seksjonen i intro-modus
+    const answersEl = document.getElementById("answers");
+    if (answersEl) {
+        answersEl.style.display = introMode ? "none" : "";
+
+        // Fjern eventuell gammel print-knapp
+        const oldPrint = answersEl.querySelector("#answers-print-btn");
+        if (oldPrint) oldPrint.remove();
+    }
 
     if (!node) {
-        section.innerHTML = "<p>Fant ikke noden i treet. Dataene kan være ugyldige.</p>";
-        // Clear diagram to avoid stale content
-        const diagramEl = document.getElementById("mermaid-container");
-        if (diagramEl) {
-            diagramEl.textContent = "";
-            diagramEl.removeAttribute("data-processed");
-        }
+        const err = document.createElement("p");
+        err.className = "navds-body-long";
+        err.textContent = "Fant ikke dette steget i beslutningstreet.";
+        section.appendChild(err);
         return;
     }
 
-    // Check if we're at an end node and if so add a "Konklusjon" section
-    if (node.end) {
-        const conclusionHeading = document.createElement("h3");
-        conclusionHeading.textContent = "Konklusjon";
-        pathSection.appendChild(conclusionHeading);
-
-        const conclusionParagraph = document.createElement("p");
-        conclusionParagraph.textContent = node.q || "Ingen konklusjon angitt.";
-        pathSection.appendChild(conclusionParagraph);
-    }
-
-    const question = document.createElement("h2");
-    const wrapper = document.createElement("div");
-
-    wrapper.className = "question-wrapper";
-    question.id = "question";
-    question.setAttribute("tabindex", "-1");
-    question.textContent = node.q;
-
-    function makePrintButton() {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "navds-button navds-button--primary navds-button--medium print";
-        btn.innerHTML = "<span class='navds-button__icon'></span><span class='navds-label'>Skriv ut resultatet</span>";
-        btn.addEventListener("click", () => window.print());
-        return btn;
-    }
-
-    if (node.end) {
-        question.classList.add("final-result");
-        pathSection.appendChild(makePrintButton());
-    }
-
-    wrapper.appendChild(question);
-
-    if (typeof node.help === "string" && node.help.trim() !== "") {
-        const helpBox = document.createElement("p");
-        helpBox.innerHTML = node.help;
-        wrapper.appendChild(helpBox);
-    }
-
-    section.appendChild(wrapper);
-
-
-    // Build the nav buttons
-    const btnRow = document.createElement("div");
-    btnRow.className =
-        "navds-stack navds-hstack navds-stack-gap navds-stack-direction navds-stack-wrap";
-    btnRow.id = "buttons";
-    btnRow.style.setProperty("--__ac-stack-gap-xs", "var(--a-spacing-4)");
-
-    // Put buttons in the wrapper
-    if (node.end) {
-        // Restart button (primary)
-        const restart = document.createElement("button");
-        restart.innerHTML = "<span class='navds-label'>Start på nytt</span>";
-        restart.className = "navds-button navds-button--secondary navds-button--medium";
-        restart.onclick = () => {
-            pathHistory = ["start"];
-            interacted = false;
-            localStorage.removeItem(NOTES_KEY(treeId));
-            notes = {};
-            render();
-        };
-        btnRow.appendChild(restart);
-    } else {
-
-        const optionEntries = Array.isArray(node.options) ? node.options : [];
-
-        if (optionEntries.length === 0) {
-            const msg = document.createElement("div");
-            msg.className = "navds-hint-text";
-            msg.textContent = "Ingen valg tilgjengelig for denne noden.";
-            wrapper.appendChild(msg);
-
+    // Styling of H1 & H2 depend on whether we're on the intro page or the question page
+    if (headerEl) {
+        if (introMode) {
+            headerEl.className = stepNameHeader ? stepNameHeader.className : "navds-heading navds-heading--xlarge";
         } else {
-
-            const fieldset = document.createElement("fieldset");
-            fieldset.className = "navds-radio-group navds-radio-group--medium navds-fieldset navds-fieldset--medium";
-            fieldset.setAttribute("role", "radiogroup");
-
-            const legend = document.createElement("legend");
-            const legendId = `legend-${current}`;
-            legend.setAttribute("tabindex", "-1")
-            legend.id = legendId;
-            legend.className = "navds-fieldset__legend navds-label";
-            legend.textContent = "Velg et alternativ (obligatorisk)";
-            fieldset.appendChild(legend);
-
-            const groupEl = document.createElement("div");
-            groupEl.className = "navds-radio-buttons";
-            fieldset.appendChild(groupEl);
-
-            let selectedNext = "";
-            const groupName = `opt-${current}`;
-            const optErrId = `fieldset-error-${current}`;
-
-            optionEntries.forEach(([key, option], idx) => {
-                if (!option) return;
-                const id = `${groupName}-${idx}`;
-                const radioWrap = document.createElement("div");
-                radioWrap.className = "navds-radio navds-radio--medium";
-
-                const input = document.createElement("input");
-                input.type = "radio";
-                input.className = "navds-radio__input";
-                input.name = groupName;
-                input.id = id;
-                input.value = key;
-
-                input.addEventListener("change", () => {
-                    selectedNext = option.next;
-                    clearOptionError(fieldset, optErrId);
-                });
-
-                const label = document.createElement("label");
-                label.className = "navds-radio__label";
-                label.setAttribute("for", id);
-                label.innerHTML = `<span class="navds-radio__content"><span class="navds-body-short navds-body-short--medium">${option.buttonText || key}</span></span>`;
-
-                radioWrap.appendChild(input);
-                radioWrap.appendChild(label);
-                groupEl.appendChild(radioWrap);
-            });
-
-            wrapper.appendChild(fieldset);
-
-
-            // Create Next button
-            const nextBtn = document.createElement("button");
-            nextBtn.type = "button";
-            nextBtn.innerHTML = "<span class='navds-label'>Neste steg</span>";
-            nextBtn.className = "navds-responsive navds-responsive__above--sm navds-button navds-button--primary navds-button--medium";
-            nextBtn.setAttribute("data-variant", "primary");
-
-            nextBtn.addEventListener("click", () => {
-                const errors = [];
-
-                if (!selectedNext) {
-                    showOptionError(fieldset, groupName, optErrId);
-                    errors.push({
-                        text: "Du må velge et alternativ.",
-                        href: `#legend-${current}`,
-                    });
-                }
-
-                if (node.note?.required && !getNote(current).trim()) {
-                    showNoteError(current, section); // inline
-                    errors.push({
-                        text: "Du må begrunne svaret ditt.",
-                        href: `#note-${current}`,
-                    });
-                }
-
-                if (errors.length) {
-                    createErrorSummary(wrapper, errors);
-                    return;
-                } else {
-                    clearErrorSummary(wrapper);
-                }
-
-                pathHistory.push(selectedNext);
-                render();
-            });
-
-            btnRow.appendChild(nextBtn);
+            headerEl.className = "normalFontWeight-0-1-4 navds-heading navds-heading--xsmall navds-typo--color-subtle";
         }
-
-
     }
 
-    // Back button
-    if (pathHistory.length > 1) {
-        const backBtn = document.createElement("button");
-        backBtn.innerHTML = "<span class='navds-label'>Tilbake</span>";
-        backBtn.className = "navds-button navds-button--tertiary navds-button--medium";
-        backBtn.onclick = () => {
-            pathHistory.pop();
-            render();
-        };
+    if (introEl) {
+        const introText = (typeof tree["intro"] === "string" && tree["intro"].trim()) ? tree["intro"].trim() : (typeof tree["intro-text"] === "string" ? tree["intro-text"].trim() : "");
 
-        btnRow.appendChild(backBtn);
+        // Show intro text only on the intro page (before first interaction)
+        if (introMode) {
+            introEl.textContent = introText || "";
+            introEl.style.display = introText ? "" : "none";
+            introEl.classList.remove("print-only");
+        } else if (node.end) {
+            // On the final page, keep the intro hidden on screen but include it in the DOM
+            // so that print styles can reveal it in the printout.
+            introEl.textContent = introText || "";
+            introEl.style.display = "none";
+            if (introText) {
+                introEl.classList.add("print-only");
+            } else {
+                introEl.classList.remove("print-only");
+            }
+        } else {
+            // Hide and clear on all question pages
+            introEl.textContent = "";
+            introEl.style.display = "none";
+            introEl.classList.remove("print-only");
+        }
     }
 
-    // Only control focus after user interaction
-    if (interacted) question.focus();
-    interacted = true;
+// 3) Bygg spørsmåls-UI fra template
+    const questionFrag = cloneTemplate("question-template");
+    const wrapper = questionFrag.querySelector(".question-wrapper");
+    const helpEl = questionFrag.querySelector(".question-help");
+    const noteContainer = questionFrag.querySelector(".note-container");
+    const buttonsEl = questionFrag.querySelector(".buttons");
 
-    // Free-text field between the radio-fieldset and the nav buttons
-    if (node.note && node.note.label && node.note.label.trim() !== "") {
+// Set the page header (h2#step-name) from node["step-title"] when provided; otherwise fall back to the question text
+    if (stepNameHeader) {
+        const rawStepTitle = (node && typeof node["step-title"] === "string") ? node["step-title"].trim() : "";
+        const questionText = (node && typeof node.q === "string") ? node.q.trim() : "";
+        stepNameHeader.textContent = introMode ? "" : (rawStepTitle || questionText || "");
+        stepNameHeader.style.display = introMode ? "none" : "";
+        stepNameHeader.setAttribute("aria-hidden", introMode ? "true" : "false");
+    }
+
+    if (node.end) {
+        wrapper.classList.add("final-result");
+    }
+
+    // På intro-siden viser vi ikke hjelpetekst
+    if (!introMode && typeof node.help === "string" && node.help.trim()) {
+        // hjelp-tekst kan være HTML
+        helpEl.innerHTML = node.help;
+    } else {
+        helpEl.remove();
+    }
+
+    // 4) Radio-gruppe (alternativer)
+    let fieldset = null;
+    let selectedNext = null;
+
+    if (!introMode && !node.end && Array.isArray(node.options) && node.options.length > 0) {
+        const fieldsetFrag = cloneTemplate("radio-group-template");
+        fieldset = fieldsetFrag.querySelector("fieldset");
+        const legend = fieldsetFrag.querySelector("legend");
+        const radioContainer = fieldsetFrag.querySelector(".navds-radio-buttons");
+
+        const groupName = `opt-${current}`;
+        const optErrId = `fieldset-error-${current}`;
+
+
+        legend.id = `legend-${current}`;
+        const baseText = (node && typeof node.q === "string") ? node.q.trim() : "";
+        const requiredText = " (obligatorisk)";
+        legend.textContent = (baseText || "Velg et alternativ") + requiredText;
+
+
+        node.options.forEach(([key, opt], idx) => {
+            const optFrag = cloneTemplate("radio-option-template");
+            const wrap = optFrag.querySelector(".navds-radio");
+            const input = optFrag.querySelector("input");
+            const labelEl = optFrag.querySelector("label.navds-radio__label");
+            const labelSpan = optFrag.querySelector(".navds-body-short");
+            const id = `${groupName}-${idx}`;
+
+            input.id = id;
+            input.name = groupName;
+            input.value = key;
+            labelEl.htmlFor = id;
+            labelSpan.innerHTML = opt.buttonText || key;
+
+            const previouslySelectedKey = selectedByNode[current];
+            if (previouslySelectedKey === key) {
+                input.checked = true;
+                selectedNext = opt.next;
+            }
+
+            input.addEventListener("change", () => {
+                selectedByNode[current] = key;
+                selectedNext = opt.next;
+                clearOptionError(fieldset, optErrId);
+                updateErrorSummary(wrapper);
+            });
+
+            radioContainer.appendChild(optFrag);
+        });
+
+
+        wrapper.insertBefore(fieldsetFrag, noteContainer);
+    }
+
+    // 5) Generate the free-text field from the template
+    if (!introMode && node.note && node.note.label) {
         const {label, hint, required} = node.note;
+        const noteFrag = cloneTemplate("note-template");
+        const fieldWrap = noteFrag.querySelector(".navds-form-field");
+        const labelEl = noteFrag.querySelector("label");
+        const hintEl = noteFrag.querySelector(".hint");
+        const textarea = noteFrag.querySelector("textarea");
+        const maxEl = noteFrag.querySelector(".maxlen");
+
         const fieldId = `note-${current}`;
         const hintId = `hint-${current}`;
         const maxId = `maxlen-${current}`;
 
-        // Wrapper for textarea stuff
-        const fieldWrap = document.createElement("div");
-        fieldWrap.className = "navds-form-field";
+        const taWrap = noteFrag.querySelector(".navds-textarea");
+        taWrap.id = `ta-wrap-${current}`;
+        labelEl.setAttribute("for", fieldId);
+        labelEl.textContent = label + (required ? " (obligatorisk)" : " (valgfritt)");
 
-        const lab = document.createElement("label");
-        lab.setAttribute("for", fieldId);
-        lab.className = "navds-label";
-        lab.textContent = label + (required ? " (obligatorisk)" : " (valgfritt)");
-        fieldWrap.appendChild(lab);
 
-        if (hint) {
-            const hintEl = document.createElement("div");
-            hintEl.className = "navds-hint-text";
-            hintEl.id = hintId;
-            hintEl.textContent = hint;
-            fieldWrap.appendChild(hintEl);
+        if (hintEl) {
+            if (hint) {
+                hintEl.id = hintId;
+                hintEl.textContent = hint;
+            } else {
+                hintEl.remove();
+            }
         }
 
-        // ⚠️ This wrapper is what we’ll toggle with --error and insert the error message after
-        const taWrap = document.createElement("div");
-        taWrap.className = "navds-textarea";
-        taWrap.id = `ta-wrap-${current}`;
+        if (textarea) {
+            textarea.id = fieldId;
+            textarea.maxLength = MAX_NOTE_LEN;
+            textarea.value = getNote(current);
+            textarea.setAttribute("rows", "6");
 
-        const input = document.createElement("textarea");
-        input.className = "navds-textarea__input";
-        input.id = fieldId;
-        input.maxLength = MAX_NOTE_LEN;
-        input.value = getNote(current);
-        input.setAttribute("rows", "6");
-        const described = [];
-        if (hint) described.push(hintId);
-        described.push(maxId);
-        input.setAttribute("aria-describedby", described.join(" "));
-        if (required) input.required = true;
+            const described = [];
+            if (hint && hintEl) described.push(hintId);
+            if (maxEl) described.push(maxId);
+            if (described.length) {
+                textarea.setAttribute("aria-describedby", described.join(" "));
+            }
+            if (required) textarea.required = true;
 
-        taWrap.appendChild(input);
-        fieldWrap.appendChild(taWrap);
 
-        // clear note-error on input
-        const NOTE_ERR_ID = `note-err-${current}`;
-        input.addEventListener("input", () => {
-            setNote(current, input.value);
-            const err = fieldWrap.querySelector(`#${NOTE_ERR_ID}`);
-            if (err && input.value.trim()) {
-                err.remove();
-                input.removeAttribute("aria-invalid");
-                taWrap.classList.remove("navds-textarea--error");
+            textarea.addEventListener("input", () => {
+                setNote(current, textarea.value);
 
-                const prev = input.getAttribute("aria-describedby") || "";
-                const list = prev.split(" ").filter(x => x && x !== NOTE_ERR_ID);
-                input.setAttribute("aria-describedby", list.join(" "));
+
+                clearNoteError(current, wrapper);
+
+
+                updateErrorSummary(wrapper);
+            });
+        }
+
+        maxEl.id = maxId;
+        maxEl.textContent = `Maks ${MAX_NOTE_LEN} tegn.`;
+        noteContainer.appendChild(noteFrag);
+
+    }
+
+
+    function updateErrorSummary(wrapper) {
+        // Do not show any summary before user attempts to go Next
+        if (!attemptedSubmit) return;
+
+        const errors = [];
+
+        // 1) Radio selected?
+        if (!selectedNext && !node.end) {
+            errors.push({
+                text: "Velg et alternativ.", href: `#legend-${current}`,
+            });
+        }
+
+        // 2) Note required?
+        const noteConfig = node.note;
+        const noteIsRequired = noteConfig && noteConfig.label && noteConfig.required;
+
+        if (noteIsRequired) {
+            const textarea = wrapper.querySelector(`#note-${current}`);
+            const value = textarea ? textarea.value.trim() : "";
+            if (!value) {
+                errors.push({
+                    text: "Skriv en begrunnelse for svaret ditt.", href: `#note-${current}`,
+                });
+            }
+        }
+
+        clearErrorSummary(wrapper);
+
+        if (errors.length > 0) {
+            createErrorSummary(wrapper, errors, {focus: false});
+        }
+        // If no errors remain, the summary stays cleared (disappears)
+    }
+
+    function resetTreeState() {
+        // Clear all stored notes for this tree
+        notes = {};
+        if (treeId) {
+            localStorage.removeItem(NOTES_KEY(treeId));
+        }
+
+        // Reset navigation state
+        pathHistory = ["start"];
+        interacted = false;
+        attemptedSubmit = false;
+        lastRenderedNodeId = null;
+    }
+
+    // Knapper
+    function makeNextButton() {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "navds-button navds-button--primary navds-button--medium navds-button--icon navds-button--icon-right";
+
+        btn.innerHTML = "<span class='navds-label'>Neste steg</span>" + "<span class='navds-button__icon' aria-hidden='true'><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n" + "<path d=\"M14.0878 6.87338C14.3788 6.68148 14.774 6.7139 15.0302 6.97006L19.5302 11.4701C19.6707 11.6107 19.7499 11.8015 19.7499 12.0003C19.7498 12.1991 19.6707 12.39 19.5302 12.5306L15.0302 17.0306C14.7739 17.2866 14.3788 17.3183 14.0878 17.1263C14.0462 17.0989 14.0062 17.0672 13.9696 17.0306C13.7133 16.7743 13.6817 16.3784 13.8739 16.0873C13.9013 16.0458 13.9331 16.0066 13.9696 15.9701L17.1893 12.7503H4.99988C4.58909 12.7503 4.25528 12.4196 4.24988 12.0101C4.24984 12.007 4.24988 12.0035 4.24988 12.0003C4.24988 11.5862 4.58572 11.2504 4.99988 11.2503H17.1893L13.9696 8.03061C13.7133 7.77433 13.6817 7.37837 13.8739 7.08725C13.9013 7.04583 13.9331 7.00655 13.9696 6.97006C14.0062 6.93345 14.0462 6.90084 14.0878 6.87338Z\" fill=\"#ffffff\"/>\n" + "</svg>\n</span>";
+
+
+        btn.addEventListener("click", (e) => {
+            e.preventDefault();
+            interacted = true;
+            attemptedSubmit = true;
+
+            if (node.end) return;
+
+            // Fjern eventuell gammel summary
+            clearErrorSummary(wrapper);
+
+            const errors = [];
+
+            // 1) Radio må være valgt
+            if (!selectedNext) {
+                if (fieldset && typeof showOptionError === "function") {
+                    const groupName = `opt-${current}`;
+                    const optErrId = `fieldset-error-${current}`;
+                    showOptionError(fieldset, groupName, optErrId);
+                }
+
+                errors.push({
+                    text: "Velg et alternativ.", href: `#legend-${current}`,
+                });
+            }
+
+            // 2) Notatfelt hvis det er påkrevd
+            const noteConfig = node.note;
+            const noteIsRequired = noteConfig && noteConfig.label && noteConfig.required;
+
+            if (noteIsRequired) {
+                const textarea = wrapper.querySelector(`#note-${current}`);
+                const value = textarea ? textarea.value.trim() : "";
+
+                if (!value) {
+
+                    showNoteError(current, wrapper);
+
+
+                    errors.push({
+                        text: "Skriv en begrunnelse for svaret ditt.", href: `#note-${current}`,
+                    });
+                }
+            }
+
+            // 3) Hvis vi har feil, vis summary rett over knappene
+            if (errors.length > 0) {
+                createErrorSummary(wrapper, errors, {focus: true});
+                return;
+            }
+
+            // Alt ok, gå videre
+            pathHistory.push(selectedNext);
+            render();
+        });
+
+        return btn;
+    }
+
+    function makeStartButton() {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "navds-button navds-button--primary navds-button--medium";
+        btn.innerHTML = "<span class='navds-label'>Start</span>";
+        btn.addEventListener("click", (e) => {
+            e.preventDefault();
+            interacted = true;
+            render();
+            // Flytt fokus til stegtittel for kontekst
+            const h2 = document.getElementById("step-name");
+            if (h2) {
+                h2.setAttribute("tabindex", "-1");
+                h2.focus();
+                h2.addEventListener("blur", () => h2.removeAttribute("tabindex"), {once: true});
+            }
+        });
+        return btn;
+    }
+
+    function makeBackButton() {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "navds-button navds-button--secondary navds-button--medium navds-button--icon navds-button--icon-left";
+        btn.innerHTML = "<span class='navds-button__icon' aria-hidden='true'><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1em\" height=\"1em\" fill=\"none\" viewBox=\"0 0 24 24\" focusable=\"false\" role=\"img\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M8.97 6.97a.75.75 0 1 1 1.06 1.06l-3.22 3.22H19a.75.75 0 0 1 0 1.5H6.81l3.22 3.22a.75.75 0 1 1-1.06 1.06l-4.5-4.5a.75.75 0 0 1 0-1.06z\"></path></svg></span>" + "<span class='navds-label'>Forrige steg</span>";
+
+        btn.addEventListener("click", (e) => {
+            e.preventDefault();
+            if (pathHistory.length > 1) {
+                pathHistory.pop();
+                render();
             }
         });
 
-
-        // Max-length note
-        const maxNote = document.createElement("div");
-        maxNote.className = "navds-hint-text";
-        maxNote.id = maxId;
-        maxNote.textContent = `Maks ${MAX_NOTE_LEN} tegn.`;
-        fieldWrap.appendChild(maxNote);
-
-        wrapper.appendChild(fieldWrap);
+        return btn;
     }
 
-    section.appendChild(btnRow);
+
+    function makeRestartButton() {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "navds-button navds-button--tertiary navds-button--medium navds-button--icon navds-button--icon-left";
+        btn.innerHTML = "<span class='navds-button__icon' aria-hidden='true'><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n" + "<path d=\"M18.7463 7.25C17.2522 5.1318 14.787 3.75 12 3.75C7.44365 3.75 3.75 7.44365 3.75 12C3.75 16.5563 7.44365 20.25 12 20.25C16.5563 20.25 20.25 16.5563 20.25 12C20.25 11.5858 20.5858 11.25 21 11.25C21.4142 11.25 21.75 11.5858 21.75 12C21.75 17.3848 17.3848 21.75 12 21.75C6.61522 21.75 2.25 17.3848 2.25 12C2.25 6.61522 6.61522 2.25 12 2.25C15.1606 2.25 17.969 3.75399 19.75 6.08327V3.5C19.75 3.08579 20.0858 2.75 20.5 2.75C20.9142 2.75 21.25 3.08579 21.25 3.5V8C21.25 8.41421 20.9142 8.75 20.5 8.75H16C15.5858 8.75 15.25 8.41421 15.25 8C15.25 7.58579 15.5858 7.25 16 7.25H18.7463Z\" fill=\"currentColor\"/>\n" + "</svg>\n</span>" + "<span class='navds-label'>Slett data og start på nytt</span>";
+
+        btn.addEventListener("click", (e) => {
+            e.preventDefault();
+            resetTreeState();
+            render();
+            // Flytt fokus til topp etter restart
+            const h1 = document.getElementById("tree-name");
+            if (h1) {
+                h1.setAttribute("tabindex", "-1");
+                h1.focus();
+                h1.addEventListener("blur", () => h1.removeAttribute("tabindex"), {once: true});
+            }
+        });
+
+        return btn;
+    }
+
+    function makeHomeButton() {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "navds-button navds-button--tertiary navds-button--medium navds-button--icon navds-button--icon-left";
+        btn.innerHTML = "<span class='navds-button__icon' aria-hidden='true'><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n" + "<path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M4.5 6.25C4.08579 6.25 3.75 6.58579 3.75 7C3.75 7.41421 4.08579 7.75 4.5 7.75H5.30548L6.18119 19.1342C6.25132 20.046 7.01159 20.75 7.92603 20.75H16.074C16.9884 20.75 17.7487 20.046 17.8188 19.1342L18.6945 7.75H19.5C19.9142 7.75 20.25 7.41421 20.25 7C20.25 6.58579 19.9142 6.25 19.5 6.25H16.75V6C16.75 4.48122 15.5188 3.25 14 3.25H10C8.48122 3.25 7.25 4.48122 7.25 6V6.25H4.5ZM10 4.75C9.30964 4.75 8.75 5.30964 8.75 6V6.25H15.25V6C15.25 5.30964 14.6904 4.75 14 4.75H10ZM6.80991 7.75L7.67677 19.0192C7.68679 19.1494 7.7954 19.25 7.92603 19.25H16.074C16.2046 19.25 16.3132 19.1494 16.3232 19.0192L17.1901 7.75H6.80991ZM10 9.75C10.4142 9.75 10.75 10.0858 10.75 10.5V16.5C10.75 16.9142 10.4142 17.25 10 17.25C9.58579 17.25 9.25 16.9142 9.25 16.5V10.5C9.25 10.0858 9.58579 9.75 10 9.75ZM14 9.75C14.4142 9.75 14.75 10.0858 14.75 10.5V16.5C14.75 16.9142 14.4142 17.25 14 17.25C13.5858 17.25 13.25 16.9142 13.25 16.5V10.5C13.25 10.0858 13.5858 9.75 14 9.75Z\" fill=\"currentColor\"/>\n" + "</svg>\n</span>" + "<span class='navds-label'>Slett data og gå til forsiden</span>";
+
+        btn.addEventListener("click", (e) => {
+            e.preventDefault();
+            resetTreeState();
+            window.location.href = "index.html";
+        });
+
+        return btn;
+    }
+
+    function makePrintButton() {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.id = "answers-print-btn";
+        btn.className = "navds-button navds-button--primary navds-button--medium print";
+        btn.innerHTML = "<span class='navds-button__icon' aria-hidden='true'></span>" + "<span class='navds-label'>Skriv ut</span>";
+
+        btn.addEventListener("click", (e) => {
+            e.preventDefault();
+            window.print();
+        });
+
+        return btn;
+    }
+
+
+    if (!introMode && pathHistory.length > 1) {
+        buttonsEl.appendChild(makeBackButton());
+    }
+
+    if (introMode) {
+        buttonsEl.appendChild(makeStartButton());
+    } else if (node.end) {
+        buttonsEl.appendChild(makeRestartButton());
+        buttonsEl.appendChild(makeHomeButton());
+    } else {
+        buttonsEl.appendChild(makeNextButton());
+    }
+
+
+    // På resultatsiden: vis "Skriv ut"-knapp nederst under "Dine svar"
+    if (node.end) {
+        if (answersEl) {
+            const printBtn = makePrintButton();
+            answersEl.appendChild(printBtn);
+        }
+    }
+
+    // 7) Legg inn spørsmålet i seksjonen
+    section.appendChild(questionFrag);
+
+    // 8) Tegn mermaid-grafen som før
     drawMermaid(tree);
+
+    // Remember which node we just rendered to manage validation state per node
+    lastRenderedNodeId = current;
 }
+
 
 // Generate Mermaid source code from the tree
 function mermaidSource(tree, pathHistory) {
@@ -573,6 +837,8 @@ function mermaidSource(tree, pathHistory) {
     const historySet = new Set(pathHistory); // for styling
     const drawnEdges = new Set();
     const current = pathHistory[pathHistory.length - 1];
+    // On the intro page (before any interaction), do not highlight the first node
+    const isIntroDiagram = (pathHistory.length === 1 && !interacted);
 
     function drawNode(id, txt, shape = "rect") {
         const esc = txt.replace(/"/g, '\\"').replace(/\n/g, " ");
@@ -608,12 +874,12 @@ function mermaidSource(tree, pathHistory) {
         visitedNodes.add(id);
 
         const n = tree[id];
-        if (!n) return;
         nodeLines.push(drawNode(id, n.q, n.shape));
 
-        if (id === current) {
+        // Highlight current and visited nodes, except on the intro page where the start node should not be highlighted
+        if (id === current && !(isIntroDiagram && id === "start")) {
             classLines.push(`class ${id} current`);
-        } else if (historySet.has(id)) {
+        } else if (historySet.has(id) && !(isIntroDiagram && id === "start")) {
             classLines.push(`class ${id} visited`);
         }
 
@@ -644,19 +910,12 @@ function mermaidSource(tree, pathHistory) {
     visit("start");
 
     if (visitedEdges.size) {
-        edgeLines.push(
-            `linkStyle ${[...visitedEdges].join(",")} stroke:#1844a3,stroke-width:2px;`
-        );
+        edgeLines.push(`linkStyle ${[...visitedEdges].join(",")} stroke:#1844a3,stroke-width:2px;`);
     }
 
-    classLines.push(
-        "classDef current fill:#fff2b3,stroke:#333,stroke-width:3px",
-        "classDef visited fill:#e6f0ff,stroke:#1844a3,stroke-width:2px"
-    );
+    classLines.push("classDef current fill:#fff2b3,stroke:#333,stroke-width:3px", "classDef visited fill:#e6f0ff,stroke:#1844a3,stroke-width:2px");
 
-    return `graph TD\n${nodeLines.join("\n")}\n${edgeLines.join(
-        "\n"
-    )}\n${classLines.join("\n")}`;
+    return `graph TD\n${nodeLines.join("\n")}\n${edgeLines.join("\n")}\n${classLines.join("\n")}`;
 }
 
 // Render the Mermaid diagram

@@ -1,100 +1,130 @@
-
 {
-    "title": "Er vi leverandør eller idriftsetter?",
-    "start": {
-        "q": "Har Nav utviklet eller spesialbestilt KI-systemet?",
-        "help": "Et eksempel på det motsatte er der Nav kjøper hyllevare, altså et ferdigutviklet KI-system eller en GKI-modell som allerede finnes på markedet hos en leverandør. I disse tilfellene kan du svare nei her.",
-        "note": {
-            "label": "Begrunn svaret ditt",
-            "hint": "",
-            "required": false
-        },
-        "options": {
-            "yes": {
-                "next": "provider",
-                "buttonText": "Ja",
-                "label": "Du utvikler eller spesialbestiller KI-systemet."
-            },
-            "no": {
-                "next": "node2",
-                "buttonText": "Nei",
-                "label": "Du hverken utvikler eller spesialbestiller KI-systemet."
-            }
-        }
+  "title": "Er vi leverandør eller idriftsetter?",
+  "intro-text": "Dette treet avklarer hvilken rolle Nav får etter forordningen: leverandør (provider) eller idriftsetter (deployer). Det ser på hvor løsningen kommer fra, hva slags endringer Nav gjør, hvilken bruk som er planlagt, og om systemet fremstår som Navs eget produkt. Resultatet avgjør hvilke plikter som gjelder.",
+  "start": {
+    "step-title": "Egenutvikling vs. hyllevare",
+    "q": "Har Nav utviklet eller spesialbestilt KI-systemet?",
+    "help": "Et eksempel på det motsatte er der Nav kjøper hyllevare, altså et ferdigutviklet KI-system eller en GKI-modell som allerede finnes på markedet hos en leverandør. I disse tilfellene kan du svare nei her.",
+    "read-more": {
+      "read-more-about": "",
+      "read-more-text": ""
     },
-    "node2": {
-        "q": "Gjør du trening, finjustering ('fine-tuning'), parameterendring eller annet som vesentlig endrer KI-systemet?",
-        "help": "En vesentlig endring er en endring i et KI-system etter at det har blitt satt på markedet eller tatt i bruk, som ikke var planlagt under den opprinnelige samsvarsvurderingen (Conformity Assessment) av systemet. Denne endringen kan påvirke om KI-systemet fremdeles oppfyller kravene i KI-forordningen. Vesentlige endringer kan også endre den tiltenkte bruken av KI-systemet. For eksempel vil endringer i operativsystemet eller programvarearkitekturen som kan påvirke etterlevelse av regelverket anses som vesentlige endringer. Derimot vil endringer som var planlagt og vurdert av leverandøren i samsvarsvurderingen, som f.eks. endringer i algoritmen og ytelsen til KI-systemer som fortsetter å lære etter å ha blitt satt på markedet, ikke regnes som vesentlige endringer. Dersom Nav gjør en vesentlig endring må vi gjøre en ny samsvarsvurdering.",
-        "note": {
-            "label": "Begrunn svaret ditt",
-            "hint": "",
-            "required": false
-        },
-        "options": {
-            "isReport": {
-            "next": "provider",
-            "buttonText": "Ja",
-            "label": "Du gjør en vesentlig endring ('substantial modification')"
-        },
-        "notReport": {
-            "next": "node3",
-            "buttonText": "Nei",
-            "label": "Du gjør ingen vesentlig endring ('substantial modification')"
-        }
-        }
+    "options": {
+      "yes": {
+        "next": "provider",
+        "buttonText": "Ja",
+        "label": "Du utvikler eller spesialbestiller KI-systemet."
+      },
+      "no": {
+        "next": "node2",
+        "buttonText": "Nei",
+        "label": "Du hverken utvikler eller spesialbestiller KI-systemet."
+      }
     },
-    "node3": {
-        "q": "Skal du bruke KI-systemet til noe annet enn det er bestemt at KI-systemet kan brukes til?",
-        "help": "Du finner informasjon om hva systemet kan brukes til enten i instruksjoner eller teknisk dokumentasjon som følger med systemet, i avtalen eller salgsmateriale.",
-        "note": {
-            "label": "Begrunn svaret ditt",
-            "hint": "",
-            "required": false
-        },
-        "options": {
-            "isReport": {
-                "next": "provider",
-                "buttonText": "Ja",
-                "label": "Du skal bruke KI-systemet til noe annet enn det tilbyderen (provider) har beskrevet ('intended purpose')"
-            },
-            "notReport": {
-                "next": "node4",
-                "buttonText": "Nei",
-                "label": "Du skal bruke KI-systemet i tråd med tilbyders (providers) anvisninger"
-            }
-        }
-    }, 
-    "node4": {
-        "q": "Skal KI-systemet tas i bruk under Navs eller logo?",
-        "help": "",
-        "note": {
-            "label": "Begrunn svaret ditt",
-            "hint": "",
-            "required": false
-        },
-        "options": {
-            "isReport": {
-                "next": "provider",
-                "buttonText": "Ja",
-                "label": "KI-systemet benyttes under Navs navn og logo"
-            },
-            "notReport": {
-                "next": "deployer",
-                "buttonText": "Nei",
-                "label": "KI-systemet benyttes ikke under Navs navn og logo."
-            }
-        }
-    }, 
-    "provider": {
-        "q": "Nav har rollen som tilbyder/leverandør (provider) av KI-systemet",
-        "help": "Se art.3 nr.3 i KI-forordningen for definisjonen av 'provider'",
-        "shape": "circle",
-        "end": true
-    },
-    "deployer": {
-        "q": "Nav har rollen som bruker/idriftsetter (deployer) av KI-systemet",
-        "help": "Se art.3 nr.4 i KI-forordningen for definisjonen av 'deployer'. Se i Støtte til etterlevelse hvilke krav som gjelder, avhengig av KI-systemets risikoklassifisering.",
-        "shape": "circle",
-        "end": true
+    "note": {
+      "label": "Begrunn svaret ditt",
+      "hint": "",
+      "required": false
     }
+  },
+  "node2": {
+    "step-title": "Vesentlig endring eller modelltilpasning",
+    "q": "Gjør du trening, finjustering ('fine-tuning'), parameterendring eller annet som vesentlig endrer KI-systemet?",
+    "help": "En vesentlig endring er en endring i et KI-system etter at det har blitt satt på markedet eller tatt i bruk, som ikke var planlagt under den opprinnelige samsvarsvurderingen (Conformity Assessment) av systemet. Denne endringen kan påvirke om KI-systemet fremdeles oppfyller kravene i KI-forordningen. Vesentlige endringer kan også endre den tiltenkte bruken av KI-systemet. For eksempel vil endringer i operativsystemet eller programvarearkitekturen som kan påvirke etterlevelse av regelverket anses som vesentlige endringer. Derimot vil endringer som var planlagt og vurdert av leverandøren i samsvarsvurderingen, som f.eks. endringer i algoritmen og ytelsen til KI-systemer som fortsetter å lære etter å ha blitt satt på markedet, ikke regnes som vesentlige endringer. Dersom Nav gjør en vesentlig endring må vi gjøre en ny samsvarsvurdering.",
+    "read-more": {
+      "read-more-about": "",
+      "read-more-text": ""
+    },
+    "options": {
+      "isReport": {
+        "next": "provider",
+        "buttonText": "Ja",
+        "label": "Du gjør en vesentlig endring ('substantial modification')"
+      },
+      "notReport": {
+        "next": "node3",
+        "buttonText": "Nei",
+        "label": "Du gjør ingen vesentlig endring ('substantial modification')"
+      }
+    },
+    "note": {
+      "label": "Begrunn svaret ditt",
+      "hint": "",
+      "required": false
+    }
+  },
+  "node3": {
+    "step-title": "Endret formål",
+    "q": "Skal du bruke KI-systemet til noe annet enn det er bestemt at KI-systemet kan brukes til?",
+    "help": "Du finner informasjon om hva systemet kan brukes til enten i instruksjoner eller teknisk dokumentasjon som følger med systemet, i avtalen eller salgsmateriale.",
+    "read-more": {
+      "read-more-about": "",
+      "read-more-text": ""
+    },
+    "options": {
+      "isReport": {
+        "next": "provider",
+        "buttonText": "Ja",
+        "label": "Du skal bruke KI-systemet til noe annet enn det tilbyderen (provider) har beskrevet ('intended purpose')"
+      },
+      "notReport": {
+        "next": "node4",
+        "buttonText": "Nei",
+        "label": "Du skal bruke KI-systemet i tråd med tilbyders (providers) anvisninger"
+      }
+    },
+    "note": {
+      "label": "Begrunn svaret ditt",
+      "hint": "",
+      "required": false
+    }
+  },
+  "node4": {
+    "step-title": "Nav som avsender",
+    "q": "Skal KI-systemet tas i bruk under Navs eller logo?",
+    "help": "",
+    "read-more": {
+      "read-more-about": "",
+      "read-more-text": ""
+    },
+    "options": {
+      "isReport": {
+        "next": "provider",
+        "buttonText": "Ja",
+        "label": "KI-systemet benyttes under Navs navn og logo"
+      },
+      "notReport": {
+        "next": "deployer",
+        "buttonText": "Nei",
+        "label": "KI-systemet benyttes ikke under Navs navn og logo."
+      }
+    },
+    "note": {
+      "label": "Begrunn svaret ditt",
+      "hint": "",
+      "required": false
+    }
+  },
+  "provider": {
+    "step-title": "Nav anses som leverandør (provider) av løsningen etter KI-forordningen.",
+    "q": "Nav har rollen som tilbyder/leverandør (provider) av KI-systemet",
+    "read-more": {
+      "read-more-about": "",
+      "read-more-text": ""
+    },
+    "help": "Se art.3 nr.3 i KI-forordningen for definisjonen av 'provider'",
+    "shape": "circle",
+    "end": true
+  },
+  "deployer": {
+    "step-title": "Nav som idriftsetter (deployer)",
+    "q": "Nav har rollen som bruker/idriftsetter (deployer) av KI-systemet",
+    "read-more": {
+      "read-more-about": "",
+      "read-more-text": ""
+    },
+    "help": "Se art.3 nr.4 i KI-forordningen for definisjonen av 'deployer'. Se i Støtte til etterlevelse hvilke krav som gjelder, avhengig av KI-systemets risikoklassifisering.",
+    "shape": "circle",
+    "end": true
+  }
 }
