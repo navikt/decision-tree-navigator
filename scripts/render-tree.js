@@ -24,9 +24,11 @@ let pathHistory = ["start"];
 let interacted = false;
 let attemptedSubmit = false; // becomes true after user clicks Next on a node
 let lastRenderedNodeId = null; // track node to reset attemptedSubmit when node changes
+let selectedByNode = {};
 
 const NOTES_KEY = (treeId) => `beslutt:${treeId}:notes`;
 const MAX_NOTE_LEN = 1000;
+
 
 // Set up HTML template rendering
 // Clone a <template> by id and return its DocumentFragment
@@ -633,6 +635,7 @@ function render() {
         interacted = false;
         attemptedSubmit = false;
         lastRenderedNodeId = null;
+        selectedByNode = {};
     }
 
     // Knapper
