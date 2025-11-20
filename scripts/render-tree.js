@@ -31,12 +31,7 @@ const MAX_NOTE_LEN = 1000;
 // Set up HTML template rendering
 // Clone a <template> by id and return its DocumentFragment
 function cloneTemplate(id) {
-    const tmpl = document.getElementById(id);
-    if (!tmpl) {
-        console.error(`Mangler template med id=${id}`);
-        return document.createDocumentFragment();
-    }
-    return tmpl.content.cloneNode(true);
+    return document.getElementById(id).content.cloneNode(true);
 }
 
 // Read persisted note for a node (empty string if none)
@@ -56,12 +51,11 @@ function setNote(nodeId, value) {
 // This makes iteration/rendering deterministic while still letting the JSON
 // use object syntax for human readability.
 function normalizeTreeOptions(treeObj) {
-    const sortPairs = (optionsObj) =>
-        Object.entries(optionsObj || {}).sort((a, b) => {
-            const oa = (a[1] && typeof a[1].order === "number") ? a[1].order : Number.POSITIVE_INFINITY;
-            const ob = (b[1] && typeof b[1].order === "number") ? b[1].order : Number.POSITIVE_INFINITY;
-            return oa !== ob ? oa - ob : String(a[0]).localeCompare(String(b[0]));
-        });
+    const sortPairs = (optionsObj) => Object.entries(optionsObj || {}).sort((a, b) => {
+        const oa = (a[1] && typeof a[1].order === "number") ? a[1].order : Number.POSITIVE_INFINITY;
+        const ob = (b[1] && typeof b[1].order === "number") ? b[1].order : Number.POSITIVE_INFINITY;
+        return oa !== ob ? oa - ob : String(a[0]).localeCompare(String(b[0]));
+    });
 
     for (const node of Object.values(treeObj)) {
         if (node && node.options && typeof node.options === "object" && !Array.isArray(node.options)) {
@@ -76,7 +70,7 @@ function clearErrorSummary(wrapperEl) {
     if (old) old.remove();
 }
 
-function createErrorSummary(wrapperEl, items, { focus = true } = {}) {
+function createErrorSummary(wrapperEl, items, {focus = true} = {}) {
     clearErrorSummary(wrapperEl);
 
     const box = document.createElement("div");
@@ -92,7 +86,7 @@ function createErrorSummary(wrapperEl, items, { focus = true } = {}) {
     const list = document.createElement("ul");
     list.className = "navds-error-summary__list";
 
-    items.forEach(({ text, href }) => {
+    items.forEach(({text, href}) => {
         const li = document.createElement("li");
         const a = document.createElement("a");
         a.className = "navds-link";
@@ -141,10 +135,7 @@ function makeAkselErrorMessage(id, text) {
 
 // Inline error message for radio buttons
 function showOptionError(fieldset, groupName, optErrId) {
-    fieldset.classList.add(
-        "navds-radio-group", "navds-radio-group--medium",
-        "navds-fieldset", "navds-fieldset--medium", "navds-fieldset--error"
-    );
+    fieldset.classList.add("navds-radio-group", "navds-radio-group--medium", "navds-fieldset", "navds-fieldset--medium", "navds-fieldset--error");
     fieldset.setAttribute("aria-invalid", "true");
 
     const radios = fieldset.querySelectorAll(".navds-radio");
@@ -195,8 +186,7 @@ function clearOptionError(fieldset, optErrId) {
         if (input) {
             const prev = input.getAttribute("aria-describedby") || "";
             const list = prev.split(" ").filter((x) => x && x !== optErrId);
-            if (list.length) input.setAttribute("aria-describedby", list.join(" "));
-            else input.removeAttribute("aria-describedby");
+            if (list.length) input.setAttribute("aria-describedby", list.join(" ")); else input.removeAttribute("aria-describedby");
         }
     });
 }
@@ -227,10 +217,7 @@ function showNoteError(current, section) {
         .filter(Boolean)
         .filter((x) => x !== NOTE_ERR_ID && x !== maxId);
 
-    input.setAttribute(
-        "aria-describedby",
-        [NOTE_ERR_ID, ...base, maxId].join(" ")
-    );
+    input.setAttribute("aria-describedby", [NOTE_ERR_ID, ...base, maxId].join(" "));
 }
 
 function clearNoteError(current, section) {
@@ -272,77 +259,63 @@ let notes = {};
 
 // Bootstrap: resolve tree id from URL, set title, load persisted notes, then fetch the tree
 async function init() {
-    // Figure out which tree we're loading based on the URL params
     const params = new URLSearchParams(window.location.search);
     treeId = params.get("id");
-
     if (!treeId) {
-        document.body.innerHTML =
-            "<p>No <code>id</code> query-parameter was supplied.</p>";
-        throw new Error("Missing ?id=");
+        document.body.innerHTML = "<p>Mangler <code>?id=</code> i URL-en.</p>";
+        return;
     }
 
-    // Resolve catalog entry
     let entry = {title: treeId, file: `${treeId}.json`};
 
     try {
         const catalog = await fetch("data/trees.json").then(r => r.json());
         const match = catalog.find(t => t.id === treeId);
         if (match) entry = match;
-    } catch (_) {
-        console.warn("No catalog – falling back to", entry.file);
+    } catch {
+        // still fall back silently
     }
 
     window.TREE_FILE = `data/${entry.file}`;
     window.TREE_TITLE = entry.title;
+
     document.title = entry.title;
-    const h1 = document.getElementById("tree-name");
-    if (h1) h1.textContent = entry.title;
+    document.getElementById("tree-name").textContent = entry.title;
 
-    // Initialize notes from storage after we know the tree id
     notes = JSON.parse(localStorage.getItem(NOTES_KEY(treeId)) || "{}");
-
     await loadTree();
 }
+
 
 // Fetch the tree JSON, normalize it, then render the UI
 async function loadTree() {
     try {
-
         const response = await fetch(window.TREE_FILE);
-        if (!response.ok) throw new Error("Could not load decision tree");
-
         tree = await response.json();
         normalizeTreeOptions(tree);
         render();
-
     } catch (e) {
         console.error("Failed to load tree:", e);
-        const treeEl = document.getElementById("tree");
-        if (treeEl) treeEl.innerHTML = "<p>Kunne ikke laste beslutningstreet.</p>";
+        document.getElementById("tree").innerHTML = "<p>Kunne ikke laste beslutningstreet.</p>";
         const diagramEl = document.getElementById("mermaid-container");
-        if (diagramEl) {
-            diagramEl.textContent = "";
-            diagramEl.removeAttribute("data-processed");
-        }
+        diagramEl.textContent = "";
+        diagramEl.removeAttribute("data-processed");
     }
+
 }
 
 // Render the entire page for the current node
 function render() {
     const headerEl = document.getElementById("tree-name");
-    if (headerEl) {
-        const customTitle = (tree && typeof tree.title === "string") ? tree.title.trim() : "";
-        headerEl.textContent = customTitle || window.TREE_TITLE;
-    }
+    const stepNameHeader = document.getElementById("step-name");
+    const introEl = document.getElementById("tree-intro");
+
+    const customTitle = (tree && typeof tree.title === "string") ? tree.title.trim() : "";
+    headerEl.textContent = customTitle || window.TREE_TITLE;
+
 
     const section = document.getElementById("tree");
     const pathSection = document.getElementById("path");
-
-    if (!section || !pathSection) {
-        console.error("Mangler #tree og/eller #path i DOM-en");
-        return;
-    }
 
     // Reset view
     section.innerHTML = "";
@@ -368,7 +341,6 @@ function render() {
         const nodeId = pathHistory[i];
         const nextId = pathHistory[i + 1];
         const n = tree[nodeId];
-        if (!n || !Array.isArray(n.options)) continue;
 
         const match = n.options.find(([, opt]) => opt && opt.next === nextId);
         if (match) {
@@ -382,9 +354,6 @@ function render() {
         pathList.className = "navds-list navds-list--unordered";
 
         completedIds.forEach((nodeId) => {
-            const n = tree[nodeId];
-            if (!n) return;
-
             const opt = chosenForNode[nodeId];
             const labelText = opt && opt.label ? opt.label : "";
             const noteText = (getNote(nodeId) || "").trim();
@@ -407,10 +376,7 @@ function render() {
             if (noteText) {
                 const noteContainer = document.createElement("div");
                 noteContainer.className = "navds-body-long";
-                noteContainer.textContent = labelText ? `${noteText}` : noteText;
-                if (labelText) {
-                    li.appendChild(document.createTextNode(" "));
-                }
+                noteContainer.textContent = noteText;
                 li.appendChild(noteContainer);
             }
 
@@ -421,7 +387,6 @@ function render() {
             pathSection.appendChild(pathList);
         }
     }
-
 
 
     // Skjul hele svar-seksjonen i intro-modus
@@ -442,24 +407,17 @@ function render() {
         return;
     }
 
-    // Intro page tweaks: H1 styling and intro text
-    const h1El = document.getElementById("tree-name");
-    const h2El = document.getElementById("step-name");
-    const introEl = document.getElementById("tree-intro");
-
     // Styling of H1 & H2 depend on whether we're on the intro page or the question page
-    if (h1El) {
+    if (headerEl) {
         if (introMode) {
-            h1El.className = h2El ? h2El.className : "navds-heading navds-heading--xlarge";
+            headerEl.className = stepNameHeader ? stepNameHeader.className : "navds-heading navds-heading--xlarge";
         } else {
-            h1El.className = "normalFontWeight-0-1-4 navds-heading navds-heading--xsmall navds-typo--color-subtle";
+            headerEl.className = "normalFontWeight-0-1-4 navds-heading navds-heading--xsmall navds-typo--color-subtle";
         }
     }
 
     if (introEl) {
-        const introText = (typeof tree["intro"] === "string" && tree["intro"].trim())
-            ? tree["intro"].trim()
-            : (typeof tree["intro-text"] === "string" ? tree["intro-text"].trim() : "");
+        const introText = (typeof tree["intro"] === "string" && tree["intro"].trim()) ? tree["intro"].trim() : (typeof tree["intro-text"] === "string" ? tree["intro-text"].trim() : "");
 
         // Show intro text only on the intro page (before first interaction)
         if (introMode) {
@@ -491,14 +449,7 @@ function render() {
     const noteContainer = questionFrag.querySelector(".note-container");
     const buttonsEl = questionFrag.querySelector(".buttons");
 
-    if (!wrapper || !buttonsEl) {
-        console.error("Template question-template mangler forventede elementer");
-        section.appendChild(questionFrag);
-        return;
-    }
-
 // Set the page header (h2#step-name) from node["step-title"] when provided; otherwise fall back to the question text
-    const stepNameHeader = document.getElementById("step-name");
     if (stepNameHeader) {
         const rawStepTitle = (node && typeof node["step-title"] === "string") ? node["step-title"].trim() : "";
         const questionText = (node && typeof node.q === "string") ? node.q.trim() : "";
@@ -532,51 +483,50 @@ function render() {
         const groupName = `opt-${current}`;
         const optErrId = `fieldset-error-${current}`;
 
-        if (legend) {
-            legend.id = `legend-${current}`;
-            const baseText = (node && typeof node.q === "string") ? node.q.trim() : "";
-            const requiredText = " (obligatorisk)";
-            legend.textContent = (baseText || "Velg et alternativ") + requiredText;
-        }
+
+        legend.id = `legend-${current}`;
+        const baseText = (node && typeof node.q === "string") ? node.q.trim() : "";
+        const requiredText = " (obligatorisk)";
+        legend.textContent = (baseText || "Velg et alternativ") + requiredText;
+
 
         node.options.forEach(([key, opt], idx) => {
-            if (!opt) return;
             const optFrag = cloneTemplate("radio-option-template");
             const wrap = optFrag.querySelector(".navds-radio");
             const input = optFrag.querySelector("input");
             const labelEl = optFrag.querySelector("label.navds-radio__label");
             const labelSpan = optFrag.querySelector(".navds-body-short");
-
-            if (!wrap || !input || !labelEl || !labelSpan) return;
-
             const id = `${groupName}-${idx}`;
+
             input.id = id;
             input.name = groupName;
             input.value = key;
-
             labelEl.htmlFor = id;
-
             labelSpan.innerHTML = opt.buttonText || key;
 
-            input.addEventListener("change", () => {
+            const previouslySelectedKey = selectedByNode[current];
+            if (previouslySelectedKey === key) {
+                input.checked = true;
                 selectedNext = opt.next;
+            }
 
-                if (typeof clearOptionError === "function") {
-                    clearOptionError(fieldset, optErrId);
-                }
-
+            input.addEventListener("change", () => {
+                selectedByNode[current] = key;
+                selectedNext = opt.next;
+                clearOptionError(fieldset, optErrId);
                 updateErrorSummary(wrapper);
             });
 
             radioContainer.appendChild(optFrag);
         });
 
+
         wrapper.insertBefore(fieldsetFrag, noteContainer);
     }
 
     // 5) Generate the free-text field from the template
     if (!introMode && node.note && node.note.label) {
-        const { label, hint, required } = node.note;
+        const {label, hint, required} = node.note;
         const noteFrag = cloneTemplate("note-template");
         const fieldWrap = noteFrag.querySelector(".navds-form-field");
         const labelEl = noteFrag.querySelector("label");
@@ -589,14 +539,10 @@ function render() {
         const maxId = `maxlen-${current}`;
 
         const taWrap = noteFrag.querySelector(".navds-textarea");
-        if (taWrap) {
-            taWrap.id = `ta-wrap-${current}`;
-        }
+        taWrap.id = `ta-wrap-${current}`;
+        labelEl.setAttribute("for", fieldId);
+        labelEl.textContent = label + (required ? " (obligatorisk)" : " (valgfritt)");
 
-        if (labelEl) {
-            labelEl.setAttribute("for", fieldId);
-            labelEl.textContent = label + (required ? " (obligatorisk)" : " (valgfritt)");
-        }
 
         if (hintEl) {
             if (hint) {
@@ -625,22 +571,18 @@ function render() {
             textarea.addEventListener("input", () => {
                 setNote(current, textarea.value);
 
-                if (typeof clearNoteError === "function") {
-                    clearNoteError(current, wrapper);
-                }
+
+                clearNoteError(current, wrapper);
+
 
                 updateErrorSummary(wrapper);
             });
         }
 
-        if (maxEl) {
-            maxEl.id = maxId;
-            maxEl.textContent = `Maks ${MAX_NOTE_LEN} tegn.`;
-        }
+        maxEl.id = maxId;
+        maxEl.textContent = `Maks ${MAX_NOTE_LEN} tegn.`;
+        noteContainer.appendChild(noteFrag);
 
-        if (fieldWrap) {
-            noteContainer.appendChild(noteFrag);
-        }
     }
 
 
@@ -653,23 +595,20 @@ function render() {
         // 1) Radio selected?
         if (!selectedNext && !node.end) {
             errors.push({
-                text: "Velg et alternativ.",
-                href: `#legend-${current}`,
+                text: "Velg et alternativ.", href: `#legend-${current}`,
             });
         }
 
         // 2) Note required?
         const noteConfig = node.note;
-        const noteIsRequired =
-            noteConfig && noteConfig.label && noteConfig.required;
+        const noteIsRequired = noteConfig && noteConfig.label && noteConfig.required;
 
         if (noteIsRequired) {
             const textarea = wrapper.querySelector(`#note-${current}`);
             const value = textarea ? textarea.value.trim() : "";
             if (!value) {
                 errors.push({
-                    text: "Skriv en begrunnelse for svaret ditt.",
-                    href: `#note-${current}`,
+                    text: "Skriv en begrunnelse for svaret ditt.", href: `#note-${current}`,
                 });
             }
         }
@@ -677,7 +616,7 @@ function render() {
         clearErrorSummary(wrapper);
 
         if (errors.length > 0) {
-            createErrorSummary(wrapper, errors, { focus: false });
+            createErrorSummary(wrapper, errors, {focus: false});
         }
         // If no errors remain, the summary stays cleared (disappears)
     }
@@ -700,8 +639,10 @@ function render() {
     function makeNextButton() {
         const btn = document.createElement("button");
         btn.type = "button";
-        btn.className = "navds-button navds-button--primary navds-button--medium";
-        btn.innerHTML = "<span class='navds-label'>Neste</span>";
+        btn.className = "navds-button navds-button--primary navds-button--medium navds-button--icon navds-button--icon-right";
+
+        btn.innerHTML = "<span class='navds-label'>Neste steg</span>" + "<span class='navds-button__icon' aria-hidden='true'><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n" + "<path d=\"M14.0878 6.87338C14.3788 6.68148 14.774 6.7139 15.0302 6.97006L19.5302 11.4701C19.6707 11.6107 19.7499 11.8015 19.7499 12.0003C19.7498 12.1991 19.6707 12.39 19.5302 12.5306L15.0302 17.0306C14.7739 17.2866 14.3788 17.3183 14.0878 17.1263C14.0462 17.0989 14.0062 17.0672 13.9696 17.0306C13.7133 16.7743 13.6817 16.3784 13.8739 16.0873C13.9013 16.0458 13.9331 16.0066 13.9696 15.9701L17.1893 12.7503H4.99988C4.58909 12.7503 4.25528 12.4196 4.24988 12.0101C4.24984 12.007 4.24988 12.0035 4.24988 12.0003C4.24988 11.5862 4.58572 11.2504 4.99988 11.2503H17.1893L13.9696 8.03061C13.7133 7.77433 13.6817 7.37837 13.8739 7.08725C13.9013 7.04583 13.9331 7.00655 13.9696 6.97006C14.0062 6.93345 14.0462 6.90084 14.0878 6.87338Z\" fill=\"#ffffff\"/>\n" + "</svg>\n</span>";
+
 
         btn.addEventListener("click", (e) => {
             e.preventDefault();
@@ -724,35 +665,32 @@ function render() {
                 }
 
                 errors.push({
-                    text: "Velg et alternativ.",
-                    href: `#legend-${current}`,
+                    text: "Velg et alternativ.", href: `#legend-${current}`,
                 });
             }
 
             // 2) Notatfelt hvis det er påkrevd
             const noteConfig = node.note;
-            const noteIsRequired =
-                noteConfig && noteConfig.label && noteConfig.required;
+            const noteIsRequired = noteConfig && noteConfig.label && noteConfig.required;
 
             if (noteIsRequired) {
                 const textarea = wrapper.querySelector(`#note-${current}`);
                 const value = textarea ? textarea.value.trim() : "";
 
                 if (!value) {
-                    if (typeof showNoteError === "function") {
-                        showNoteError(current, wrapper);
-                    }
+
+                    showNoteError(current, wrapper);
+
 
                     errors.push({
-                        text: "Skriv en begrunnelse for svaret ditt.",
-                        href: `#note-${current}`,
+                        text: "Skriv en begrunnelse for svaret ditt.", href: `#note-${current}`,
                     });
                 }
             }
 
             // 3) Hvis vi har feil, vis summary rett over knappene
             if (errors.length > 0) {
-                createErrorSummary(wrapper, errors, { focus: true });
+                createErrorSummary(wrapper, errors, {focus: true});
                 return;
             }
 
@@ -778,7 +716,7 @@ function render() {
             if (h2) {
                 h2.setAttribute("tabindex", "-1");
                 h2.focus();
-                h2.addEventListener("blur", () => h2.removeAttribute("tabindex"), { once: true });
+                h2.addEventListener("blur", () => h2.removeAttribute("tabindex"), {once: true});
             }
         });
         return btn;
@@ -787,8 +725,8 @@ function render() {
     function makeBackButton() {
         const btn = document.createElement("button");
         btn.type = "button";
-        btn.className = "navds-button navds-button--tertiary navds-button--medium";
-        btn.innerHTML = "<span class='navds-label'>Tilbake</span>";
+        btn.className = "navds-button navds-button--secondary navds-button--medium navds-button--icon navds-button--icon-left";
+        btn.innerHTML = "<span class='navds-button__icon' aria-hidden='true'><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1em\" height=\"1em\" fill=\"none\" viewBox=\"0 0 24 24\" focusable=\"false\" role=\"img\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M8.97 6.97a.75.75 0 1 1 1.06 1.06l-3.22 3.22H19a.75.75 0 0 1 0 1.5H6.81l3.22 3.22a.75.75 0 1 1-1.06 1.06l-4.5-4.5a.75.75 0 0 1 0-1.06z\"></path></svg></span>" + "<span class='navds-label'>Forrige steg</span>";
 
         btn.addEventListener("click", (e) => {
             e.preventDefault();
@@ -801,13 +739,12 @@ function render() {
         return btn;
     }
 
+
     function makeRestartButton() {
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "navds-button navds-button--tertiary navds-button--medium navds-button--icon navds-button--icon-left";
-        btn.innerHTML =
-            "<span class='navds-button__icon' aria-hidden='true'>↺</span>" +
-            "<span class='navds-label'>Slett data og start på nytt</span>";
+        btn.innerHTML = "<span class='navds-button__icon' aria-hidden='true'><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n" + "<path d=\"M18.7463 7.25C17.2522 5.1318 14.787 3.75 12 3.75C7.44365 3.75 3.75 7.44365 3.75 12C3.75 16.5563 7.44365 20.25 12 20.25C16.5563 20.25 20.25 16.5563 20.25 12C20.25 11.5858 20.5858 11.25 21 11.25C21.4142 11.25 21.75 11.5858 21.75 12C21.75 17.3848 17.3848 21.75 12 21.75C6.61522 21.75 2.25 17.3848 2.25 12C2.25 6.61522 6.61522 2.25 12 2.25C15.1606 2.25 17.969 3.75399 19.75 6.08327V3.5C19.75 3.08579 20.0858 2.75 20.5 2.75C20.9142 2.75 21.25 3.08579 21.25 3.5V8C21.25 8.41421 20.9142 8.75 20.5 8.75H16C15.5858 8.75 15.25 8.41421 15.25 8C15.25 7.58579 15.5858 7.25 16 7.25H18.7463Z\" fill=\"currentColor\"/>\n" + "</svg>\n</span>" + "<span class='navds-label'>Slett data og start på nytt</span>";
 
         btn.addEventListener("click", (e) => {
             e.preventDefault();
@@ -818,7 +755,7 @@ function render() {
             if (h1) {
                 h1.setAttribute("tabindex", "-1");
                 h1.focus();
-                h1.addEventListener("blur", () => h1.removeAttribute("tabindex"), { once: true });
+                h1.addEventListener("blur", () => h1.removeAttribute("tabindex"), {once: true});
             }
         });
 
@@ -829,9 +766,7 @@ function render() {
         const btn = document.createElement("button");
         btn.type = "button";
         btn.className = "navds-button navds-button--tertiary navds-button--medium navds-button--icon navds-button--icon-left";
-        btn.innerHTML =
-            "<span class='navds-button__icon' aria-hidden='true'>🗑</span>" +
-            "<span class='navds-label'>Slett data og gå til forsiden</span>";
+        btn.innerHTML = "<span class='navds-button__icon' aria-hidden='true'><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n" + "<path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M4.5 6.25C4.08579 6.25 3.75 6.58579 3.75 7C3.75 7.41421 4.08579 7.75 4.5 7.75H5.30548L6.18119 19.1342C6.25132 20.046 7.01159 20.75 7.92603 20.75H16.074C16.9884 20.75 17.7487 20.046 17.8188 19.1342L18.6945 7.75H19.5C19.9142 7.75 20.25 7.41421 20.25 7C20.25 6.58579 19.9142 6.25 19.5 6.25H16.75V6C16.75 4.48122 15.5188 3.25 14 3.25H10C8.48122 3.25 7.25 4.48122 7.25 6V6.25H4.5ZM10 4.75C9.30964 4.75 8.75 5.30964 8.75 6V6.25H15.25V6C15.25 5.30964 14.6904 4.75 14 4.75H10ZM6.80991 7.75L7.67677 19.0192C7.68679 19.1494 7.7954 19.25 7.92603 19.25H16.074C16.2046 19.25 16.3132 19.1494 16.3232 19.0192L17.1901 7.75H6.80991ZM10 9.75C10.4142 9.75 10.75 10.0858 10.75 10.5V16.5C10.75 16.9142 10.4142 17.25 10 17.25C9.58579 17.25 9.25 16.9142 9.25 16.5V10.5C9.25 10.0858 9.58579 9.75 10 9.75ZM14 9.75C14.4142 9.75 14.75 10.0858 14.75 10.5V16.5C14.75 16.9142 14.4142 17.25 14 17.25C13.5858 17.25 13.25 16.9142 13.25 16.5V10.5C13.25 10.0858 13.5858 9.75 14 9.75Z\" fill=\"currentColor\"/>\n" + "</svg>\n</span>" + "<span class='navds-label'>Slett data og gå til forsiden</span>";
 
         btn.addEventListener("click", (e) => {
             e.preventDefault();
@@ -846,11 +781,8 @@ function render() {
         const btn = document.createElement("button");
         btn.type = "button";
         btn.id = "answers-print-btn";
-        btn.className =
-            "navds-button navds-button--primary navds-button--medium print";
-        btn.innerHTML =
-            "<span class='navds-button__icon' aria-hidden='true'></span>" +
-            "<span class='navds-label'>Skriv ut</span>";
+        btn.className = "navds-button navds-button--primary navds-button--medium print";
+        btn.innerHTML = "<span class='navds-button__icon' aria-hidden='true'></span>" + "<span class='navds-label'>Skriv ut</span>";
 
         btn.addEventListener("click", (e) => {
             e.preventDefault();
@@ -877,7 +809,6 @@ function render() {
 
     // På resultatsiden: vis "Skriv ut"-knapp nederst under "Dine svar"
     if (node.end) {
-        const answersEl = document.getElementById("answers");
         if (answersEl) {
             const printBtn = makePrintButton();
             answersEl.appendChild(printBtn);
@@ -943,7 +874,6 @@ function mermaidSource(tree, pathHistory) {
         visitedNodes.add(id);
 
         const n = tree[id];
-        if (!n) return;
         nodeLines.push(drawNode(id, n.q, n.shape));
 
         // Highlight current and visited nodes, except on the intro page where the start node should not be highlighted
@@ -980,19 +910,12 @@ function mermaidSource(tree, pathHistory) {
     visit("start");
 
     if (visitedEdges.size) {
-        edgeLines.push(
-            `linkStyle ${[...visitedEdges].join(",")} stroke:#1844a3,stroke-width:2px;`
-        );
+        edgeLines.push(`linkStyle ${[...visitedEdges].join(",")} stroke:#1844a3,stroke-width:2px;`);
     }
 
-    classLines.push(
-        "classDef current fill:#fff2b3,stroke:#333,stroke-width:3px",
-        "classDef visited fill:#e6f0ff,stroke:#1844a3,stroke-width:2px"
-    );
+    classLines.push("classDef current fill:#fff2b3,stroke:#333,stroke-width:3px", "classDef visited fill:#e6f0ff,stroke:#1844a3,stroke-width:2px");
 
-    return `graph TD\n${nodeLines.join("\n")}\n${edgeLines.join(
-        "\n"
-    )}\n${classLines.join("\n")}`;
+    return `graph TD\n${nodeLines.join("\n")}\n${edgeLines.join("\n")}\n${classLines.join("\n")}`;
 }
 
 // Render the Mermaid diagram

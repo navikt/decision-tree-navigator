@@ -115,6 +115,23 @@ h2:focus {
     outline: none
 }
 
+#tree-name.normalFontWeight-0-1-4 {
+    font-weight: 400 !important;
+}
+
+.buttons {
+    --__ac-stack-gap-xs: var(--a-spacing-3);
+}
+
+
+.destructive-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: var(--a-spacing-3);
+    margin-top: var(--a-spacing-4);
+    align-items: flex-start;
+}
+
 button.print .navds-button__icon {
     width: 24px;
     height: 24px;
