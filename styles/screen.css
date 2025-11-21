@@ -55,15 +55,29 @@ footer {
     border-bottom: 1px solid black;
 }
 
-.site-title {
-    font-size: 1.75em;
-    text-decoration: none;
+.site-title, .tree-name {
+    font-size: 1.25rem;
     color: #000;
     font-weight: bold;
+    text-decoration: none;
 }
 
-#logo {
-    margin-top: .5em;
+.site-brand-left, .site-title {
+    display: flex;
+}
+
+.site-title {
+    gap: .5rem;
+}
+
+.site-brand-left img {
+    height: 1.5rem;
+    width: auto;
+}
+
+.site-brand-right svg {
+    height: 1rem;
+    width: auto;
 }
 
 
@@ -88,7 +102,17 @@ footer {
     grid-area: answers;
 }
 
-@media (min-width: 60rem) {
+@media (min-width: 1024px) {
+
+
+    #tree-page .wrapper {
+        padding-left: 8rem;
+    }
+
+    #tree-page .intro .wrapper {
+        padding-right: 8rem;
+    }
+
     #top-section {
         grid-template-columns: minmax(29rem, 1fr) 2fr;
         grid-template-areas:
@@ -109,14 +133,11 @@ footer {
     margin-top: 1rem;
     padding: 2rem;
     background: #f2f3f5;
+    margin-inline: auto;
 }
 
 h2:focus {
     outline: none
-}
-
-#tree-name.normalFontWeight-0-1-4 {
-    font-weight: 400 !important;
 }
 
 .buttons {
@@ -166,3 +187,5 @@ button.print .navds-button__icon {
     fill: #fff !important
 
 }
+
+

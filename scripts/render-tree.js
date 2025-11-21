@@ -259,7 +259,7 @@ function clearNoteError(current, section) {
 let treeId = "";
 let notes = {};
 
-// Bootstrap: resolve tree id from URL, set title, load persisted notes, then fetch the tree
+// Resolve tree id from URL, set title, load persisted notes, then fetch the tree
 async function init() {
     const params = new URLSearchParams(window.location.search);
     treeId = params.get("id");
@@ -282,7 +282,11 @@ async function init() {
     window.TREE_TITLE = entry.title;
 
     document.title = entry.title;
-    document.getElementById("tree-name").textContent = entry.title;
+    // Set site header: show product name and tree title immediately on intro page
+    const headerTextEl = document.querySelector('#site-header .site-title .site-title-text');
+    if (headerTextEl) headerTextEl.textContent = "Beslutt";
+    const headerTreeEl = document.querySelector('#site-header .tree-name');
+    if (headerTreeEl) headerTreeEl.textContent = `: ${entry.title}`;
 
     notes = JSON.parse(localStorage.getItem(NOTES_KEY(treeId)) || "{}");
     await loadTree();
@@ -308,13 +312,11 @@ async function loadTree() {
 
 // Render the entire page for the current node
 function render() {
-    const headerEl = document.getElementById("tree-name");
     const stepNameHeader = document.getElementById("step-name");
     const introEl = document.getElementById("tree-intro");
 
     const customTitle = (tree && typeof tree.title === "string") ? tree.title.trim() : "";
-    headerEl.textContent = customTitle || window.TREE_TITLE;
-
+    const effectiveTitle = customTitle || window.TREE_TITLE;
 
     const section = document.getElementById("tree");
     const pathSection = document.getElementById("path");
@@ -327,6 +329,18 @@ function render() {
     const current = pathHistory[pathHistory.length - 1];
     const node = tree[current];
     const introMode = (current === "start" && !interacted);
+
+    // Toggle .intro class on the article element when on intro page
+    const articleEl = document.querySelector('#tree-page article');
+    if (articleEl) {
+        articleEl.classList.toggle('intro', introMode);
+    }
+
+    // Update site header: keep only logo + "Beslutt" as the link; append tree title outside the link
+    const headerTextEl2 = document.querySelector('#site-header .site-title .site-title-text');
+    const headerTreeEl2 = document.querySelector('#site-header .tree-name');
+    if (headerTextEl2) headerTextEl2.textContent = "Beslutt";
+    if (headerTreeEl2) headerTreeEl2.textContent = `: ${effectiveTitle}`;
 
     // Reset validation-attempt flag when node changes
     if (current !== lastRenderedNodeId) {
@@ -409,15 +423,6 @@ function render() {
         return;
     }
 
-    // Styling of H1 & H2 depend on whether we're on the intro page or the question page
-    if (headerEl) {
-        if (introMode) {
-            headerEl.className = stepNameHeader ? stepNameHeader.className : "navds-heading navds-heading--xlarge";
-        } else {
-            headerEl.className = "normalFontWeight-0-1-4 navds-heading navds-heading--xsmall navds-typo--color-subtle";
-        }
-    }
-
     if (introEl) {
         const introText = (typeof tree["intro"] === "string" && tree["intro"].trim()) ? tree["intro"].trim() : (typeof tree["intro-text"] === "string" ? tree["intro-text"].trim() : "");
 
@@ -453,13 +458,13 @@ function render() {
     const destructiveButtonsEl = questionFrag.querySelector(".destructive-buttons");
 
 
-// Set the page header (h2#step-name) from node["step-title"] when provided; otherwise fall back to the question text
+// Set the page header (h1#step-name) from node["step-title"] when provided; otherwise fall back to the question text
     if (stepNameHeader) {
         const rawStepTitle = (node && typeof node["step-title"] === "string") ? node["step-title"].trim() : "";
         const questionText = (node && typeof node.q === "string") ? node.q.trim() : "";
-        stepNameHeader.textContent = introMode ? "" : (rawStepTitle || questionText || "");
-        stepNameHeader.style.display = introMode ? "none" : "";
-        stepNameHeader.setAttribute("aria-hidden", introMode ? "true" : "false");
+        stepNameHeader.textContent = introMode ? effectiveTitle : (rawStepTitle || questionText || "");
+        stepNameHeader.style.display = "";
+        stepNameHeader.setAttribute("aria-hidden", "false");
     }
 
     if (node.end) {
@@ -716,13 +721,10 @@ function render() {
         btn.type = "button";
         btn.className = "navds-button navds-button--primary navds-button--medium navds-button--icon navds-button--icon-right";
 
-        btn.innerHTML =
-            "<span class='navds-label'>Start</span>" +
-            "<span class='navds-button__icon' aria-hidden='true'>" +
-            "<svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">" +
-            "<path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M8.61965 6.3536C8.84869 6.21883 9.13193 6.21533 9.36423 6.34438L18.3642 11.3444C18.6023 11.4767 18.75 11.7276 18.75 12C18.75 12.2724 18.6023 12.5233 18.3642 12.6556L9.36423 17.6556C9.13193 17.7847 8.84869 17.7812 8.61965 17.6464C8.39062 17.5116 8.25 17.2657 8.25 17V7C8.25 6.73426 8.39062 6.48836 8.61965 6.3536ZM9.75 8.27464V15.7254L16.4557 12L9.75 8.27464Z\" fill=\"currentColor\"/>" +
-            "</svg>" +
-            "</span>";
+        btn.innerHTML = "<span class='navds-label'>Start</span>" +
+            "<span class='navds-button__icon' aria-hidden='true'><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n" +
+            "<path d=\"M14.0878 6.87338C14.3788 6.68148 14.774 6.7139 15.0302 6.97006L19.5302 11.4701C19.6707 11.6107 19.7499 11.8015 19.7499 12.0003C19.7498 12.1991 19.6707 12.39 19.5302 12.5306L15.0302 17.0306C14.7739 17.2866 14.3788 17.3183 14.0878 17.1263C14.0462 17.0989 14.0062 17.0672 13.9696 17.0306C13.7133 16.7743 13.6817 16.3784 13.8739 16.0873C13.9013 16.0458 13.9331 16.0066 13.9696 15.9701L17.1893 12.7503H4.99988C4.58909 12.7503 4.25528 12.4196 4.24988 12.0101C4.24984 12.007 4.24988 12.0035 4.24988 12.0003C4.24988 11.5862 4.58572 11.2504 4.99988 11.2503H17.1893L13.9696 8.03061C13.7133 7.77433 13.6817 7.37837 13.8739 7.08725C13.9013 7.04583 13.9331 7.00655 13.9696 6.97006C14.0062 6.93345 14.0462 6.90084 14.0878 6.87338Z\" fill=\"#ffffff\"/>\n" +
+            "</svg>\n</span>";
         btn.addEventListener("click", (e) => {
             e.preventDefault();
             interacted = true;
@@ -767,11 +769,11 @@ function render() {
             resetTreeState();
             render();
             // Flytt fokus til topp etter restart
-            const h1 = document.getElementById("tree-name");
-            if (h1) {
-                h1.setAttribute("tabindex", "-1");
-                h1.focus();
-                h1.addEventListener("blur", () => h1.removeAttribute("tabindex"), {once: true});
+            const siteTitle = document.querySelector('#site-header .site-title');
+            if (siteTitle) {
+                siteTitle.setAttribute("tabindex", "-1");
+                siteTitle.focus();
+                siteTitle.addEventListener("blur", () => siteTitle.removeAttribute("tabindex"), {once: true});
             }
         });
 

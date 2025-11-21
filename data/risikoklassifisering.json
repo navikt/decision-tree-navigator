@@ -4,7 +4,7 @@
   "start": {
     "step-title": "Bruk på hjelpemiddelområdet",
     "q": "Skal KI-systemet brukes på hjelpemiddelområdet?",
-    "help": "",
+    "help": "Systemer som inngår i, styrer eller påvirker funksjonene til medisinsk utstyr, for eksempel løsninger som vurderer brukeres funksjonsevne, gir tilpasningsanbefalinger eller optimaliserer bruk av hjelpemidler, er automatisk høy risiko etter <a href=\"\" target=\"_top\">KI-forordningen artikkel 6</a> nr. 1 bokstav a og b, fordi de allerede er regulert under eksisterende EU-regelverk.",
     "read-more": {
       "read-more-about": "",
       "read-more-text": ""
