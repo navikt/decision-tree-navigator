@@ -81,7 +81,7 @@
   },
   "node4": {
     "step-title": "Nav som avsender",
-    "q": "Skal KI-systemet tas i bruk under Navs eller logo?",
+    "q": "Skal KI-systemet tas i bruk under Navs navn eller logo?",
     "help": "",
     "read-more": {
       "read-more-about": "",
