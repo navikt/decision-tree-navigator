@@ -5,6 +5,7 @@
     "step-title": "Offentlig myndighetsutøvelse",
     "q": "Skal du bruke KI-systemet til oppgaver som er en del av NAVs utøvelse av offentlig myndighet?",
     "help": "Skal du bruke systemet til å løse Navs lovfestede oppgaver, f.eks. i saksbehandling eller ved gjennomføring av tiltak, kontroll eller oppfølging av regelverk svarer du 'ja' her. Dette gjelder selv om KI-systemet ikke har noe grensesnitt mot borgerne eller Navs brukere.",
+    "shape": "stadium",
     "read-more": {
       "read-more-about": "",
       "read-more-text": ""
@@ -187,14 +188,12 @@
     "step-title": "Høy risiko",
     "q": "KI-systemet klassifiseres som høy-risiko.",
     "help": "",
-    "shape": "stadium",
     "end": true
   },
   "lowrisk": {
     "step-title": "Ikke høy risiko",
     "q": "KI-systemet klassifiseres ikke som høy risiko.",
     "help": "",
-    "shape": "stadium",
     "end": true
   }
 }

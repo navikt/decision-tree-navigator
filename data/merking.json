@@ -5,11 +5,11 @@
     "step-title": "Innhold brukt i forbindelse Navs myndighetsutøvelse",
     "q": "Er innholdet ifm. saksbehandling?",
     "help": "Gjelder innholdet en konkret sak, beslutning eller myndighetsutøvelse?",
+    "shape": "stadium",
     "read-more": {
       "read-more-about": "",
       "read-more-text": ""
     },
-    "shape": "circle",
     "options": {
       "yes": {
         "next": "doNotUseAI",

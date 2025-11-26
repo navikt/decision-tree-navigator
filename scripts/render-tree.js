@@ -888,7 +888,7 @@ function mermaidSource(tree, pathHistory) {
             case "diamond":
             case "rhombus":
                 return `${id}{${esc}}`;
-            case "hexagon":
+            case "hex":
                 return `${id}{{${esc}}}`;
             case "asymmetric":
                 return `${id}>${esc}]`;
@@ -906,7 +906,18 @@ function mermaidSource(tree, pathHistory) {
         visitedNodes.add(id);
 
         const n = tree[id];
-        nodeLines.push(drawNode(id, n.q, n.shape));
+        const isEnd = !!n.end;
+        const hasOptions = Array.isArray(n.options) && n.options.length > 0;
+
+        // Defaulting logic:
+        // - explicit n.shape wins
+        // - start and end nodes -> stadium
+        // - everything else -> hex
+        const shape =
+            n.shape ||
+            ((id === "start" || isEnd) ? "stadium" : "rect");
+
+        nodeLines.push(drawNode(id, n.q, shape));
 
         // Highlight current and visited nodes, except on the intro page where the start node should not be highlighted
         if (id === current && !(isIntroDiagram && id === "start")) {
@@ -942,10 +953,10 @@ function mermaidSource(tree, pathHistory) {
     visit("start");
 
     if (visitedEdges.size) {
-        edgeLines.push(`linkStyle ${[...visitedEdges].join(",")} stroke:#1844a3,stroke-width:2px;`);
+        edgeLines.push(`linkStyle ${[...visitedEdges].join(",")} stroke:#1844a3,stroke-width:4px;`);
     }
 
-    classLines.push("classDef current fill:#fff2b3,stroke:#333,stroke-width:3px", "classDef visited fill:#e6f0ff,stroke:#1844a3,stroke-width:2px");
+    classLines.push("classDef current fill:#fff2b3,stroke:#333,stroke-width:4px", "classDef visited fill:#e6f0ff,stroke:#1844a3,stroke-width:2px");
 
     return `graph TD\n${nodeLines.join("\n")}\n${edgeLines.join("\n")}\n${classLines.join("\n")}`;
 }
