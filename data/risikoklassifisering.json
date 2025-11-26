@@ -2,32 +2,6 @@
   "title": "Hvilket risikonivå har KI-systemet mitt?",
   "intro-text": "Dette treet hjelper deg å avgjøre om et KI-system faller innenfor «høy risiko» etter KI-forordningen. Det leder deg gjennom faktiske bruksområder (hjelpemiddelområdet, myndighetsutøvelse, ansatt-oppfølging, profilering, smale prosessteg osv.) slik at du ender med en klassifisering som kan brukes i etterlevelsesløsningen når KI-forordningen trer i kraft.",
   "start": {
-    "step-title": "Bruk på hjelpemiddelområdet",
-    "q": "Skal KI-systemet brukes på hjelpemiddelområdet?",
-    "help": "Systemer som inngår i, styrer eller påvirker funksjonene til medisinsk utstyr, for eksempel løsninger som vurderer brukeres funksjonsevne, gir tilpasningsanbefalinger eller optimaliserer bruk av hjelpemidler, er automatisk høy risiko etter <a href=\"\" target=\"_top\">KI-forordningen artikkel 6</a> nr. 1 bokstav a og b, fordi de allerede er regulert under eksisterende EU-regelverk.",
-    "read-more": {
-      "read-more-about": "",
-      "read-more-text": ""
-    },
-    "options": {
-      "yes": {
-        "next": "highrisk",
-        "buttonText": "Ja",
-        "label": "KI-systemet skal brukes på hjelpemiddelområdet."
-      },
-      "no": {
-        "next": "node2",
-        "buttonText": "Nei",
-        "label": "KI-systemet skal ikke brukes på hjelpemiddelområdet."
-      }
-    },
-    "note": {
-      "label": "Begrunn svaret ditt",
-      "hint": "",
-      "required": false
-    }
-  },
-  "node2": {
     "step-title": "Offentlig myndighetsutøvelse",
     "q": "Skal du bruke KI-systemet til oppgaver som er en del av NAVs utøvelse av offentlig myndighet?",
     "help": "Skal du bruke systemet til å løse Navs lovfestede oppgaver, f.eks. i saksbehandling eller ved gjennomføring av tiltak, kontroll eller oppfølging av regelverk svarer du 'ja' her. Dette gjelder selv om KI-systemet ikke har noe grensesnitt mot borgerne eller Navs brukere.",
