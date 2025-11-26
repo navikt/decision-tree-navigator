@@ -839,12 +839,10 @@ function render() {
     }
 
 
-    // På resultatsiden: vis "Skriv ut"-knapp nederst under "Dine svar"
+    // På resultatsiden: vis "Skriv ut"-knapp til høyre for "Forrige steg"-knappen
     if (node.end) {
-        if (answersEl) {
-            const printBtn = makePrintButton();
-            answersEl.appendChild(printBtn);
-        }
+        const printBtn = makePrintButton();
+        buttonsEl.appendChild(printBtn);
     }
 
     // 7) Legg inn spørsmålet i seksjonen
