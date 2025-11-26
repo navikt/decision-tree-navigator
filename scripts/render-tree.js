@@ -259,6 +259,20 @@ function clearNoteError(current, section) {
 let treeId = "";
 let notes = {};
 
+// Ensure local data is cleared when the page is closed or navigated away
+function cleanupNotes() {
+    try {
+        if (treeId) {
+            localStorage.removeItem(NOTES_KEY(treeId));
+        }
+    } catch (e) {
+        // ignore storage errors
+    }
+}
+// Use pagehide (fires on tab close, refresh, history nav; supports bfcache). Fallback to beforeunload.
+window.addEventListener("pagehide", cleanupNotes);
+window.addEventListener("beforeunload", cleanupNotes);
+
 // Resolve tree id from URL, set title, load persisted notes, then fetch the tree
 async function init() {
     const params = new URLSearchParams(window.location.search);

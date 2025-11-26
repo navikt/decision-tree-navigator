@@ -113,7 +113,7 @@
       "read-more-text": ""
     },
     "help": "Se art.3 nr.3 i KI-forordningen for definisjonen av 'provider'",
-    "shape": "circle",
+    "shape": "stadium",
     "end": true
   },
   "deployer": {
@@ -124,7 +124,7 @@
       "read-more-text": ""
     },
     "help": "Se art.3 nr.4 i KI-forordningen for definisjonen av 'deployer'. Se i Støtte til etterlevelse hvilke krav som gjelder, avhengig av KI-systemets risikoklassifisering.",
-    "shape": "circle",
+    "shape": "stadium",
     "end": true
   }
 }
