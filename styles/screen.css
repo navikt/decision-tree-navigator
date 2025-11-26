@@ -15,7 +15,7 @@ body {
     background: #f2f3f5;
 }
 
-header, footer {
+#site-header, footer {
     background: #fff;
 }
 
@@ -29,7 +29,11 @@ main {
     padding: 1rem;
 }
 
-header .wrapper, footer .wrapper {
+
+
+
+
+#site-header .wrapper, footer .wrapper {
     display: flex;
     flex-flow: row nowrap;
     justify-content: space-between;
@@ -37,14 +41,8 @@ header .wrapper, footer .wrapper {
     gap: 2rem;
 }
 
-#tree-page header {
-    margin-top: 2em;
-}
-
-
 footer {
     border-top: 1px solid black;
-    position: sticky;
     bottom: 0;
     background-color: #fff;
 }
@@ -61,72 +59,62 @@ footer .back {
 }
 
 .site-title, .tree-name {
-    font-size: 1.25rem;
     color: #000;
-    font-weight: bold;
     text-decoration: none;
 }
 
-.site-brand-left, .site-title {
-    display: flex;
-}
-
 .site-title {
-    gap: .5rem;
+    background: url("../images/logo.svg") no-repeat left center;
 }
 
-.site-brand-left img {
-    height: 1.5rem;
+#index .site-title {
+    padding-left: 4rem;
+}
+
+#tree-page .site-title {
+    padding-left: 2rem;
+}
+
+#tree-page .tree-name, #tree-page .site-title {
+    font-size: 1.25rem;
+}
+
+.site-intro {
+    margin: 0 4rem;
+}
+
+.site-intro p {
+    margin: 0 0 .5em;
+}
+
+
+/* Nav logo */
+#site-header .right img {
     width: auto;
-}
-
-.site-brand-right svg {
     height: 1rem;
-    width: auto;
+}
+
+.start #site-header .tree-name {
+    display: none;
 }
 
 
 /* Tree page layout */
-#tree-page {
+#tree-page main {
     background: #fff;
 }
 
-#top-section {
+#top-section .wrapper {
     display: grid;
+    grid-template-columns: minmax(0, 1fr);
     gap: 2rem;
-    grid-template-areas:
-    "tree"
-    "answers";
-}
-
-#tree {
-    grid-area: tree;
-}
-
-#answers {
-    grid-area: answers;
+    align-items: flex-start;
 }
 
 @media (min-width: 1024px) {
-
-
-    #tree-page .wrapper {
-        padding-left: 8rem;
+    #top-section .wrapper {
+        grid-template-columns: 1fr 1fr;
     }
-
-    #tree-page .intro .wrapper {
-        padding-right: 8rem;
-    }
-
-    #top-section {
-        grid-template-columns: minmax(29rem, 1fr) 2fr;
-        grid-template-areas:
-      "tree answers";
-    }
-}
-
-#tree-page header {
-    margin-top: 2em;
 }
 
 #path ul {
@@ -135,20 +123,25 @@ footer .back {
 }
 
 #diagram {
-    margin-top: 1rem;
     padding: 2rem;
     background: #f2f3f5;
     margin-inline: auto;
+}
+
+#answers h2 {
+    margin-top: 0;
 }
 
 h2:focus {
     outline: none
 }
 
+
+
+
 .buttons {
     --__ac-stack-gap-xs: var(--a-spacing-3);
 }
-
 
 .destructive-buttons {
     display: flex;
@@ -162,15 +155,6 @@ button.print .navds-button__icon {
     width: 24px;
     height: 24px;
     background: url("../images/PrinterSmall.svg") no-repeat center center;
-}
-
-#question {
-    display: inline-block;
-}
-
-#question.final-result {
-    background: url("../images/CheckmarkCircle.svg") no-repeat right .2em;
-    padding-right: 1.75rem;
 }
 
 .question-wrapper > * {

@@ -316,7 +316,7 @@ async function loadTree() {
         render();
     } catch (e) {
         console.error("Failed to load tree:", e);
-        document.getElementById("tree").innerHTML = "<p>Kunne ikke laste beslutningstreet.</p>";
+        document.getElementById("question").innerHTML = "<p>Kunne ikke laste beslutningstreet.</p>";
         const diagramEl = document.getElementById("mermaid-container");
         diagramEl.textContent = "";
         diagramEl.removeAttribute("data-processed");
@@ -332,7 +332,7 @@ function render() {
     const customTitle = (tree && typeof tree.title === "string") ? tree.title.trim() : "";
     const effectiveTitle = customTitle || window.TREE_TITLE;
 
-    const section = document.getElementById("tree");
+    const section = document.getElementById("question");
     const pathSection = document.getElementById("path");
 
     // Reset view
@@ -348,6 +348,19 @@ function render() {
     const articleEl = document.querySelector('#tree-page article');
     if (articleEl) {
         articleEl.classList.toggle('intro', introMode);
+    }
+
+    // Toggle page-type classes on the body element: "start", "question", "end"
+    const pageEl = document.body;
+    if (pageEl) {
+        pageEl.classList.remove('start', 'question', 'end');
+        if (introMode) {
+            pageEl.classList.add('start');
+        } else if (node && node.end) {
+            pageEl.classList.add('end');
+        } else {
+            pageEl.classList.add('question');
+        }
     }
 
     // Update site header: keep only logo + "Beslutt" as the link; append tree title outside the link
@@ -437,17 +450,48 @@ function render() {
         return;
     }
 
+    // Intro page: keep the H1 in the article header; render only intro content + Start inside #tree
+    if (introMode) {
+        const introText = (typeof tree["intro"] === "string" && tree["intro"].trim()) ? tree["intro"].trim() : (typeof tree["intro-text"] === "string" ? tree["intro-text"].trim() : "");
+
+        // Ensure the header H1 is populated and visible in intro mode
+        if (stepNameHeader) {
+            stepNameHeader.textContent = effectiveTitle;
+            stepNameHeader.style.display = "";
+            stepNameHeader.removeAttribute("aria-hidden");
+        }
+        // Keep the legacy intro container in the header empty/hidden on screen
+        if (introEl) {
+            introEl.textContent = "";
+            introEl.style.display = "none";
+            introEl.classList.remove("print-only");
+        }
+
+        // Build intro content in the main #tree area (intro text + Start button)
+        if (introText) {
+            const introTextEl = document.createElement("div");
+            introTextEl.className = "navds-body-long";
+            introTextEl.textContent = introText;
+            section.appendChild(introTextEl);
+        }
+
+        const btnRow = document.createElement("div");
+        btnRow.className = "navds-stack navds-hstack navds-stack-gap navds-stack-direction";
+        btnRow.appendChild(makeStartButton());
+        section.appendChild(btnRow);
+
+        // Always render the Mermaid diagram, even on the intro page
+        drawMermaid(tree);
+
+        return; // Stop here; do not render question UI in intro mode
+    }
+
     if (introEl) {
         const introText = (typeof tree["intro"] === "string" && tree["intro"].trim()) ? tree["intro"].trim() : (typeof tree["intro-text"] === "string" ? tree["intro-text"].trim() : "");
 
-        // Show intro text only on the intro page (before first interaction)
-        if (introMode) {
-            introEl.textContent = introText || "";
-            introEl.style.display = introText ? "" : "none";
-            introEl.classList.remove("print-only");
-        } else if (node.end) {
-            // On the final page, keep the intro hidden on screen but include it in the DOM
-            // so that print styles can reveal it in the printout.
+        // On the final page, keep the intro hidden on screen but include it in the DOM
+        // so that print styles can reveal it in the printout.
+        if (node.end) {
             introEl.textContent = introText || "";
             introEl.style.display = "none";
             if (introText) {
@@ -478,7 +522,7 @@ function render() {
         const questionText = (node && typeof node.q === "string") ? node.q.trim() : "";
         stepNameHeader.textContent = introMode ? effectiveTitle : (rawStepTitle || questionText || "");
         stepNameHeader.style.display = "";
-        stepNameHeader.setAttribute("aria-hidden", "false");
+        stepNameHeader.removeAttribute("aria-hidden");
     }
 
     if (node.end) {
