@@ -49,6 +49,11 @@ footer {
     background-color: #fff;
 }
 
+footer .back {
+    background: url("../images/ArrowLeft.svg") no-repeat left center;
+    padding-left: 1.5rem;
+}
+
 /* Site header */
 
 #site-header {
