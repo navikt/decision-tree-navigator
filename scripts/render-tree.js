@@ -507,14 +507,13 @@ function render() {
         if (prevMeta) prevMeta.remove();
         if (!introMode) {
             // Sørg for at vi har oppdatert introMeta fra storage ved behov
-            if (!introMeta || ((!introMeta.serviceName || !introMeta.contactPerson) && treeId)) {
+            if (!introMeta || ((!introMeta.serviceName) && treeId)) {
                 loadIntroMeta();
             }
             const metaWrap = document.createElement('div');
             metaWrap.id = 'case-meta';
-            metaWrap.className = 'navds-stack';
 
-            // Felt: Navn til tjenesten (alltid vises)
+            // Felt: Navn til tjenesten
             const serviceField = document.createElement('div');
             serviceField.className = 'navds-form-field';
             const serviceLabel = document.createElement('div');
@@ -527,18 +526,21 @@ function render() {
             serviceField.appendChild(serviceValue);
             metaWrap.appendChild(serviceField);
 
-            // Felt: Kontaktperson (vises alltid, kan være tom)
-            const contactField = document.createElement('div');
-            contactField.className = 'navds-form-field';
-            const contactLabel = document.createElement('div');
-            contactLabel.className = 'navds-label';
-            contactLabel.textContent = 'Kontaktperson';
-            const contactValue = document.createElement('div');
-            contactValue.className = 'navds-body-long';
-            contactValue.textContent = (introMeta && introMeta.contactPerson) ? introMeta.contactPerson : '';
-            contactField.appendChild(contactLabel);
-            contactField.appendChild(contactValue);
-            metaWrap.appendChild(contactField);
+            // Felt: Kontaktperson (vises kun hvis feltet faktisk finnes/verdi angitt)
+            const hasContact = !!(introMeta && typeof introMeta.contactPerson === 'string' && introMeta.contactPerson.trim());
+            if (hasContact) {
+                const contactField = document.createElement('div');
+                contactField.className = 'navds-form-field';
+                const contactLabel = document.createElement('div');
+                contactLabel.className = 'navds-label';
+                contactLabel.textContent = 'Kontaktperson';
+                const contactValue = document.createElement('div');
+                contactValue.className = 'navds-body-long';
+                contactValue.textContent = introMeta.contactPerson.trim();
+                contactField.appendChild(contactLabel);
+                contactField.appendChild(contactValue);
+                metaWrap.appendChild(contactField);
+            }
 
             // Sett meta før "Dine svar"-listen
             const pathEl = answersEl.querySelector('#path');

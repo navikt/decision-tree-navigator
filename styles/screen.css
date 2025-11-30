@@ -173,9 +173,19 @@ body.start #answers {
     margin-top: 1rem;
 }
 
-#answers h2 {
-    margin-top: 0;
+#answers, .buttons {
+    --__ac-stack-gap-xs: var(--a-spacing-4);
 }
+
+#case-meta {
+    --__ac-stack-gap-xs: var(--a-spacing-2);
+}
+
+#answers h2 {
+    margin: 0;
+}
+
+
 
 h1:focus, h2:focus {
     outline: none
@@ -183,18 +193,13 @@ h1:focus, h2:focus {
 
 
 
-
-.buttons {
-    --__ac-stack-gap-xs: var(--a-spacing-4);
-}
-
 .navds-text-field, .navds-textarea {
     width: 100%;
     max-width: 508px;
 }
 
 
-.question-wrapper, .destructive-buttons {
+.question-wrapper, .destructive-buttons, #answers, #case-meta {
     display: flex;
     flex-direction: column;
     gap: var(--a-spacing-4);
