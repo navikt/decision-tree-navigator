@@ -126,7 +126,14 @@ footer .back {
 
 
 
+
+
 /* Tree page layout */
+
+body.start #answers {
+    display: none;
+}
+
 
 #step-name {
     margin-bottom: 1rem;

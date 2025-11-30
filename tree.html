@@ -113,6 +113,70 @@
 </template>
 
 
+<!-- Primær-knapp med ikon til høyre (brukes for Start / Neste steg) -->
+<template id="button-primary-right">
+    <button type="button"
+            class="navds-button navds-button--primary navds-button--medium navds-button--icon navds-button--icon-right">
+        <span class="navds-label"></span>
+        <span class="navds-button__icon" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M14.0878 6.87338C14.3788 6.68148 14.774 6.7139 15.0302 6.97006L19.5302 11.4701C19.6707 11.6107 19.7499 11.8015 19.7499 12.0003C19.7498 12.1991 19.6707 12.39 19.5302 12.5306L15.0302 17.0306C14.7739 17.2866 14.3788 17.3183 14.0878 17.1263C14.0462 17.0989 14.0062 17.0672 13.9696 17.0306C13.7133 16.7743 13.6817 16.3784 13.8739 16.0873C13.9013 16.0458 13.9331 16.0066 13.9696 15.9701L17.1893 12.7503H4.99988C4.58909 12.7503 4.25528 12.4196 4.24988 12.0101C4.24984 12.007 4.24988 12.0035 4.24988 12.0003C4.24988 11.5862 4.58572 11.2504 4.99988 11.2503H17.1893L13.9696 8.03061C13.7133 7.77433 13.6817 7.37837 13.8739 7.08725C13.9013 7.04583 13.9331 7.00655 13.9696 6.97006C14.0062 6.93345 14.0462 6.90084 14.0878 6.87338Z"
+                  fill="#fff"/>
+            </svg>
+
+        </span>
+    </button>
+</template>
+
+<!-- Sekundær-knapp med ikon til venstre (brukes for Forrige / Tilbake til start) -->
+<template id="button-secondary-left">
+    <button type="button"
+            class="navds-button navds-button--secondary navds-button--medium navds-button--icon navds-button--icon-left">
+        <span class="navds-button__icon" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M8.96973 6.96966C9.26262 6.67678 9.73738 6.67678 10.0303 6.96966C10.3232 7.26256 10.3232 7.73732 10.0303 8.03021L6.81055 11.2499H19C19.4142 11.2499 19.75 11.5857 19.75 11.9999C19.75 12.4142 19.4142 12.7499 19 12.7499H6.81055L10.0303 15.9697C10.3232 16.2626 10.3232 16.7373 10.0303 17.0302C9.73738 17.3231 9.26262 17.3231 8.96973 17.0302L4.46973 12.5302C4.32907 12.3896 4.25 12.1989 4.25 11.9999C4.25 11.801 4.32907 11.6103 4.46973 11.4697L8.96973 6.96966Z"
+                  fill="#0067C5"/>
+            </svg>
+
+        </span>
+        <span class="navds-label"></span>
+    </button>
+</template>
+
+<!-- Restart button -->
+<template id="button-tertiary-left">
+    <button type="button"
+            class="navds-button navds-button--tertiary navds-button--medium navds-button--icon navds-button--icon-left">
+        <span class="navds-button__icon" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M11.4696 2.48531C11.7625 2.19243 12.2373 2.19247 12.5302 2.48531C12.8231 2.7782 12.8231 3.25296 12.5302 3.54585L9.87784 6.19722L12.5302 8.84957C12.823 9.14247 12.823 9.61725 12.5302 9.91011C12.2373 10.2028 11.7625 10.2028 11.4696 9.91011L8.29484 6.73531C7.99805 6.43852 7.99802 5.95692 8.29484 5.66011L11.4696 2.48531Z"
+                      fill="#202733"/>
+                <path d="M3.75 13.4843C3.75 13.1429 3.77108 12.8057 3.81152 12.4746C3.86186 12.0636 4.23547 11.7711 4.64648 11.8213C5.05751 11.8714 5.34979 12.2452 5.2998 12.6562C5.26671 12.9272 5.25 13.2038 5.25 13.4843C5.25 17.2123 8.27208 20.2343 12 20.2343C15.7279 20.2343 18.75 17.2123 18.75 13.4843C18.75 9.75641 15.7279 6.73434 12 6.73434C11.3803 6.73434 10.7813 6.81798 10.2129 6.97359C9.81343 7.08296 9.40046 6.84763 9.29102 6.4482C9.18165 6.04876 9.41702 5.6358 9.81641 5.52633C10.5127 5.3357 11.2452 5.23434 12 5.23434C16.5563 5.23434 20.25 8.92799 20.25 13.4843C20.25 18.0407 16.5563 21.7343 12 21.7343C7.44365 21.7343 3.75 18.0407 3.75 13.4843Z"
+                      fill="#0067C5"/>
+                </svg>
+        </span>
+        <span class="navds-label"></span>
+    </button>
+</template>
+
+<!-- Print-knapp på resultatsiden -->
+<template id="button-print">
+    <button type="button"
+            id="answers-print-btn"
+            class="navds-button navds-button--primary navds-button--medium print">
+        <span class="navds-button__icon" aria-hidden="true">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path fill-rule="evenodd" clip-rule="evenodd"
+                  d="M7 2.25C6.58579 2.25 6.25 2.58579 6.25 3V7.25H4C3.0335 7.25 2.25 8.0335 2.25 9V18C2.25 18.4142 2.58579 18.75 3 18.75H6.25V21C6.25 21.4142 6.58579 21.75 7 21.75H17C17.4142 21.75 17.75 21.4142 17.75 21V18.75H21C21.4142 18.75 21.75 18.4142 21.75 18V9C21.75 8.0335 20.9665 7.25 20 7.25H17.75V3C17.75 2.58579 17.4142 2.25 17 2.25H7ZM3.75 9C3.75 8.86193 3.86193 8.75 4 8.75H20C20.1381 8.75 20.25 8.86193 20.25 9V17.25H17.75V12C17.75 11.5858 17.4142 11.25 17 11.25H7C6.58579 11.25 6.25 11.5858 6.25 12V17.25H3.75V9ZM16.25 7.25V3.75H7.75V7.25H16.25ZM7.75 12.75V20.25H16.25V12.75H7.75ZM9.25 15C9.25 14.5858 9.58579 14.25 10 14.25H14C14.4142 14.25 14.75 14.5858 14.75 15C14.75 15.4142 14.4142 15.75 14 15.75H10C9.58579 15.75 9.25 15.4142 9.25 15ZM9.25 18C9.25 17.5858 9.58579 17.25 10 17.25H12.5C12.9142 17.25 13.25 17.5858 13.25 18C13.25 18.4142 12.9142 18.75 12.5 18.75H10C9.58579 18.75 9.25 18.4142 9.25 18Z"
+                  fill="#fff"/>
+            </svg>
+
+        </span>
+        <span class="navds-label">Skriv ut eller lagre som PDF</span>
+    </button>
+</template>
+
+
 <footer>
     <div class="wrapper">
         <div class="left">

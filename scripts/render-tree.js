@@ -37,6 +37,27 @@ function cloneTemplate(id) {
     return document.getElementById(id).content.cloneNode(true);
 }
 
+function cloneButtonTemplate(templateId, labelText) {
+    const tpl = document.getElementById(templateId);
+    if (!tpl) {
+        throw new Error(`Mangler buttontemplate med id="${templateId}"`);
+    }
+
+    const button = tpl.content.firstElementChild.cloneNode(true);
+
+    if (labelText) {
+        const labelSpan = button.querySelector(".navds-label");
+        if (labelSpan) {
+            labelSpan.textContent = labelText;
+        }
+    }
+
+    return button;
+}
+
+
+
+
 // Read persisted note for a node (empty string if none)
 function getNote(nodeId) {
     return notes[nodeId] || "";
@@ -82,7 +103,7 @@ function createErrorSummary(wrapperEl, items, {focus = true} = {}) {
     const list = box.querySelector(".navds-error-summary__list");
     if (list) {
         list.textContent = "";
-        items.forEach(({ text, href }) => {
+        items.forEach(({text, href}) => {
             const li = document.createElement("li");
             const a = document.createElement("a");
             a.className = "navds-link";
@@ -284,7 +305,7 @@ function clearTextFieldError(fieldWrap, inputEl, errId) {
 
 let treeId = "";
 let notes = {};
-let introMeta = { serviceName: "", contactPerson: "" };
+let introMeta = {serviceName: "", contactPerson: ""};
 
 function loadIntroMeta() {
     try {
@@ -320,6 +341,7 @@ function cleanupNotes() {
         // ignore storage errors
     }
 }
+
 // Use pagehide (fires on tab close, refresh, history nav; supports bfcache). Fallback to beforeunload.
 window.addEventListener("pagehide", cleanupNotes);
 window.addEventListener("beforeunload", cleanupNotes);
@@ -474,7 +496,6 @@ function render() {
     // Skjul hele svar-seksjonen i intro-modus
     const answersEl = document.getElementById("answers");
     if (answersEl) {
-        answersEl.style.display = introMode ? "none" : "";
 
         // Fjern eventuell gammel print-knapp
         const oldPrint = answersEl.querySelector("#answers-print-btn");
@@ -537,15 +558,12 @@ function render() {
         return;
     }
 
-    // Intro page: keep the H1 in the article header; render only intro content + Start inside #tree
+    // Intro page for trees
     if (introMode) {
         const introText = (typeof tree["intro"] === "string" && tree["intro"].trim()) ? tree["intro"].trim() : (typeof tree["intro-text"] === "string" ? tree["intro-text"].trim() : "");
 
-        // Ensure the header H1 is populated and visible in intro mode
-        if (stepNameHeader) {
-            stepNameHeader.textContent = effectiveTitle;
-            stepNameHeader.style.display = "";
-        }
+
+        stepNameHeader.textContent = effectiveTitle;
 
 
         // Load saved intro meta (serviceName/contactPerson) for this tree
@@ -813,7 +831,7 @@ function render() {
             localStorage.removeItem(INTRO_META_KEY(treeId));
         }
         // Clear intro meta in memory
-        introMeta = { serviceName: "", contactPerson: "" };
+        introMeta = {serviceName: "", contactPerson: ""};
 
         // Clear stored radio selections
         for (const key in selectedByNode) {
@@ -829,15 +847,9 @@ function render() {
     }
 
 
-    // Knapper
+    // Buttons
     function makeNextButton() {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "navds-button navds-button--primary navds-button--medium navds-button--icon navds-button--icon-right";
-
-        btn.innerHTML = "<span class='navds-label'>Neste steg</span>" + "<span class='navds-button__icon' aria-hidden='true'><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n" + "<path d=\"M14.0878 6.87338C14.3788 6.68148 14.774 6.7139 15.0302 6.97006L19.5302 11.4701C19.6707 11.6107 19.7499 11.8015 19.7499 12.0003C19.7498 12.1991 19.6707 12.39 19.5302 12.5306L15.0302 17.0306C14.7739 17.2866 14.3788 17.3183 14.0878 17.1263C14.0462 17.0989 14.0062 17.0672 13.9696 17.0306C13.7133 16.7743 13.6817 16.3784 13.8739 16.0873C13.9013 16.0458 13.9331 16.0066 13.9696 15.9701L17.1893 12.7503H4.99988C4.58909 12.7503 4.25528 12.4196 4.24988 12.0101C4.24984 12.007 4.24988 12.0035 4.24988 12.0003C4.24988 11.5862 4.58572 11.2504 4.99988 11.2503H17.1893L13.9696 8.03061C13.7133 7.77433 13.6817 7.37837 13.8739 7.08725C13.9013 7.04583 13.9331 7.00655 13.9696 6.97006C14.0062 6.93345 14.0462 6.90084 14.0878 6.87338Z\" fill=\"#ffffff\"/>\n" + "</svg>\n</span>";
-
-
+        const btn = cloneButtonTemplate("button-primary-right", "Neste steg");
         btn.addEventListener("click", (e) => {
             e.preventDefault();
             interacted = true;
@@ -892,19 +904,11 @@ function render() {
             pathHistory.push(selectedNext);
             render();
         });
-
         return btn;
     }
 
     function makeStartButton() {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "navds-button navds-button--primary navds-button--medium navds-button--icon navds-button--icon-right";
-
-        btn.innerHTML = "<span class='navds-label'>Start</span>" +
-            "<span class='navds-button__icon' aria-hidden='true'><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n" +
-            "<path d=\"M14.0878 6.87338C14.3788 6.68148 14.774 6.7139 15.0302 6.97006L19.5302 11.4701C19.6707 11.6107 19.7499 11.8015 19.7499 12.0003C19.7498 12.1991 19.6707 12.39 19.5302 12.5306L15.0302 17.0306C14.7739 17.2866 14.3788 17.3183 14.0878 17.1263C14.0462 17.0989 14.0062 17.0672 13.9696 17.0306C13.7133 16.7743 13.6817 16.3784 13.8739 16.0873C13.9013 16.0458 13.9331 16.0066 13.9696 15.9701L17.1893 12.7503H4.99988C4.58909 12.7503 4.25528 12.4196 4.24988 12.0101C4.24984 12.007 4.24988 12.0035 4.24988 12.0003C4.24988 11.5862 4.58572 11.2504 4.99988 11.2503H17.1893L13.9696 8.03061C13.7133 7.77433 13.6817 7.37837 13.8739 7.08725C13.9013 7.04583 13.9331 7.00655 13.9696 6.97006C14.0062 6.93345 14.0462 6.90084 14.0878 6.87338Z\" fill=\"#ffffff\"/>\n" +
-            "</svg>\n</span>";
+        const btn = cloneButtonTemplate("button-primary-right", "Start");
         btn.addEventListener("click", (e) => {
             e.preventDefault();
 
@@ -922,11 +926,11 @@ function render() {
                 if (serviceFieldWrap && serviceInput) {
                     showTextFieldError(serviceFieldWrap, serviceInput, 'intro-service-name-error', 'Skriv inn navn til tjenesten.');
                 }
-                errors.push({ text: 'Skriv inn navn til tjenesten.', href: '#intro-service-name' });
+                errors.push({text: 'Skriv inn navn til tjenesten.', href: '#intro-service-name'});
             }
 
             if (errors.length > 0) {
-                if (wrapper) createErrorSummary(wrapper, errors, { focus: true });
+                if (wrapper) createErrorSummary(wrapper, errors, {focus: true});
                 // Focus the field for convenience
                 if (serviceInput) serviceInput.focus();
                 return;
@@ -951,11 +955,7 @@ function render() {
     }
 
     function makeBackButton() {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "navds-button navds-button--secondary navds-button--medium navds-button--icon navds-button--icon-left";
-        btn.innerHTML = "<span class='navds-button__icon' aria-hidden='true'><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1em\" height=\"1em\" fill=\"none\" viewBox=\"0 0 24 24\" focusable=\"false\" role=\"img\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M8.97 6.97a.75.75 0 1 1 1.06 1.06l-3.22 3.22H19a.75.75 0 0 1 0 1.5H6.81l3.22 3.22a.75.75 0 1 1-1.06 1.06l-4.5-4.5a.75.75 0 0 1 0-1.06z\"></path></svg></span>" + "<span class='navds-label'>Forrige steg</span>";
-
+        const btn = cloneButtonTemplate("button-secondary-left", "Forrige steg");
         btn.addEventListener("click", (e) => {
             e.preventDefault();
             if (pathHistory.length > 1) {
@@ -963,15 +963,11 @@ function render() {
                 render();
             }
         });
-
         return btn;
     }
 
     function makeBackToIntroButton() {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "navds-button navds-button--secondary navds-button--medium navds-button--icon navds-button--icon-left";
-        btn.innerHTML = "<span class='navds-button__icon' aria-hidden='true'><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1em\" height=\"1em\" fill=\"none\" viewBox=\"0 0 24 24\" focusable=\"false\" role=\"img\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M8.97 6.97a.75.75 0 1 1 1.06 1.06l-3.22 3.22H19a.75.75 0 0 1 0 1.5H6.81l3.22 3.22a.75.75 0 1 1-1.06 1.06l-4.5-4.5a.75.75 0 0 1 0-1.06z\"></path></svg></span>" + "<span class='navds-label'>Forrige</span>";
+        const btn = cloneButtonTemplate("button-secondary-left", "Tilbake til start");
 
         btn.addEventListener("click", (e) => {
             e.preventDefault();
@@ -990,12 +986,8 @@ function render() {
         return btn;
     }
 
-
     function makeRestartButton() {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "navds-button navds-button--tertiary navds-button--medium navds-button--icon navds-button--icon-left";
-        btn.innerHTML = "<span class='navds-button__icon' aria-hidden='true'><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n" + "<path d=\"M18.7463 7.25C17.2522 5.1318 14.787 3.75 12 3.75C7.44365 3.75 3.75 7.44365 3.75 12C3.75 16.5563 7.44365 20.25 12 20.25C16.5563 20.25 20.25 16.5563 20.25 12C20.25 11.5858 20.5858 11.25 21 11.25C21.4142 11.25 21.75 11.5858 21.75 12C21.75 17.3848 17.3848 21.75 12 21.75C6.61522 21.75 2.25 17.3848 2.25 12C2.25 6.61522 6.61522 2.25 12 2.25C15.1606 2.25 17.969 3.75399 19.75 6.08327V3.5C19.75 3.08579 20.0858 2.75 20.5 2.75C20.9142 2.75 21.25 3.08579 21.25 3.5V8C21.25 8.41421 20.9142 8.75 20.5 8.75H16C15.5858 8.75 15.25 8.41421 15.25 8C15.25 7.58579 15.5858 7.25 16 7.25H18.7463Z\" fill=\"currentColor\"/>\n" + "</svg>\n</span>" + "<span class='navds-label'>Slett data og start på nytt</span>";
+        const btn = cloneButtonTemplate("button-tertiary-left", "Start på nytt");
 
         btn.addEventListener("click", (e) => {
             e.preventDefault();
@@ -1013,27 +1005,8 @@ function render() {
         return btn;
     }
 
-    function makeHomeButton() {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.className = "navds-button navds-button--tertiary navds-button--medium navds-button--icon navds-button--icon-left";
-        btn.innerHTML = "<span class='navds-button__icon' aria-hidden='true'><svg width=\"24\" height=\"24\" viewBox=\"0 0 24 24\" fill=\"none\" xmlns=\"http://www.w3.org/2000/svg\">\n" + "<path fill-rule=\"evenodd\" clip-rule=\"evenodd\" d=\"M4.5 6.25C4.08579 6.25 3.75 6.58579 3.75 7C3.75 7.41421 4.08579 7.75 4.5 7.75H5.30548L6.18119 19.1342C6.25132 20.046 7.01159 20.75 7.92603 20.75H16.074C16.9884 20.75 17.7487 20.046 17.8188 19.1342L18.6945 7.75H19.5C19.9142 7.75 20.25 7.41421 20.25 7C20.25 6.58579 19.9142 6.25 19.5 6.25H16.75V6C16.75 4.48122 15.5188 3.25 14 3.25H10C8.48122 3.25 7.25 4.48122 7.25 6V6.25H4.5ZM10 4.75C9.30964 4.75 8.75 5.30964 8.75 6V6.25H15.25V6C15.25 5.30964 14.6904 4.75 14 4.75H10ZM6.80991 7.75L7.67677 19.0192C7.68679 19.1494 7.7954 19.25 7.92603 19.25H16.074C16.2046 19.25 16.3132 19.1494 16.3232 19.0192L17.1901 7.75H6.80991ZM10 9.75C10.4142 9.75 10.75 10.0858 10.75 10.5V16.5C10.75 16.9142 10.4142 17.25 10 17.25C9.58579 17.25 9.25 16.9142 9.25 16.5V10.5C9.25 10.0858 9.58579 9.75 10 9.75ZM14 9.75C14.4142 9.75 14.75 10.0858 14.75 10.5V16.5C14.75 16.9142 14.4142 17.25 14 17.25C13.5858 17.25 13.25 16.9142 13.25 16.5V10.5C13.25 10.0858 13.5858 9.75 14 9.75Z\" fill=\"currentColor\"/>\n" + "</svg>\n</span>" + "<span class='navds-label'>Slett data og gå til forsiden</span>";
-
-        btn.addEventListener("click", (e) => {
-            e.preventDefault();
-            resetTreeState();
-            window.location.href = "index.html";
-        });
-
-        return btn;
-    }
-
     function makePrintButton() {
-        const btn = document.createElement("button");
-        btn.type = "button";
-        btn.id = "answers-print-btn";
-        btn.className = "navds-button navds-button--primary navds-button--medium print";
-        btn.innerHTML = "<span class='navds-button__icon' aria-hidden='true'></span>" + "<span class='navds-label'>Skriv ut</span>";
+        const btn = cloneButtonTemplate("button-print");
 
         btn.addEventListener("click", (e) => {
             e.preventDefault();
@@ -1042,7 +1015,6 @@ function render() {
 
         return btn;
     }
-
 
     if (!introMode && pathHistory.length > 1) {
         buttonsEl.appendChild(makeBackButton());
@@ -1055,7 +1027,6 @@ function render() {
         buttonsEl.appendChild(makeStartButton());
     } else if (node.end) {
         destructiveButtonsEl.appendChild(makeRestartButton());
-        destructiveButtonsEl.appendChild(makeHomeButton());
     } else {
         buttonsEl.appendChild(makeNextButton());
     }
@@ -1127,15 +1098,12 @@ function mermaidSource(tree, pathHistory) {
 
         const n = tree[id];
         const isEnd = !!n.end;
-        const hasOptions = Array.isArray(n.options) && n.options.length > 0;
 
         // Defaulting logic:
         // - explicit n.shape wins
         // - start and end nodes -> stadium
         // - everything else -> hex
-        const shape =
-            n.shape ||
-            ((id === "start" || isEnd) ? "stadium" : "rect");
+        const shape = n.shape || ((id === "start" || isEnd) ? "stadium" : "rect");
 
         nodeLines.push(drawNode(id, n.q, shape));
 
