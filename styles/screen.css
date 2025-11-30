@@ -30,7 +30,6 @@ main {
 }
 
 
-
 #site-header .wrapper, footer .wrapper {
     display: flex;
     flex-flow: row nowrap;
@@ -97,35 +96,15 @@ footer .back {
 }
 
 
-
 .site-title {
     color: #000;
     text-decoration: none;
 }
 
 
-
-
-
-
-
-
-
-
 .site-intro {
     margin: 1rem 4rem;
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 /* Tree page layout */
@@ -185,12 +164,9 @@ body.start #answers {
     margin: 0;
 }
 
-
-
 h1:focus, h2:focus {
-    outline: none
+    outline: none;
 }
-
 
 
 .navds-text-field, .navds-textarea {

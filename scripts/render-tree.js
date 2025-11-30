@@ -55,6 +55,18 @@ function cloneButtonTemplate(templateId, labelText) {
     return button;
 }
 
+function createButton(templateId, labelText, onClick) {
+    const btn = cloneButtonTemplate(templateId, labelText);
+
+    if (typeof onClick === "function") {
+        btn.addEventListener("click", (e) => {
+            e.preventDefault(); // common behaviour: don’t submit any forms
+            onClick(e);
+        });
+    }
+
+    return btn;
+}
 
 
 
@@ -125,7 +137,6 @@ function createErrorSummary(wrapperEl, items, {focus = true} = {}) {
         box.focus();
     }
 }
-
 
 function makeAkselErrorMessage(id, text) {
     const p = document.createElement("p");
@@ -562,16 +573,11 @@ function render() {
 
     // Intro page for trees
     if (introMode) {
-        const introText = (typeof tree["intro"] === "string" && tree["intro"].trim()) ? tree["intro"].trim() : (typeof tree["intro-text"] === "string" ? tree["intro-text"].trim() : "");
-
+        const introText = typeof tree["intro-text"] === "string" ? tree["intro-text"].trim() : "";
 
         stepNameHeader.textContent = effectiveTitle;
-
-
-        // Load saved intro meta (serviceName/contactPerson) for this tree
         loadIntroMeta();
 
-        // Build intro content in a .question-wrapper inside #question (to mirror real question pages)
         const wrapper = document.createElement("div");
         wrapper.className = "question-wrapper";
 
@@ -790,20 +796,18 @@ function render() {
     }
 
 
-    function updateErrorSummary(wrapper) {
-        // Do not show any summary before user attempts to go Next
-        if (!attemptedSubmit) return;
-
+    function collectErrorsForCurrentNode({ current, node, selectedNext, wrapper }) {
         const errors = [];
 
-        // 1) Radio selected?
+        // Radio required unless end node
         if (!selectedNext && !node.end) {
             errors.push({
-                text: "Velg et alternativ.", href: `#legend-${current}`,
+                text: "Velg et alternativ.",
+                href: `#legend-${current}`,
             });
         }
 
-        // 2) Note required?
+        // Note required?
         const noteConfig = node.note;
         const noteIsRequired = noteConfig && noteConfig.label && noteConfig.required;
 
@@ -812,17 +816,24 @@ function render() {
             const value = textarea ? textarea.value.trim() : "";
             if (!value) {
                 errors.push({
-                    text: "Skriv en begrunnelse for svaret ditt.", href: `#note-${current}`,
+                    text: "Skriv en begrunnelse for svaret ditt.",
+                    href: `#note-${current}`,
                 });
             }
         }
 
-        clearErrorSummary(wrapper);
+        return errors;
+    }
 
+    function updateErrorSummary(wrapper) {
+        if (!attemptedSubmit) return;
+
+        const errors = collectErrorsForCurrentNode({ current, node, selectedNext, wrapper });
+
+        clearErrorSummary(wrapper);
         if (errors.length > 0) {
-            createErrorSummary(wrapper, errors, {focus: false});
+            createErrorSummary(wrapper, errors, { focus: false });
         }
-        // If no errors remain, the summary stays cleared (disappears)
     }
 
     function resetTreeState() {
@@ -848,12 +859,13 @@ function render() {
         selectedByNode = {};
     }
 
+    function focusStepTitle() {
+        const stepTitle = document.getElementById("step-name");
+        if (stepTitle) stepTitle.focus();
+    }
 
-    // Buttons
     function makeNextButton() {
-        const btn = cloneButtonTemplate("button-primary-right", "Neste steg");
-        btn.addEventListener("click", (e) => {
-            e.preventDefault();
+        return createButton("button-primary-right", "Neste steg", () => {
             interacted = true;
             attemptedSubmit = true;
 
@@ -866,54 +878,45 @@ function render() {
 
             // 1) Radio må være valgt
             if (!selectedNext) {
-                if (fieldset && typeof showOptionError === "function") {
-                    const groupName = `opt-${current}`;
-                    const optErrId = `fieldset-error-${current}`;
+                const groupName = `opt-${current}`;
+                const optErrId = `fieldset-error-${current}`;
+                if (fieldset) {
                     showOptionError(fieldset, groupName, optErrId);
                 }
-
                 errors.push({
-                    text: "Velg et alternativ.", href: `#legend-${current}`,
+                    text: "Velg et alternativ.",
+                    href: `#legend-${current}`,
                 });
             }
 
-            // 2) Notatfelt hvis det er påkrevd
+            // 2) Notat påkrevd?
             const noteConfig = node.note;
             const noteIsRequired = noteConfig && noteConfig.label && noteConfig.required;
 
             if (noteIsRequired) {
                 const textarea = wrapper.querySelector(`#note-${current}`);
                 const value = textarea ? textarea.value.trim() : "";
-
                 if (!value) {
-
                     showNoteError(current, wrapper);
-
-
                     errors.push({
-                        text: "Skriv en begrunnelse for svaret ditt.", href: `#note-${current}`,
+                        text: "Skriv en begrunnelse for svaret ditt.",
+                        href: `#note-${current}`,
                     });
                 }
             }
 
-            // 3) Hvis vi har feil, vis summary rett over knappene
             if (errors.length > 0) {
                 createErrorSummary(wrapper, errors, {focus: true});
                 return;
             }
 
-            // Alt ok, gå videre
             pathHistory.push(selectedNext);
             render();
         });
-        return btn;
     }
 
     function makeStartButton() {
-        const btn = cloneButtonTemplate("button-primary-right", "Start");
-        btn.addEventListener("click", (e) => {
-            e.preventDefault();
-
+        return createButton("button-primary-right", "Start", () => {
             // Validate required intro field before proceeding
             const wrapper = document.querySelector('#question .question-wrapper');
             const serviceField = wrapper ? wrapper.querySelector('.navds-form-field :where(#intro-service-name)') : null;
@@ -926,15 +929,18 @@ function render() {
             const value = (serviceInput && typeof serviceInput.value === 'string') ? serviceInput.value.trim() : '';
             if (!value) {
                 if (serviceFieldWrap && serviceInput) {
-                    showTextFieldError(serviceFieldWrap, serviceInput, 'intro-service-name-error', 'Skriv inn navn til tjenesten.');
+                    showTextFieldError(
+                        serviceFieldWrap,
+                        serviceInput,
+                        'intro-service-name-error',
+                        'Skriv inn navn til tjenesten.',
+                    );
                 }
                 errors.push({text: 'Skriv inn navn til tjenesten.', href: '#intro-service-name'});
             }
 
             if (errors.length > 0) {
                 if (wrapper) createErrorSummary(wrapper, errors, {focus: true});
-                // Focus the field for convenience
-                if (serviceInput) serviceInput.focus();
                 return;
             }
 
@@ -945,94 +951,56 @@ function render() {
 
             interacted = true;
             render();
-            // Flytt fokus til stegtittel for kontekst
-            const h2 = document.getElementById("step-name");
-            if (h2) {
-                h2.setAttribute("tabindex", "-1");
-                h2.focus();
-                h2.addEventListener("blur", () => h2.removeAttribute("tabindex"), {once: true});
-            }
+            focusStepTitle();
         });
-        return btn;
     }
 
     function makeBackButton() {
-        const btn = cloneButtonTemplate("button-secondary-left", "Forrige steg");
-        btn.addEventListener("click", (e) => {
-            e.preventDefault();
+        return createButton("button-secondary-left", "Forrige steg", () => {
             if (pathHistory.length > 1) {
                 pathHistory.pop();
                 render();
             }
         });
-        return btn;
     }
 
     function makeBackToIntroButton() {
-        const btn = cloneButtonTemplate("button-secondary-left", "Tilbake til start");
-
-        btn.addEventListener("click", (e) => {
-            e.preventDefault();
-            // Gå tilbake til intro-siden for dette treet
+        return createButton("button-secondary-left", "Tilbake til start", () => {
+            pathHistory.length = 1;
             interacted = false;
             render();
-            // Flytt fokus til topp for kontekst
-            const siteTitle = document.querySelector('#site-header .site-title');
-            if (siteTitle) {
-                siteTitle.setAttribute("tabindex", "-1");
-                siteTitle.focus();
-                siteTitle.addEventListener("blur", () => siteTitle.removeAttribute("tabindex"), {once: true});
-            }
+            focusStepTitle();
         });
-
-        return btn;
     }
 
     function makeRestartButton() {
-        const btn = cloneButtonTemplate("button-tertiary-left", "Start på nytt");
-
-        btn.addEventListener("click", (e) => {
-            e.preventDefault();
+        return createButton("button-tertiary-left", "Start på nytt", () => {
             resetTreeState();
             render();
-            // Flytt fokus til topp etter restart
-            const siteTitle = document.querySelector('#site-header .site-title');
-            if (siteTitle) {
-                siteTitle.setAttribute("tabindex", "-1");
-                siteTitle.focus();
-                siteTitle.addEventListener("blur", () => siteTitle.removeAttribute("tabindex"), {once: true});
-            }
+            focusStepTitle();
         });
-
-        return btn;
     }
+
 
     function makePrintButton() {
-        const btn = cloneButtonTemplate("button-print");
-
-        btn.addEventListener("click", (e) => {
-            e.preventDefault();
+        return createButton("button-print", null, () => {
             window.print();
         });
-
-        return btn;
     }
 
-    if (!introMode && pathHistory.length > 1) {
+    // Back buttons
+    if (pathHistory.length > 1) {
         buttonsEl.appendChild(makeBackButton());
-    } else if (!introMode && pathHistory.length === 1) {
-        // On the first question page, provide a back button to go to the intro page
+    } else {
         buttonsEl.appendChild(makeBackToIntroButton());
     }
 
-    if (introMode) {
-        buttonsEl.appendChild(makeStartButton());
-    } else if (node.end) {
+    // Main action button
+    if (node.end) {
         destructiveButtonsEl.appendChild(makeRestartButton());
     } else {
         buttonsEl.appendChild(makeNextButton());
     }
-
 
     // På resultatsiden: vis "Skriv ut"-knapp til høyre for "Forrige steg"-knappen
     if (node.end) {
@@ -1040,13 +1008,8 @@ function render() {
         buttonsEl.appendChild(printBtn);
     }
 
-    // 7) Legg inn spørsmålet i seksjonen
     section.appendChild(questionFrag);
-
-    // 8) Tegn mermaid-grafen som før
     drawMermaid(tree);
-
-    // Remember which node we just rendered to manage validation state per node
     lastRenderedNodeId = current;
 }
 
