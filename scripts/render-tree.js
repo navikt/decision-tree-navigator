@@ -76,30 +76,22 @@ function clearErrorSummary(wrapperEl) {
 function createErrorSummary(wrapperEl, items, {focus = true} = {}) {
     clearErrorSummary(wrapperEl);
 
-    const box = document.createElement("div");
-    box.className = "navds-error-summary";
-    box.id = "error-summary";
-    box.tabIndex = -1;
+    const tpl = document.getElementById("error-summary-template");
 
-    const heading = document.createElement("div");
-    heading.className = "navds-error-summary__heading navds-heading";
-    heading.textContent = "Du må rette disse feilene før du kan fortsette:";
-    box.appendChild(heading);
-
-    const list = document.createElement("ul");
-    list.className = "navds-error-summary__list";
-
-    items.forEach(({text, href}) => {
-        const li = document.createElement("li");
-        const a = document.createElement("a");
-        a.className = "navds-link";
-        a.href = href;
-        a.textContent = text;
-        li.appendChild(a);
-        list.appendChild(li);
-    });
-
-    box.appendChild(list);
+    let box = tpl.content.firstElementChild.cloneNode(true);
+    const list = box.querySelector(".navds-error-summary__list");
+    if (list) {
+        list.textContent = "";
+        items.forEach(({ text, href }) => {
+            const li = document.createElement("li");
+            const a = document.createElement("a");
+            a.className = "navds-link";
+            a.href = href;
+            a.textContent = text;
+            li.appendChild(a);
+            list.appendChild(li);
+        });
+    }
 
     const buttons = wrapperEl.querySelector(".buttons");
     if (buttons && buttons.parentNode === wrapperEl) {
@@ -355,9 +347,6 @@ async function init() {
     window.TREE_TITLE = entry.title;
 
     document.title = entry.title;
-    // Set site header: show product name and tree title immediately on intro page
-    const headerTextEl = document.querySelector('#site-header .site-title .site-title-text');
-    if (headerTextEl) headerTextEl.textContent = "Beslutt";
 
     notes = JSON.parse(localStorage.getItem(NOTES_KEY(treeId)) || "{}");
     await loadTree();
@@ -384,7 +373,6 @@ async function loadTree() {
 // Render the entire page for the current node
 function render() {
     const stepNameHeader = document.getElementById("step-name");
-    const introEl = document.getElementById("tree-intro");
 
     const customTitle = (tree && typeof tree.title === "string") ? tree.title.trim() : "";
     const effectiveTitle = customTitle || window.TREE_TITLE;
@@ -420,9 +408,6 @@ function render() {
         }
     }
 
-    // Update site header: keep only logo + "Beslutt" as the link; append tree title outside the link
-    const headerTextEl2 = document.querySelector('#site-header .site-title .site-title-text');
-    if (headerTextEl2) headerTextEl2.textContent = "Beslutt";
 
     // Reset validation-attempt flag when node changes
     if (current !== lastRenderedNodeId) {
@@ -562,12 +547,6 @@ function render() {
             stepNameHeader.style.display = "";
         }
 
-        // Keep the legacy intro container in the header empty/hidden on screen
-        if (introEl) {
-            introEl.textContent = "";
-            introEl.style.display = "none";
-            introEl.classList.remove("print-only");
-        }
 
         // Load saved intro meta (serviceName/contactPerson) for this tree
         loadIntroMeta();
@@ -646,26 +625,6 @@ function render() {
         return; // Stop here; do not render question UI in intro mode
     }
 
-    if (introEl) {
-        const introText = (typeof tree["intro"] === "string" && tree["intro"].trim()) ? tree["intro"].trim() : (typeof tree["intro-text"] === "string" ? tree["intro-text"].trim() : "");
-
-        // On the final page, keep the intro hidden on screen but include it in the DOM
-        // so that print styles can reveal it in the printout.
-        if (node.end) {
-            introEl.textContent = introText || "";
-            introEl.style.display = "none";
-            if (introText) {
-                introEl.classList.add("print-only");
-            } else {
-                introEl.classList.remove("print-only");
-            }
-        } else {
-            // Hide and clear on all question pages
-            introEl.textContent = "";
-            introEl.style.display = "none";
-            introEl.classList.remove("print-only");
-        }
-    }
 
 // 3) Bygg spørsmåls-UI fra template
     const questionFrag = cloneTemplate("question-template");
