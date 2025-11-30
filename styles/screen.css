@@ -26,7 +26,7 @@ main {
 .wrapper {
     max-width: 60em;
     margin-inline: auto;
-    padding: 1rem;
+    padding: 0 1rem;
 }
 
 
@@ -39,6 +39,7 @@ main {
     justify-content: space-between;
     align-items: center;
     gap: 2rem;
+    padding: 1rem;
 }
 
 footer {
@@ -80,11 +81,7 @@ footer .back {
 }
 
 .site-intro {
-    margin: 0 4rem;
-}
-
-.site-intro p {
-    margin: 0 0 .5em;
+    margin: 1rem 4rem;
 }
 
 
@@ -100,8 +97,18 @@ footer .back {
 
 
 /* Tree page layout */
+
+#step-name {
+    margin-bottom: 1rem;
+}
+
+
 #tree-page main {
     background: #fff;
+}
+
+#tree-page main header {
+    padding-top: 1rem;
 }
 
 #top-section .wrapper {
@@ -126,6 +133,7 @@ footer .back {
     padding: 2rem;
     background: #f2f3f5;
     margin-inline: auto;
+    margin-top: 1rem;
 }
 
 #answers h2 {
@@ -140,25 +148,27 @@ h2:focus {
 
 
 .buttons {
-    --__ac-stack-gap-xs: var(--a-spacing-3);
+    --__ac-stack-gap-xs: var(--a-spacing-4);
 }
 
-.destructive-buttons {
+
+.question-wrapper, .destructive-buttons {
     display: flex;
     flex-direction: column;
-    gap: var(--a-spacing-3);
-    margin-top: var(--a-spacing-4);
+    gap: var(--a-spacing-4);
+}
+
+
+.destructive-buttons {
+    gap: var(--a-spacing-2);
     align-items: flex-start;
 }
+
 
 button.print .navds-button__icon {
     width: 24px;
     height: 24px;
     background: url("../images/PrinterSmall.svg") no-repeat center center;
-}
-
-.question-wrapper > * {
-    margin-bottom: 1.5rem;
 }
 
 .navds-textarea__input {

@@ -417,8 +417,7 @@ function render() {
 
             // Notat: vis bare hvis det faktisk finnes
             if (noteText) {
-                const noteContainer = document.createElement("div");
-                noteContainer.className = "navds-body-long";
+                const noteContainer = document.createElement("p");
                 noteContainer.textContent = noteText;
                 li.appendChild(noteContainer);
             }
@@ -458,8 +457,8 @@ function render() {
         if (stepNameHeader) {
             stepNameHeader.textContent = effectiveTitle;
             stepNameHeader.style.display = "";
-            stepNameHeader.removeAttribute("aria-hidden");
         }
+
         // Keep the legacy intro container in the header empty/hidden on screen
         if (introEl) {
             introEl.textContent = "";
@@ -467,18 +466,23 @@ function render() {
             introEl.classList.remove("print-only");
         }
 
-        // Build intro content in the main #tree area (intro text + Start button)
+        // Build intro content in a .question-wrapper inside #question (to mirror real question pages)
+        const wrapper = document.createElement("div");
+        wrapper.className = "question-wrapper";
+
         if (introText) {
             const introTextEl = document.createElement("div");
             introTextEl.className = "navds-body-long";
             introTextEl.textContent = introText;
-            section.appendChild(introTextEl);
+            wrapper.appendChild(introTextEl);
         }
 
         const btnRow = document.createElement("div");
         btnRow.className = "navds-stack navds-hstack navds-stack-gap navds-stack-direction";
         btnRow.appendChild(makeStartButton());
-        section.appendChild(btnRow);
+        wrapper.appendChild(btnRow);
+
+        section.appendChild(wrapper);
 
         // Always render the Mermaid diagram, even on the intro page
         drawMermaid(tree);
@@ -815,6 +819,29 @@ function render() {
         return btn;
     }
 
+    function makeBackToIntroButton() {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "navds-button navds-button--secondary navds-button--medium navds-button--icon navds-button--icon-left";
+        btn.innerHTML = "<span class='navds-button__icon' aria-hidden='true'><svg xmlns=\"http://www.w3.org/2000/svg\" width=\"1em\" height=\"1em\" fill=\"none\" viewBox=\"0 0 24 24\" focusable=\"false\" role=\"img\" aria-hidden=\"true\"><path fill=\"currentColor\" d=\"M8.97 6.97a.75.75 0 1 1 1.06 1.06l-3.22 3.22H19a.75.75 0 0 1 0 1.5H6.81l3.22 3.22a.75.75 0 1 1-1.06 1.06l-4.5-4.5a.75.75 0 0 1 0-1.06z\"></path></svg></span>" + "<span class='navds-label'>Forrige</span>";
+
+        btn.addEventListener("click", (e) => {
+            e.preventDefault();
+            // Gå tilbake til intro-siden for dette treet
+            interacted = false;
+            render();
+            // Flytt fokus til topp for kontekst
+            const siteTitle = document.querySelector('#site-header .site-title');
+            if (siteTitle) {
+                siteTitle.setAttribute("tabindex", "-1");
+                siteTitle.focus();
+                siteTitle.addEventListener("blur", () => siteTitle.removeAttribute("tabindex"), {once: true});
+            }
+        });
+
+        return btn;
+    }
+
 
     function makeRestartButton() {
         const btn = document.createElement("button");
@@ -871,6 +898,9 @@ function render() {
 
     if (!introMode && pathHistory.length > 1) {
         buttonsEl.appendChild(makeBackButton());
+    } else if (!introMode && pathHistory.length === 1) {
+        // On the first question page, provide a back button to go to the intro page
+        buttonsEl.appendChild(makeBackToIntroButton());
     }
 
     if (introMode) {
