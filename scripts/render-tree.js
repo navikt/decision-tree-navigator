@@ -418,9 +418,15 @@ async function loadTree() {
 // Render the entire page for the current node
 function render() {
     const stepNameHeader = document.getElementById("step-name");
+    const treeTitleEl = document.getElementById("tree-title");
 
     const customTitle = (tree && typeof tree.title === "string") ? tree.title.trim() : "";
     const effectiveTitle = customTitle || window.TREE_TITLE;
+
+    // Always show the tree title in the span above the H1
+    if (treeTitleEl) {
+        treeTitleEl.textContent = effectiveTitle || "";
+    }
 
     const section = document.getElementById("question");
     const pathSection = document.getElementById("path");

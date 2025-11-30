@@ -114,6 +114,11 @@ body.start #answers {
 }
 
 
+#tree-title {
+    margin-bottom: .25rem;
+    font-weight: normal;
+    }
+
 #step-name {
     margin-bottom: 1rem;
 }
@@ -184,6 +189,9 @@ h1:focus, h2:focus {
 .question-help {
     margin-bottom: var(--a-spacing-4);
 }
+.question-help p {
+    margin-top: 0;
+}
 
 .destructive-buttons {
     gap: var(--a-spacing-2);
@@ -195,11 +203,15 @@ h1:focus, h2:focus {
     resize: both;
 }
 
+/*
 body.question .question-wrapper {
     padding-left: 3rem;
     background: no-repeat top left/2.5rem url("../images/QuestionmarkDiamond.svg")
 }
-
+*/
+body.start #tree-title {
+    display: none;
+}
 
 
 /* Graph styling overrides */
