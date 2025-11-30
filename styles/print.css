@@ -20,4 +20,10 @@
     #decisions, header, #diagram {
         padding: 0;
     }
+
+    a[href]::after,
+    .navds-link[href]::after {
+        content: none !important;
+    }
+
 }

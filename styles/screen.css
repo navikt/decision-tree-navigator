@@ -31,8 +31,6 @@ main {
 
 
 
-
-
 #site-header .wrapper, footer .wrapper {
     display: flex;
     flex-flow: row nowrap;
@@ -56,32 +54,34 @@ footer .back {
 /* Site header */
 
 #site-header {
-    border-bottom: 1px solid black;
+    border-bottom: 1px solid #CBCFD5;
 }
 
-.site-title, .tree-name {
-    color: #000;
-    text-decoration: none;
+/* Logo/title/tree name styling */
+
+#site-header .left, #site-header .right, .site-title {
+    display: flex;
+    flex-flow: row nowrap;
+    align-items: stretch;
 }
 
-.site-title {
-    background: url("../images/logo.svg") no-repeat left center;
+#site-header .left img {
+    width: auto;
+    height: 3rem;
+    margin-right: 1rem;
 }
 
-#index .site-title {
-    padding-left: 4rem;
+#tree-page #site-header .left img {
+    height: 1.5rem;
+    margin-right: .5rem;
 }
 
-#tree-page .site-title {
-    padding-left: 2rem;
+#site-header .site-title {
+    font-size: 2.5rem;
 }
 
-#tree-page .tree-name, #tree-page .site-title {
-    font-size: 1.25rem;
-}
-
-.site-intro {
-    margin: 1rem 4rem;
+#tree-page #site-header .site-title {
+    font-size: 1.5rem;
 }
 
 
@@ -91,9 +91,39 @@ footer .back {
     height: 1rem;
 }
 
-.start #site-header .tree-name {
-    display: none;
+
+#index #site-header .right img {
+    margin-top: .5rem;
 }
+
+
+
+.site-title {
+    color: #000;
+    text-decoration: none;
+}
+
+
+
+
+
+
+
+
+
+
+.site-intro {
+    margin: 1rem 4rem;
+}
+
+
+
+
+
+
+
+
+
 
 
 /* Tree page layout */
@@ -140,7 +170,7 @@ footer .back {
     margin-top: 0;
 }
 
-h2:focus {
+h1:focus, h2:focus {
     outline: none
 }
 
@@ -149,6 +179,11 @@ h2:focus {
 
 .buttons {
     --__ac-stack-gap-xs: var(--a-spacing-4);
+}
+
+.navds-text-field, .navds-textarea {
+    width: 100%;
+    max-width: 508px;
 }
 
 
@@ -174,10 +209,6 @@ button.print .navds-button__icon {
 .navds-textarea__input {
     width: 100%;
     resize: both;
-}
-
-.navds-form-field {
-    justify-items: unset;
 }
 
 

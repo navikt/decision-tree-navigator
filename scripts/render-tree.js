@@ -27,6 +27,7 @@ let lastRenderedNodeId = null; // track node to reset attemptedSubmit when node 
 let selectedByNode = {};
 
 const NOTES_KEY = (treeId) => `beslutt:${treeId}:notes`;
+const INTRO_META_KEY = (treeId) => `beslutt:${treeId}:intro-meta`;
 const MAX_NOTE_LEN = 1000;
 
 
@@ -255,15 +256,73 @@ function clearNoteError(current, section) {
     }
 }
 
+// Generic text input error handling (for intro fields)
+function showTextFieldError(fieldWrap, inputEl, errId, message) {
+    if (!fieldWrap || !inputEl) return;
+    const textWrap = fieldWrap.querySelector('.navds-text-field');
+    if (textWrap) textWrap.classList.add('navds-text-field--error');
+
+    if (!fieldWrap.querySelector(`#${errId}`)) {
+        const msg = makeAkselErrorMessage(errId, message);
+        if (textWrap && textWrap.nextSibling) {
+            fieldWrap.insertBefore(msg, textWrap.nextSibling);
+        } else {
+            fieldWrap.appendChild(msg);
+        }
+    }
+
+    inputEl.setAttribute('aria-invalid', 'true');
+    const prev = inputEl.getAttribute('aria-describedby') || '';
+    const list = prev.split(' ').filter(Boolean).filter((x) => x !== errId);
+    list.unshift(errId);
+    inputEl.setAttribute('aria-describedby', list.join(' '));
+}
+
+function clearTextFieldError(fieldWrap, inputEl, errId) {
+    if (!fieldWrap || !inputEl) return;
+    const textWrap = fieldWrap.querySelector('.navds-text-field');
+    if (textWrap) textWrap.classList.remove('navds-text-field--error');
+    const msg = fieldWrap.querySelector(`#${errId}`);
+    if (msg) msg.remove();
+    inputEl.removeAttribute('aria-invalid');
+    const prev = inputEl.getAttribute('aria-describedby') || '';
+    const list = prev.split(' ').filter(Boolean).filter((x) => x !== errId);
+    if (list.length) inputEl.setAttribute('aria-describedby', list.join(' ')); else inputEl.removeAttribute('aria-describedby');
+}
 
 let treeId = "";
 let notes = {};
+let introMeta = { serviceName: "", contactPerson: "" };
+
+function loadIntroMeta() {
+    try {
+        if (!treeId) return;
+        const raw = localStorage.getItem(INTRO_META_KEY(treeId));
+        if (raw) {
+            const parsed = JSON.parse(raw);
+            introMeta.serviceName = (parsed.serviceName || "").trim();
+            introMeta.contactPerson = (parsed.contactPerson || "").trim();
+        }
+    } catch (e) {
+        // ignore
+    }
+}
+
+function setIntroMetaField(key, value) {
+    introMeta[key] = (value || "").trim();
+    try {
+        if (treeId) localStorage.setItem(INTRO_META_KEY(treeId), JSON.stringify(introMeta));
+    } catch (e) {
+        // ignore
+    }
+}
 
 // Ensure local data is cleared when the page is closed or navigated away
 function cleanupNotes() {
     try {
         if (treeId) {
             localStorage.removeItem(NOTES_KEY(treeId));
+            localStorage.removeItem(INTRO_META_KEY(treeId));
         }
     } catch (e) {
         // ignore storage errors
@@ -299,8 +358,6 @@ async function init() {
     // Set site header: show product name and tree title immediately on intro page
     const headerTextEl = document.querySelector('#site-header .site-title .site-title-text');
     if (headerTextEl) headerTextEl.textContent = "Beslutt";
-    const headerTreeEl = document.querySelector('#site-header .tree-name');
-    if (headerTreeEl) headerTreeEl.textContent = `: ${entry.title}`;
 
     notes = JSON.parse(localStorage.getItem(NOTES_KEY(treeId)) || "{}");
     await loadTree();
@@ -365,9 +422,7 @@ function render() {
 
     // Update site header: keep only logo + "Beslutt" as the link; append tree title outside the link
     const headerTextEl2 = document.querySelector('#site-header .site-title .site-title-text');
-    const headerTreeEl2 = document.querySelector('#site-header .tree-name');
     if (headerTextEl2) headerTextEl2.textContent = "Beslutt";
-    if (headerTreeEl2) headerTreeEl2.textContent = `: ${effectiveTitle}`;
 
     // Reset validation-attempt flag when node changes
     if (current !== lastRenderedNodeId) {
@@ -439,6 +494,54 @@ function render() {
         // Fjern eventuell gammel print-knapp
         const oldPrint = answersEl.querySelector("#answers-print-btn");
         if (oldPrint) oldPrint.remove();
+
+        // Oppdater meta-blokk (Navn til tjenesten / Kontaktperson) under "Dine svar" på alle ikke-intro-sider
+        // Plasseres i svar-kolonnen slik at den også kommer med i utskrift
+        const prevMeta = answersEl.querySelector('#case-meta');
+        if (prevMeta) prevMeta.remove();
+        if (!introMode) {
+            // Sørg for at vi har oppdatert introMeta fra storage ved behov
+            if (!introMeta || ((!introMeta.serviceName || !introMeta.contactPerson) && treeId)) {
+                loadIntroMeta();
+            }
+            const metaWrap = document.createElement('div');
+            metaWrap.id = 'case-meta';
+            metaWrap.className = 'navds-stack';
+
+            // Felt: Navn til tjenesten (alltid vises)
+            const serviceField = document.createElement('div');
+            serviceField.className = 'navds-form-field';
+            const serviceLabel = document.createElement('div');
+            serviceLabel.className = 'navds-label';
+            serviceLabel.textContent = 'Navn til tjenesten';
+            const serviceValue = document.createElement('div');
+            serviceValue.className = 'navds-body-long';
+            serviceValue.textContent = (introMeta && introMeta.serviceName) ? introMeta.serviceName : '';
+            serviceField.appendChild(serviceLabel);
+            serviceField.appendChild(serviceValue);
+            metaWrap.appendChild(serviceField);
+
+            // Felt: Kontaktperson (vises alltid, kan være tom)
+            const contactField = document.createElement('div');
+            contactField.className = 'navds-form-field';
+            const contactLabel = document.createElement('div');
+            contactLabel.className = 'navds-label';
+            contactLabel.textContent = 'Kontaktperson';
+            const contactValue = document.createElement('div');
+            contactValue.className = 'navds-body-long';
+            contactValue.textContent = (introMeta && introMeta.contactPerson) ? introMeta.contactPerson : '';
+            contactField.appendChild(contactLabel);
+            contactField.appendChild(contactValue);
+            metaWrap.appendChild(contactField);
+
+            // Sett meta før "Dine svar"-listen
+            const pathEl = answersEl.querySelector('#path');
+            if (pathEl && pathEl.parentNode === answersEl) {
+                answersEl.insertBefore(metaWrap, pathEl);
+            } else {
+                answersEl.appendChild(metaWrap);
+            }
+        }
     }
 
     if (!node) {
@@ -466,6 +569,9 @@ function render() {
             introEl.classList.remove("print-only");
         }
 
+        // Load saved intro meta (serviceName/contactPerson) for this tree
+        loadIntroMeta();
+
         // Build intro content in a .question-wrapper inside #question (to mirror real question pages)
         const wrapper = document.createElement("div");
         wrapper.className = "question-wrapper";
@@ -477,8 +583,58 @@ function render() {
             wrapper.appendChild(introTextEl);
         }
 
+        // Field 1: Navn til tjenesten (required)
+        const serviceField = document.createElement('div');
+        serviceField.className = 'navds-form-field';
+        const serviceLabel = document.createElement('label');
+        serviceLabel.className = 'navds-label';
+        serviceLabel.setAttribute('for', 'intro-service-name');
+        serviceLabel.textContent = 'Navn til tjenesten (obligatorisk)';
+        const serviceWrap = document.createElement('div');
+        serviceWrap.className = 'navds-text-field';
+        const serviceInput = document.createElement('input');
+        serviceInput.type = 'text';
+        serviceInput.id = 'intro-service-name';
+        serviceInput.className = 'navds-text-field__input';
+        serviceInput.setAttribute('autocomplete', 'off');
+        serviceInput.value = introMeta.serviceName || '';
+        serviceInput.addEventListener('input', () => {
+            setIntroMetaField('serviceName', serviceInput.value);
+            clearTextFieldError(serviceField, serviceInput, 'intro-service-name-error');
+            clearErrorSummary(wrapper);
+        });
+        serviceWrap.appendChild(serviceInput);
+        serviceField.appendChild(serviceLabel);
+        serviceField.appendChild(serviceWrap);
+
+        // Field 2: Kontaktperson (optional)
+        const contactField = document.createElement('div');
+        contactField.className = 'navds-form-field';
+        const contactLabel = document.createElement('label');
+        contactLabel.className = 'navds-label';
+        contactLabel.setAttribute('for', 'intro-contact-person');
+        contactLabel.textContent = 'Kontaktperson (valgfritt)';
+        const contactWrap = document.createElement('div');
+        contactWrap.className = 'navds-text-field';
+        const contactInput = document.createElement('input');
+        contactInput.type = 'text';
+        contactInput.id = 'intro-contact-person';
+        contactInput.className = 'navds-text-field__input';
+        contactInput.setAttribute('autocomplete', 'off');
+        contactInput.value = introMeta.contactPerson || '';
+        contactInput.addEventListener('input', () => {
+            setIntroMetaField('contactPerson', contactInput.value);
+        });
+        contactWrap.appendChild(contactInput);
+        contactField.appendChild(contactLabel);
+        contactField.appendChild(contactWrap);
+
+        // Append fields directly into wrapper (no extra container)
+        wrapper.appendChild(serviceField);
+        wrapper.appendChild(contactField);
+
         const btnRow = document.createElement("div");
-        btnRow.className = "navds-stack navds-hstack navds-stack-gap navds-stack-direction";
+        btnRow.className = "navds-stack navds-hstack navds-stack-gap navds-stack-direction buttons";
         btnRow.appendChild(makeStartButton());
         wrapper.appendChild(btnRow);
 
@@ -695,7 +851,10 @@ function render() {
         notes = {};
         if (treeId) {
             localStorage.removeItem(NOTES_KEY(treeId));
+            localStorage.removeItem(INTRO_META_KEY(treeId));
         }
+        // Clear intro meta in memory
+        introMeta = { serviceName: "", contactPerson: "" };
 
         // Clear stored radio selections
         for (const key in selectedByNode) {
@@ -789,6 +948,36 @@ function render() {
             "</svg>\n</span>";
         btn.addEventListener("click", (e) => {
             e.preventDefault();
+
+            // Validate required intro field before proceeding
+            const wrapper = document.querySelector('#question .question-wrapper');
+            const serviceField = wrapper ? wrapper.querySelector('.navds-form-field :where(#intro-service-name)') : null;
+            const serviceInput = serviceField instanceof HTMLElement ? serviceField : document.getElementById('intro-service-name');
+            const serviceFieldWrap = serviceInput ? serviceInput.closest('.navds-form-field') : null;
+
+            clearErrorSummary(wrapper || document);
+
+            const errors = [];
+            const value = (serviceInput && typeof serviceInput.value === 'string') ? serviceInput.value.trim() : '';
+            if (!value) {
+                if (serviceFieldWrap && serviceInput) {
+                    showTextFieldError(serviceFieldWrap, serviceInput, 'intro-service-name-error', 'Skriv inn navn til tjenesten.');
+                }
+                errors.push({ text: 'Skriv inn navn til tjenesten.', href: '#intro-service-name' });
+            }
+
+            if (errors.length > 0) {
+                if (wrapper) createErrorSummary(wrapper, errors, { focus: true });
+                // Focus the field for convenience
+                if (serviceInput) serviceInput.focus();
+                return;
+            }
+
+            // Persist latest values explicitly
+            setIntroMetaField('serviceName', value);
+            const contactInput = document.getElementById('intro-contact-person');
+            if (contactInput) setIntroMetaField('contactPerson', contactInput.value || '');
+
             interacted = true;
             render();
             // Flytt fokus til stegtittel for kontekst
