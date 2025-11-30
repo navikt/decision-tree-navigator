@@ -1,10 +1,10 @@
 {
   "title": "Hvilket risikonivå har KI-systemet mitt?",
-  "intro-text": "Dette treet hjelper deg å avgjøre om et KI-system faller innenfor «høy risiko» etter KI-forordningen. Det leder deg gjennom faktiske bruksområder (hjelpemiddelområdet, myndighetsutøvelse, ansatt-oppfølging, profilering, smale prosessteg osv.) slik at du ender med en klassifisering som kan brukes i etterlevelsesløsningen når KI-forordningen trer i kraft.",
+  "intro-text": "Dette treet hjelper deg å avgjøre om et KI-system skal klassifiseres som høy risiko etter KI-forordningen. I treet ledes du gjennom faktiske bruksområder (hjelpemiddelområdet, myndighetsutøvelse, ansatt-oppfølging, profilering, smale prosessteg osv.) slik at du ender med en klassifisering som kan brukes i etterlevelsesløsningen når KI-forordningen trer i kraft.",
   "start": {
     "step-title": "Offentlig myndighetsutøvelse",
-    "q": "Skal du bruke KI-systemet til oppgaver som er en del av NAVs utøvelse av offentlig myndighet?",
-    "help": "Skal du bruke systemet til å løse Navs lovfestede oppgaver, f.eks. i saksbehandling eller ved gjennomføring av tiltak, kontroll eller oppfølging av regelverk svarer du 'ja' her. Dette gjelder selv om KI-systemet ikke har noe grensesnitt mot borgerne eller Navs brukere.",
+    "q": "Skal du bruke KI-systemet for å vurdere om personer har rett til offentlige ytelser og tjenester, samt for å gi, redusere, tilbakekalle eller kreve tilbake slike ytelser og tjenester?",
+    "help": "<p>Dette spørsmålet gjelder KI-systemer som brukes av offentlige myndigheter som Nav, eller på deres vegne, for å avgjøre om personer har rett til viktige offentlige ytelser og tjenester. Dette omfatter blant annet helsetjenester, økonomisk bistand og andre vesentlige velferdsordninger. Det inkluderer også situasjoner der KI-systemet brukes til å tildele, redusere, tilbakekalle eller kreve tilbake slike ytelser.</p><p>Hvis KI-systemet har en slik funksjon, skal svarer du Ja. Hvis det ikke har det, svarer du Nei.</p>",
     "shape": "stadium",
     "read-more": {
       "read-more-about": "",

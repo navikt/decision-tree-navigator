@@ -69,7 +69,6 @@ function createButton(templateId, labelText, onClick) {
 }
 
 
-
 // Read persisted note for a node (empty string if none)
 function getNote(nodeId) {
     return notes[nodeId] || "";
@@ -79,6 +78,18 @@ function setNote(nodeId, value) {
     const trimmed = (value ?? "").trim();
     notes[nodeId] = trimmed.length > MAX_NOTE_LEN ? trimmed.slice(0, MAX_NOTE_LEN) : trimmed;
     localStorage.setItem(NOTES_KEY(treeId), JSON.stringify(notes));
+}
+
+const NOTE_REQUIRED_MSG = "Skriv en begrunnelse for svaret ditt.";
+
+function isNoteRequired(node) {
+    const cfg = node && node.note;
+    return !!(cfg && cfg.label && cfg.required);
+}
+
+function getNoteValue(wrapper, current) {
+    const textarea = wrapper.querySelector(`#note-${current}`);
+    return textarea ? textarea.value.trim() : "";
 }
 
 
@@ -160,9 +171,29 @@ function makeAkselErrorMessage(id, text) {
     return p;
 }
 
+function addDescribedBy(input, id) {
+    if (!input || !id) return;
+    const prev = input.getAttribute("aria-describedby") || "";
+    const list = prev.split(" ").filter(Boolean);
+    if (!list.includes(id)) list.push(id);
+    input.setAttribute("aria-describedby", list.join(" "));
+}
+
+function removeDescribedBy(input, id) {
+    if (!input || !id) return;
+    const prev = input.getAttribute("aria-describedby") || "";
+    const list = prev.split(" ").filter(Boolean).filter((x) => x !== id);
+    if (list.length) {
+        input.setAttribute("aria-describedby", list.join(" "));
+    } else {
+        input.removeAttribute("aria-describedby");
+    }
+}
+
+
 // Inline error message for radio buttons
 function showOptionError(fieldset, groupName, optErrId) {
-    fieldset.classList.add("navds-radio-group", "navds-radio-group--medium", "navds-fieldset", "navds-fieldset--medium", "navds-fieldset--error");
+    fieldset.classList.add("navds-fieldset--error");
     fieldset.setAttribute("aria-invalid", "true");
 
     const radios = fieldset.querySelectorAll(".navds-radio");
@@ -171,10 +202,7 @@ function showOptionError(fieldset, groupName, optErrId) {
         wrap.setAttribute("data-color", "danger");
         const input = wrap.querySelector('input[type="radio"]');
         if (input) {
-            const prev = input.getAttribute("aria-describedby") || "";
-            const list = prev.split(" ").filter(Boolean);
-            if (!list.includes(optErrId)) list.push(optErrId);
-            input.setAttribute("aria-describedby", list.join(" "));
+            addDescribedBy(input, optErrId);
         }
     });
 
@@ -211,9 +239,7 @@ function clearOptionError(fieldset, optErrId) {
         wrap.removeAttribute("data-color");
         const input = wrap.querySelector('input[type="radio"]');
         if (input) {
-            const prev = input.getAttribute("aria-describedby") || "";
-            const list = prev.split(" ").filter((x) => x && x !== optErrId);
-            if (list.length) input.setAttribute("aria-describedby", list.join(" ")); else input.removeAttribute("aria-describedby");
+            removeDescribedBy(input, optErrId);
         }
     });
 }
@@ -232,19 +258,12 @@ function showNoteError(current, section) {
     taWrap.classList.add("navds-textarea--error");
 
     if (!fieldWrap.querySelector(`#${NOTE_ERR_ID}`)) {
-        const msg = makeAkselErrorMessage(NOTE_ERR_ID, "Du må begrunne svaret ditt.");
+        const msg = makeAkselErrorMessage(NOTE_ERR_ID, NOTE_REQUIRED_MSG);
         fieldWrap.insertBefore(msg, taWrap.nextSibling);
     }
 
     input.setAttribute("aria-invalid", "true");
-    const maxId = `maxlen-${current}`;
-    const prev = input.getAttribute("aria-describedby") || "";
-    const base = prev
-        .split(" ")
-        .filter(Boolean)
-        .filter((x) => x !== NOTE_ERR_ID && x !== maxId);
-
-    input.setAttribute("aria-describedby", [NOTE_ERR_ID, ...base, maxId].join(" "));
+    addDescribedBy(input, NOTE_ERR_ID);
 }
 
 function clearNoteError(current, section) {
@@ -265,26 +284,17 @@ function clearNoteError(current, section) {
     }
 
     input.removeAttribute("aria-invalid");
-
-    const prev = input.getAttribute("aria-describedby") || "";
-    if (prev) {
-        const list = prev
-            .split(" ")
-            .filter((x) => x && x !== NOTE_ERR_ID);
-
-        if (list.length) {
-            input.setAttribute("aria-describedby", list.join(" "));
-        } else {
-            input.removeAttribute("aria-describedby");
-        }
-    }
+    removeDescribedBy(input, NOTE_ERR_ID);
 }
 
 // Generic text input error handling (for intro fields)
 function showTextFieldError(fieldWrap, inputEl, errId, message) {
     if (!fieldWrap || !inputEl) return;
+
     const textWrap = fieldWrap.querySelector('.navds-text-field');
-    if (textWrap) textWrap.classList.add('navds-text-field--error');
+    if (textWrap) {
+        textWrap.classList.add('navds-text-field--error');
+    }
 
     if (!fieldWrap.querySelector(`#${errId}`)) {
         const msg = makeAkselErrorMessage(errId, message);
@@ -296,23 +306,25 @@ function showTextFieldError(fieldWrap, inputEl, errId, message) {
     }
 
     inputEl.setAttribute('aria-invalid', 'true');
-    const prev = inputEl.getAttribute('aria-describedby') || '';
-    const list = prev.split(' ').filter(Boolean).filter((x) => x !== errId);
-    list.unshift(errId);
-    inputEl.setAttribute('aria-describedby', list.join(' '));
+    addDescribedBy(inputEl, errId);
 }
+
 
 function clearTextFieldError(fieldWrap, inputEl, errId) {
     if (!fieldWrap || !inputEl) return;
+
     const textWrap = fieldWrap.querySelector('.navds-text-field');
-    if (textWrap) textWrap.classList.remove('navds-text-field--error');
+    if (textWrap) {
+        textWrap.classList.remove('navds-text-field--error');
+    }
+
     const msg = fieldWrap.querySelector(`#${errId}`);
     if (msg) msg.remove();
+
     inputEl.removeAttribute('aria-invalid');
-    const prev = inputEl.getAttribute('aria-describedby') || '';
-    const list = prev.split(' ').filter(Boolean).filter((x) => x !== errId);
-    if (list.length) inputEl.setAttribute('aria-describedby', list.join(' ')); else inputEl.removeAttribute('aria-describedby');
+    removeDescribedBy(inputEl, errId);
 }
+
 
 let treeId = "";
 let notes = {};
@@ -421,12 +433,6 @@ function render() {
     const current = pathHistory[pathHistory.length - 1];
     const node = tree[current];
     const introMode = (current === "start" && !interacted);
-
-    // Toggle .intro class on the article element when on intro page
-    const articleEl = document.querySelector('#tree-page article');
-    if (articleEl) {
-        articleEl.classList.toggle('intro', introMode);
-    }
 
     // Toggle page-type classes on the body element: "start", "question", "end"
     const pageEl = document.body;
@@ -666,8 +672,6 @@ function render() {
         const rawStepTitle = (node && typeof node["step-title"] === "string") ? node["step-title"].trim() : "";
         const questionText = (node && typeof node.q === "string") ? node.q.trim() : "";
         stepNameHeader.textContent = introMode ? effectiveTitle : (rawStepTitle || questionText || "");
-        stepNameHeader.style.display = "";
-        stepNameHeader.removeAttribute("aria-hidden");
     }
 
     if (node.end) {
@@ -795,29 +799,22 @@ function render() {
 
     }
 
-
-    function collectErrorsForCurrentNode({ current, node, selectedNext, wrapper }) {
+    function collectErrorsForCurrentNode({current, node, selectedNext, wrapper}) {
         const errors = [];
 
         // Radio required unless end node
         if (!selectedNext && !node.end) {
             errors.push({
-                text: "Velg et alternativ.",
-                href: `#legend-${current}`,
+                text: "Velg et alternativ.", href: `#legend-${current}`,
             });
         }
 
         // Note required?
-        const noteConfig = node.note;
-        const noteIsRequired = noteConfig && noteConfig.label && noteConfig.required;
-
-        if (noteIsRequired) {
-            const textarea = wrapper.querySelector(`#note-${current}`);
-            const value = textarea ? textarea.value.trim() : "";
+        if (isNoteRequired(node)) {
+            const value = getNoteValue(wrapper, current);
             if (!value) {
                 errors.push({
-                    text: "Skriv en begrunnelse for svaret ditt.",
-                    href: `#note-${current}`,
+                    text: NOTE_REQUIRED_MSG, href: `#note-${current}`,
                 });
             }
         }
@@ -828,11 +825,11 @@ function render() {
     function updateErrorSummary(wrapper) {
         if (!attemptedSubmit) return;
 
-        const errors = collectErrorsForCurrentNode({ current, node, selectedNext, wrapper });
+        const errors = collectErrorsForCurrentNode({current, node, selectedNext, wrapper});
 
         clearErrorSummary(wrapper);
         if (errors.length > 0) {
-            createErrorSummary(wrapper, errors, { focus: false });
+            createErrorSummary(wrapper, errors, {focus: false});
         }
     }
 
@@ -868,41 +865,20 @@ function render() {
         return createButton("button-primary-right", "Neste steg", () => {
             interacted = true;
             attemptedSubmit = true;
-
             if (node.end) return;
 
-            // Fjern eventuell gammel summary
             clearErrorSummary(wrapper);
 
-            const errors = [];
+            const errors = collectErrorsForCurrentNode({current, node, selectedNext, wrapper});
 
-            // 1) Radio må være valgt
-            if (!selectedNext) {
+            // Drive inline errors based on which hrefs exist
+            if (errors.some(e => e.href === `#legend-${current}`) && fieldset) {
                 const groupName = `opt-${current}`;
                 const optErrId = `fieldset-error-${current}`;
-                if (fieldset) {
-                    showOptionError(fieldset, groupName, optErrId);
-                }
-                errors.push({
-                    text: "Velg et alternativ.",
-                    href: `#legend-${current}`,
-                });
+                showOptionError(fieldset, groupName, optErrId);
             }
-
-            // 2) Notat påkrevd?
-            const noteConfig = node.note;
-            const noteIsRequired = noteConfig && noteConfig.label && noteConfig.required;
-
-            if (noteIsRequired) {
-                const textarea = wrapper.querySelector(`#note-${current}`);
-                const value = textarea ? textarea.value.trim() : "";
-                if (!value) {
-                    showNoteError(current, wrapper);
-                    errors.push({
-                        text: "Skriv en begrunnelse for svaret ditt.",
-                        href: `#note-${current}`,
-                    });
-                }
+            if (errors.some(e => e.href === `#note-${current}`)) {
+                showNoteError(current, wrapper);
             }
 
             if (errors.length > 0) {
@@ -912,29 +888,25 @@ function render() {
 
             pathHistory.push(selectedNext);
             render();
+            focusStepTitle();
         });
     }
 
+
     function makeStartButton() {
         return createButton("button-primary-right", "Start", () => {
-            // Validate required intro field before proceeding
             const wrapper = document.querySelector('#question .question-wrapper');
-            const serviceField = wrapper ? wrapper.querySelector('.navds-form-field :where(#intro-service-name)') : null;
-            const serviceInput = serviceField instanceof HTMLElement ? serviceField : document.getElementById('intro-service-name');
+            const serviceInput = document.getElementById('intro-service-name');
             const serviceFieldWrap = serviceInput ? serviceInput.closest('.navds-form-field') : null;
 
             clearErrorSummary(wrapper || document);
 
             const errors = [];
             const value = (serviceInput && typeof serviceInput.value === 'string') ? serviceInput.value.trim() : '';
+
             if (!value) {
                 if (serviceFieldWrap && serviceInput) {
-                    showTextFieldError(
-                        serviceFieldWrap,
-                        serviceInput,
-                        'intro-service-name-error',
-                        'Skriv inn navn til tjenesten.',
-                    );
+                    showTextFieldError(serviceFieldWrap, serviceInput, 'intro-service-name-error', 'Skriv inn navn til tjenesten.',);
                 }
                 errors.push({text: 'Skriv inn navn til tjenesten.', href: '#intro-service-name'});
             }
@@ -944,7 +916,6 @@ function render() {
                 return;
             }
 
-            // Persist latest values explicitly
             setIntroMetaField('serviceName', value);
             const contactInput = document.getElementById('intro-contact-person');
             if (contactInput) setIntroMetaField('contactPerson', contactInput.value || '');
@@ -960,6 +931,7 @@ function render() {
             if (pathHistory.length > 1) {
                 pathHistory.pop();
                 render();
+                focusStepTitle();
             }
         });
     }
@@ -1067,7 +1039,7 @@ function mermaidSource(tree, pathHistory) {
         // Defaulting logic:
         // - explicit n.shape wins
         // - start and end nodes -> stadium
-        // - everything else -> hex
+        // - everything else -> rectangle
         const shape = n.shape || ((id === "start" || isEnd) ? "stadium" : "rect");
 
         nodeLines.push(drawNode(id, n.q, shape));
@@ -1118,9 +1090,16 @@ function mermaidSource(tree, pathHistory) {
 function drawMermaid(tree) {
     const el = document.getElementById('mermaid-container');
     if (!el) return;
+
+    // Hvis mermaid ikke er tilgjengelig enda, bare hopp over / prøv igjen senere hvis du vil.
+    if (typeof window.mermaid === "undefined") {
+        return;
+    }
+
     el.textContent = mermaidSource(tree, pathHistory);
     el.removeAttribute("data-processed");
     mermaid.run({nodes: [el]});
 }
+
 
 init();

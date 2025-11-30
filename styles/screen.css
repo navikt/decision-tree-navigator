@@ -181,23 +181,25 @@ h1:focus, h2:focus {
     gap: var(--a-spacing-4);
 }
 
+.question-help {
+    margin-bottom: var(--a-spacing-4);
+}
 
 .destructive-buttons {
     gap: var(--a-spacing-2);
     align-items: flex-start;
 }
 
-
-button.print .navds-button__icon {
-    width: 24px;
-    height: 24px;
-    background: url("../images/PrinterSmall.svg") no-repeat center center;
-}
-
 .navds-textarea__input {
     width: 100%;
     resize: both;
 }
+
+body.question .question-wrapper {
+    padding-left: 3rem;
+    background: no-repeat top left/2.5rem url("../images/QuestionmarkDiamond.svg")
+}
+
 
 
 /* Graph styling overrides */
