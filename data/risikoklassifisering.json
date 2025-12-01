@@ -38,12 +38,12 @@
     },
     "options": {
       "isReport": {
-        "next": "profilering",
+        "next": "highrisk",
         "buttonText": "Ja",
         "label": "KI-systemet skal brukes til rekruttering/ansettelse eller for å monitorere/evaluere Nav-ansatte."
       },
       "notReport": {
-        "next": "lowrisk",
+        "next": "profilering",
         "buttonText": "Nei",
         "label": "KI-systemet skal ikke brukes til rekruttering/ansettelse eller for å monitorere/evaluere Nav-ansatte."
       }
@@ -168,12 +168,12 @@
     },
     "options": {
       "isReport": {
-        "next": "lowrisk",
+        "next": "highrisk",
         "buttonText": "Ja",
         "label": "KI-systemet brukes for å forberede en avgjørelse eller vurdering på et av områdene omtalt i Billag 3."
       },
       "notReport": {
-        "next": "highrisk",
+        "next": "lowrisk",
         "buttonText": "Nei",
         "label": "KI-systemet *skal ikke* brukes for å forberede en avgjørelse eller vurdering på et av områdene omtalt i Billag 3"
       }
