@@ -103,7 +103,7 @@
     "note": {
       "label": "Begrunn svaret ditt",
       "hint": "",
-      "required": false
+      "required": true
     }
   },
   "node5": {
