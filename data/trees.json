@@ -1,7 +1,7 @@
 [
   {
     "id": "risiko",
-    "title": "Risiko ifm. KI-forordningen: Hvilket risikonivå har KI-systemet mitt?",
+    "title": "Risikoklassifisering: Hvilken risikoklasse har KI-systemet mitt etter KI-forordningen?",
     "file": "risikoklassifisering.json"
   },
   {
