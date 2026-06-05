@@ -1,0 +1,327 @@
+{
+  "title": "Skal KI og Innsikt delta i forskningsprosjektet?",
+  "intro-text": "Du har motttatt en forslag til å inngå i et forskningsprosjekt. Denne veilederen hjelper deg med å vurdere om du skal med eller ikke med utgangspunkt i noen velvalgte kriterier",  
+  "start": {
+    "step-title": "Strategisk fit / Prioritert område",
+    "q": "Kan forskningsprosjektet kobles til minst ett av de prioriterte strategiområdene?",
+    "help": "Forskningsprosjektet bør i det fleste tilfeller kunne kobles til ett av de prioriterte strategiområdene for KI i Nav.\n\n<p>De prioriterte strategiområdene i KI-strategien er som følger:</p>\n<ul><li>KS1: <i>Bidra til å få flere i arbeid</i></li><li>KS2: <i>Bidra til raskere og riktigere vedtak som forstås av bruker</i></li><li>KS3: <i>Gi støtte til inkludering og redusere utenforskap</i></li><li>KS4: <i>Gi medarbeidere i Nav en enklere hverdag</i></li></ul><p>Prinsippene for ansvarlig KI vektlegger følgende områder:</p>\n<ul><li>AP1: <i>Samfunnsnytte og bærekraft</i><li>AP2: <i>Verdighet, respekt, personvern</i></li><li>AP3: <i>Forklarbarhet</i></li><li>AP4: <i>Rettferdighet og likebehandling</i></li><li>AP5: <i></i>Sikkerhet</li><li>AP6: <i>Etterretterlighet</i></li></ul>",
+    "shape": "stadium",
+    "read-more": {
+      "read-more-about": "Dette er en tekst",
+      "read-more-text": "Dette er en annen tekst"
+    },
+    "options": {
+      "isReport": {
+        "next": "blindsone",
+        "buttonText": "Ja",
+        "label": "Forskningsprosjektet *kan* kobles til minst ett av de prioriterte strategiområdene."
+      },
+      "notReport": {
+        "next": "reject1",
+        "buttonText": "Nei",
+        "label": "Forskningsprosjektet *kan ikke* kobles til noen av prioriterte strategiområdene."
+      }
+    },
+    "note": {
+      "label": "Begrunn svaret ditt",
+      "hint": "Hvis 'ja': lim de prioriterte satsningsområdene som passer inn i feltet under. Du må velge minst én.Hvis 'nei': Lim inn 'Ingen strategisk fit' i feltet under.",
+      "required": true
+    }
+  },
+  "blindsone": {
+    "step-title": "Blindsoner? Synergier?",
+    "q": "Blindsoner? Synergier?",
+    "help": "KI og Innsikt er allerede involvert i flere forskningsprosjekter [sett inn lenke til oversikt]. Mange forslag til nye forskningsprosjekter vil ha tematisk overlapp med eksisterende prosjekter. Nye forskningsprojekter bør tilføre porteføljen noe nytt, helst ved å dekke blindsoner som ikke er dekket av eksisterende prosjekter i dag. Om prosjekter overlapper med eksisterende prosjekter, kan det likevel være aktuelt hvis det prosjektene utfyller hverandre særlig godt (f.eks. ved å belyse samme problem fra ulike perspektiver. Hvis  Dekker forskningsprosjektet blindsoner i porteføljen? Hvis ikke, er det nyttige synergier med relaterte prosjekter i porteføljen?",
+    "read-more": {
+      "read-more-about": "",
+      "read-more-text": ""
+    },
+    "options": {
+      "isReport": {
+        "next": "necessary",
+        "buttonText": "Ja",
+        "label": "KI-systemet profilerer individer."
+      },
+      "notReport": {
+        "next": "reject2",
+        "buttonText": "Nei",
+        "label": "Ingen blindsone eller synergier."
+      }
+    },
+    "note": {
+      "label": "Hvis 'ja', begrunn svaret ditt ved å forklare hvilke blindsoner som dekkes og/eller hvilke synergier som oppstår. Hvis 'nei', skriver du 'ingen'",
+      "hint": "",
+      "required": true
+    }
+  },
+  "necessary": {
+    "step-title": "Nødvendig å bli med?",
+    "q": "Er det nødvendig å bli med for å dra nytte av forskningen? Unik mulighet?",
+    "help": "Selv om forskningen er relevant, trenger vi ikke nødvendigvis å bli med for å dra nytte av forskningen. Er det nødvendig å bli med for å høste gevinster? Er det en unik mulighet? Er det andre måter å dra nytte av forskningen på uten å bli med i prosjektet?",
+    "read-more": {
+      "read-more-about": "",
+      "read-more-text": ""
+    },
+    "options": {
+      "isReport": {
+        "next": "kvalitet",
+        "buttonText": "Ja",
+        "label": "Nødvendig å bli med for å dra nytte av forskningen."
+      },
+      "notReport": {
+        "next": "reject2",
+        "buttonText": "Nei",
+        "label": "Ikke nødvendig å bli med for å dra nytte av forskningen."
+      }
+    },
+    "note": {
+      "label": "Begrunn svaret ditt",
+      "hint": "",
+      "required": true
+    }
+  },
+  "kvalitet": {
+    "step-title": "Kvalitetsvurdering",
+    "q": "Holder forskningsprosjektet høy faglig kvalitet? Er det en seriøs aktør som står bak? Er det en realistisk plan for gjennomføring?",
+    "help": "ledende miljø?",
+    "read-more": {
+      "read-more-about": "",
+      "read-more-text": ""
+    },
+    "options": {
+      "isReport": {
+        "next": "success",
+        "buttonText": "Ja",
+        "label": "Forskningsprosjektet holder tilstrekkelig høy kvalitet."
+      },
+      "notReport": {
+        "next": "reject3",
+        "buttonText": "Nei",
+        "label": "Utilstrekkelig kvalitet."
+      }
+    },
+    "note": {
+      "label": "Begrunn svaret ditt",
+      "hint": "",
+      "required": false
+    }
+  },
+  "success": {
+    "step-title": "Suksesskriterier",
+    "q": "Tidligere erfaring med forskningsmiljøet? Har vi forankring/interessenter i relevante miljøer i Nav?",
+    "help": "",
+    "read-more": {
+      "read-more-about": "",
+      "read-more-text": ""
+    },
+    "options": {
+      "isReport": {
+        "next": "role",
+        "buttonText": "Ja",
+        "label": "Vi har tidligere erfaring og/eller forankring/interessenter i relevante miljøer i Nav."
+      },
+      "notReport": {
+        "next": "corrective",
+        "buttonText": "Nei",
+        "label": "Vi har *ikke* tidligere erfaring og/eller forankring/interessenter i relevante miljøer i Nav."
+      }
+    },
+    "note": {
+      "label": "Begrunn svaret ditt",
+      "hint": "",
+      "required": false
+    }
+  },
+  "corrective": {
+    "step-title": "Mulig å rette opp mangler?",
+    "q": "Er det mulig å korrigere mangler i forankring/interessenter i relevante miljøer i Nav? Er det mulig å bygge videre på tidligere erfaringer for å få til en god gjennomføring?",
+    "help": "",
+    "read-more": {
+      "read-more-about": "",
+      "read-more-text": ""
+    },
+    "options": {
+      "isReport": {
+        "next": "role",
+        "buttonText": "Ja",
+        "label": "Ikke mulig å korrigere mangler i forankring/interessenter i relevante miljøer i Nav, eller å bygge videre på tidligere erfaringer for å få til en god gjennomføring."
+      },
+      "notReport": {
+        "next": "reject4",
+        "buttonText": "Nei",
+        "label": "*Ikke* mulig å korrigere mangler i forankring/interessenter i relevante miljøer i Nav, eller å bygge videre på tidligere erfaringer for å få til en god gjennomføring."
+      }
+    },
+    "note": {
+      "label": "Begrunn svaret ditt",
+      "hint": "",
+      "required": false
+    }
+  },
+  "role": {
+    "step-title": "Aktiv/Passiv?",
+    "q": "Er vi tiltenkt en aktiv eller passiv rolle i prosjektet?",
+    "help": "",
+    "read-more": {
+      "read-more-about": "",
+      "read-more-text": ""
+    },
+    "options": {
+      "isReport": {
+        "next": "resources",
+        "buttonText": "Aktiv rolle",
+        "label": "Aktiv rolle"
+      },
+      "notReport": {
+        "next": "passive",
+        "buttonText": "Passiv rolle",
+        "label": "Passiv rolle"
+      }
+    },
+    "note": {
+      "label": "Begrunn svaret ditt",
+      "hint": "",
+      "required": false
+    }
+  },
+  "resources": {
+    "step-title": "Relevante ressurser tilgjengelig?",
+    "q": "Har vi eller vil vi klare å finne relevante ressurspersoner som ønsker å bidra til prosjektet?",
+    "help": "",
+    "read-more": {
+      "read-more-about": "",
+      "read-more-text": ""
+    },
+    "options": {
+      "isReport": {
+        "next": "costbenefit",
+        "buttonText": "Ja",
+        "label": "Har tilstrekkelig med relevante ressurspersoner som ønsker å bidra til prosjektet."
+      },
+      "notReport": {
+        "next": "reject5",
+        "buttonText": "Nei",
+        "label": "Mangler relevante ressurspersoner som ønsker å bidra til prosjektet."
+      }
+    },
+    "note": {
+      "label": "Begrunn svaret ditt",
+      "hint": "",
+      "required": false
+    }
+  },
+  "costbenefit": {
+    "step-title": "Kost/nytte?",
+    "q": "Er bidraget vårt dekket av eksisterende aktiviteter, eller krever det betydelige ekstra ressurser?",
+    "help": "",
+    "read-more": {
+      "read-more-about": "",
+      "read-more-text": ""
+    },
+    "options": {
+      "isReport": {
+        "next": "utility",
+        "buttonText": "Akseptabel kostnad",
+        "label": "Akseptabel kost/nytte."
+      },
+      "notReport": {
+        "next": "reject5",
+        "buttonText": "Høy kostnad",
+        "label": "Høy kostnad og/eller usikker nytte."
+      }
+    },
+    "note": {
+      "label": "Begrunn svaret ditt",
+      "hint": "",
+      "required": false
+    }
+  },
+  "utility": {
+    "step-title": "Omsetningsdyktighet/kompetansebygging",
+    "q": "Klarer vi å omsette forskningsproduktene? Bygger vi intern kompetanse?",
+    "help": "",
+    "read-more": {
+      "read-more-about": "",
+      "read-more-text": ""
+    },
+    "options": {
+      "isReport": {
+        "next": "accept",
+        "buttonText": "Ja",
+        "label": "Vi kan omsette forskningsproduktene og/eller bygger intern kompetanse."
+      },
+      "notReport": {
+        "next": "reject5",
+        "buttonText": "Nei",
+        "label": "Vi *kan ikke* omsette forskningsproduktene og/eller bygger ikke tilstrekkelig intern kompetanse."
+      }
+    },
+    "note": {
+      "label": "Begrunn svaret ditt",
+      "hint": "",
+      "required": false
+    }
+  },
+  "passive": {
+    "step-title": "Verdi i passiv deltakelse?",
+    "q": "Er det tilstrekkelig verdi i å følge prosjektet uten å ha en aktiv rolle? Får vi realisert det vi ønsker med en passiv rolle?",
+    "help": "",
+    "read-more": {
+      "read-more-about": "",
+      "read-more-text": ""
+    },
+    "options": {
+      "isReport": {
+        "next": "utility",
+        "buttonText": "Ja",
+        "label": "Passiv rolle er tilstrekkelig for å realisere det vi ønsker å få ut av prosjektet."
+      },
+      "notReport": {
+        "next": "reject5",
+        "buttonText": "Nei",
+        "label": "Passiv rolle er *ikke* tilstrekkelig for å realisere det vi ønsker å få ut av prosjektet."
+      }
+    },
+    "note": {
+      "label": "Begrunn svaret ditt",
+      "hint": "",
+      "required": false
+    }
+  },
+  "accept": {
+    "step-title": "Godkjent",
+    "q": "Forskningsprosjektet er relevant, holder tilstrekkelig høy kvalitet, og det er gode forutsetninger for en vellykket gjennomføring. Det er derfor anbefalt å gå videre med prosjektet.",
+    "help": "",
+    "end": true
+  },
+  "reject1": {
+    "step-title": "Avslå",
+    "q": "Forskningsprosjektet passer ikke med strategiske prioriteringer og bør avslås.",
+    "help": "",
+    "end": true
+  },
+  "reject2": {
+    "step-title": "Pause",
+    "q": "Lav prioritet/redundant.",
+    "help": "",
+    "end": true
+  },
+  "reject3": {
+    "step-title": "Avslå",
+    "q": "Utilstrekkelig kvalitet.",
+    "help": "",
+    "end": true
+  },
+  "reject4": {
+    "step-title": "Avslå",
+    "q": "Høy risiko for å ikke lykkes.",
+    "help": "",
+    "end": true
+  },
+  "reject5": {
+    "step-title": "Hold",
+    "q": "Usikker kostnad/nytte, lav omsettingsverdi og/eller mangler intern buy-in",
+    "help": "",
+    "end": true
+  }
+}

@@ -13,5 +13,10 @@
     "id": "merking",
     "title": "Bør jeg merke KI-innholdet mitt?",
     "file": "merking.json"
+  },
+  {
+    "id": "forskning",
+    "title": "Hvilke forskningsprosjekt?",
+    "file": "forskningsprosjekt.json"
   }
 ]
