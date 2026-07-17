@@ -2,21 +2,25 @@
   {
     "id": "risiko",
     "title": "Risikoklassifisering: Hvilken risikoklasse har KI-systemet mitt etter KI-forordningen?",
+    "desc": "Avgjør om et KI-system skal klassifiseres som høy risiko etter KI-forordningen.",
     "file": "risikoklassifisering.json"
   },
   {
     "id": "provider-deployer",
     "title": "Rolle etter KI-forordningen: Er vi leverandør eller idriftsetter?",
+    "desc": "Avklarer hvilken rolle Nav har etter KI-forordningen, og hvilke plikter som gjelder.",
     "file": "deployer-provider.json"
   },
   {
     "id": "merking",
     "title": "Bør jeg merke KI-innholdet mitt?",
+    "desc": "Går gjennom kontekst, realisme og bruksområde for å avgjøre om og hvordan innhold bør merkes.",
     "file": "merking.json"
   },
   {
     "id": "forskning",
     "title": "Skal vi delta i forskningsprosjektet?",
+    "desc": "Hjelper deg vurdere om dere skal delta i forskningsprosjektet, ut fra noen velvalgte kriterier.",
     "file": "forskningsprosjekt.json"
   }
 ]

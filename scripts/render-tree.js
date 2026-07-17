@@ -25,6 +25,8 @@ let interacted = false;
 let attemptedSubmit = false; // becomes true after user clicks Next on a node
 let lastRenderedNodeId = null; // track node to reset attemptedSubmit when node changes
 let selectedByNode = {};
+let minRemaining = {}; // node id -> shortest path (in steps) to any end node
+let maxRemaining = {}; // node id -> longest path (in steps) to any end node
 
 const NOTES_KEY = (treeId) => `beslutt:${treeId}:notes`;
 const INTRO_META_KEY = (treeId) => `beslutt:${treeId}:intro-meta`;
@@ -109,6 +111,46 @@ function normalizeTreeOptions(treeObj) {
             node.options = sortPairs(node.options);
         }
     }
+}
+
+// Shortest and longest path (in steps) from each node to any reachable end node.
+// Pure structural property of the tree — drives the "Steg N av M" / "Steg N av inntil M" label.
+// Must run after normalizeTreeOptions(), since it expects node.options as [key, opt] pairs.
+function computeStepRange(treeObj) {
+    const maxMemo = {};
+    const minMemo = {};
+    const visiting = {};
+
+    function walk(id) {
+        if (maxMemo[id] !== undefined) return;
+        if (visiting[id]) {
+            maxMemo[id] = 0;
+            minMemo[id] = 0;
+            return;
+        }
+        visiting[id] = true;
+        const node = treeObj[id];
+        let maxR = 0;
+        let minR = Infinity;
+        if (node && !node.end && Array.isArray(node.options) && node.options.length) {
+            node.options.forEach(([, opt]) => {
+                if (opt && opt.next) {
+                    walk(opt.next);
+                    maxR = Math.max(maxR, 1 + maxMemo[opt.next]);
+                    minR = Math.min(minR, 1 + minMemo[opt.next]);
+                }
+            });
+        } else {
+            minR = 0;
+        }
+        visiting[id] = false;
+        maxMemo[id] = maxR;
+        minMemo[id] = minR === Infinity ? 0 : minR;
+    }
+
+    Object.keys(treeObj).forEach(walk);
+    minRemaining = minMemo;
+    maxRemaining = maxMemo;
 }
 
 // Remove existing error summary box (if any)
@@ -404,6 +446,7 @@ async function loadTree() {
         const response = await fetch(window.TREE_FILE);
         tree = await response.json();
         normalizeTreeOptions(tree);
+        computeStepRange(tree);
         render();
     } catch (e) {
         console.error("Failed to load tree:", e);
@@ -439,6 +482,48 @@ function render() {
     const current = pathHistory[pathHistory.length - 1];
     const node = tree[current];
     const introMode = (current === "start" && !interacted);
+
+    // Progress indicator: "N–M spørsmål" on the intro page, "Steg N av M" (or "av inntil M"
+    // when the remaining depth isn't fixed across branches) once questions start.
+    const progressSectionEl = document.getElementById("progress-section");
+    const questionRangeEl = document.getElementById("question-range");
+    if (progressSectionEl) progressSectionEl.innerHTML = "";
+    if (questionRangeEl) questionRangeEl.textContent = "";
+
+    if (introMode) {
+        const rangeMin = minRemaining["start"] || 0;
+        const rangeMax = maxRemaining["start"] || 0;
+        if (questionRangeEl) {
+            questionRangeEl.textContent = (rangeMin === rangeMax)
+                ? `${rangeMin} spørsmål`
+                : `${rangeMin}–${rangeMax} spørsmål`;
+        }
+    } else if (node && progressSectionEl) {
+        const stepsTaken = pathHistory.length - 1;
+        const maxR = maxRemaining[current] || 0;
+        const minR = minRemaining[current] || 0;
+        const totalStepsNum = node.end ? stepsTaken : Math.max(stepsTaken + maxR, stepsTaken + 1);
+        const activeStepNum = node.end ? totalStepsNum : stepsTaken + 1;
+        const stepsKnownExact = node.end || minR === maxR;
+        const stepLabelText = stepsKnownExact
+            ? `Steg ${activeStepNum} av ${totalStepsNum}`
+            : `Steg ${activeStepNum} av inntil ${totalStepsNum}`;
+        const translateX = totalStepsNum > 0 ? (100 - (activeStepNum / totalStepsNum) * 100) : 0;
+
+        const bar = document.createElement("div");
+        bar.className = "navds-progress-bar navds-progress-bar--medium";
+        bar.setAttribute("aria-hidden", "true");
+        const fg = document.createElement("div");
+        fg.className = "navds-progress-bar__foreground";
+        fg.style.setProperty("--__ac-progress-bar-translate", `-${translateX}%`);
+        bar.appendChild(fg);
+        progressSectionEl.appendChild(bar);
+
+        const label = document.createElement("p");
+        label.className = "navds-body-short step-label";
+        label.textContent = stepLabelText;
+        progressSectionEl.appendChild(label);
+    }
 
     // Toggle page-type classes on the body element: "start", "question", "end"
     const pageEl = document.body;
@@ -477,11 +562,46 @@ function render() {
         }
     }
 
-    if (!introMode && completedIds.length > 0) {
-        const pathList = document.createElement("ul");
-        pathList.className = "navds-list navds-list--unordered";
+    // Bygg en enkelt dt/dd-rad (Aksel FormSummary-mønster) for gjenbruk
+    // mellom saks-metadata (navn/kontaktperson) og besvarte spørsmål.
+    function makeAnswerRow(labelText, valueText, extraDdClass) {
+        const row = document.createElement("div");
+        row.className = "navds-form-summary__answer";
 
+        const dt = document.createElement("dt");
+        dt.className = "navds-label";
+        dt.textContent = labelText;
+        row.appendChild(dt);
+
+        const dd = document.createElement("dd");
+        dd.className = "navds-form-summary__value navds-body-long navds-body-long--medium" + (extraDdClass ? " " + extraDdClass : "");
+        dd.textContent = valueText;
+        row.appendChild(dd);
+
+        return row;
+    }
+
+    if (!introMode) {
+        const rows = [];
+
+        // Sørg for at vi har oppdatert introMeta fra storage ved behov
+        if (!introMeta || ((!introMeta.serviceName) && treeId)) {
+            loadIntroMeta();
+        }
+
+        // Saks-metadata (navn til tjenesten / kontaktperson) som egne rader øverst
+        if (introMeta && introMeta.serviceName) {
+            rows.push(makeAnswerRow("Navn til tjenesten", introMeta.serviceName));
+        }
+        const hasContact = !!(introMeta && typeof introMeta.contactPerson === 'string' && introMeta.contactPerson.trim());
+        if (hasContact) {
+            rows.push(makeAnswerRow("Kontaktperson", introMeta.contactPerson.trim()));
+        }
+
+        // Besvarte spørsmål: bruk valgt alternativ sin label + notat,
+        // og kun for ferdig besvarte steg (alle unntatt siste i pathHistory).
         completedIds.forEach((nodeId) => {
+            const n = tree[nodeId];
             const opt = chosenForNode[nodeId];
             const labelText = opt && opt.label ? opt.label : "";
             const noteText = (getNote(nodeId) || "").trim();
@@ -489,89 +609,37 @@ function render() {
             // Ikke vis noe hvis vi verken har label fra JSON eller notat
             if (!labelText && !noteText) return;
 
-            const li = document.createElement("li");
-            li.className = "navds-list__item";
-
-            // Hovedtekst: label fra JSON (valgt alternativ)
+            const questionTitle = (n && (n["step-title"] || n.q)) || "";
+            let row;
             if (labelText) {
-                const labelContainer = document.createElement("div");
-                labelContainer.className = "navds-label";
-                labelContainer.textContent = labelText;
-                li.appendChild(labelContainer);
+                row = makeAnswerRow(questionTitle, labelText);
+            } else {
+                row = document.createElement("div");
+                row.className = "navds-form-summary__answer";
+                const dt = document.createElement("dt");
+                dt.className = "navds-label";
+                dt.textContent = questionTitle;
+                row.appendChild(dt);
             }
 
-            // Notat: vis bare hvis det faktisk finnes
+            // Begrunnelse, hvis notert (egen dd, mer diskret stil)
             if (noteText) {
-                const noteContainer = document.createElement("p");
-                noteContainer.textContent = noteText;
-                li.appendChild(noteContainer);
+                const noteDd = document.createElement("dd");
+                noteDd.className = "navds-form-summary__value navds-body-short navds-typo--color-subtle";
+                noteDd.textContent = noteText;
+                row.appendChild(noteDd);
             }
 
-            pathList.appendChild(li);
+            rows.push(row);
         });
 
-        if (pathList.children.length > 0) {
-            pathSection.appendChild(pathList);
-        }
-    }
-
-
-    // Skjul hele svar-seksjonen i intro-modus
-    const answersEl = document.getElementById("answers");
-    if (answersEl) {
-
-        // Fjern eventuell gammel print-knapp
-        const oldPrint = answersEl.querySelector("#answers-print-btn");
-        if (oldPrint) oldPrint.remove();
-
-        // Oppdater meta-blokk (Navn til tjenesten / Kontaktperson) under "Dine svar" på alle ikke-intro-sider
-        // Plasseres i svar-kolonnen slik at den også kommer med i utskrift
-        const prevMeta = answersEl.querySelector('#case-meta');
-        if (prevMeta) prevMeta.remove();
-        if (!introMode) {
-            // Sørg for at vi har oppdatert introMeta fra storage ved behov
-            if (!introMeta || ((!introMeta.serviceName) && treeId)) {
-                loadIntroMeta();
-            }
-            const metaWrap = document.createElement('div');
-            metaWrap.id = 'case-meta';
-
-            // Felt: Navn til tjenesten
-            const serviceField = document.createElement('div');
-            serviceField.className = 'navds-form-field';
-            const serviceLabel = document.createElement('div');
-            serviceLabel.className = 'navds-label';
-            serviceLabel.textContent = 'Navn til tjenesten';
-            const serviceValue = document.createElement('div');
-            serviceValue.className = 'navds-body-long';
-            serviceValue.textContent = (introMeta && introMeta.serviceName) ? introMeta.serviceName : '';
-            serviceField.appendChild(serviceLabel);
-            serviceField.appendChild(serviceValue);
-            metaWrap.appendChild(serviceField);
-
-            // Felt: Kontaktperson (vises kun hvis feltet faktisk finnes/verdi angitt)
-            const hasContact = !!(introMeta && typeof introMeta.contactPerson === 'string' && introMeta.contactPerson.trim());
-            if (hasContact) {
-                const contactField = document.createElement('div');
-                contactField.className = 'navds-form-field';
-                const contactLabel = document.createElement('div');
-                contactLabel.className = 'navds-label';
-                contactLabel.textContent = 'Kontaktperson';
-                const contactValue = document.createElement('div');
-                contactValue.className = 'navds-body-long';
-                contactValue.textContent = introMeta.contactPerson.trim();
-                contactField.appendChild(contactLabel);
-                contactField.appendChild(contactValue);
-                metaWrap.appendChild(contactField);
-            }
-
-            // Sett meta før "Dine svar"-listen
-            const pathEl = answersEl.querySelector('#path');
-            if (pathEl && pathEl.parentNode === answersEl) {
-                answersEl.insertBefore(metaWrap, pathEl);
-            } else {
-                answersEl.appendChild(metaWrap);
-            }
+        if (rows.length > 0) {
+            rows.forEach((row) => pathSection.appendChild(row));
+        } else {
+            const empty = document.createElement("p");
+            empty.className = "navds-label";
+            empty.textContent = "Svarene dine vises her etter hvert som du går gjennom stegene.";
+            pathSection.appendChild(empty);
         }
     }
 
@@ -670,7 +738,6 @@ function render() {
     const helpEl = questionFrag.querySelector(".question-help");
     const noteContainer = questionFrag.querySelector(".note-container");
     const buttonsEl = questionFrag.querySelector(".buttons");
-    const destructiveButtonsEl = questionFrag.querySelector(".destructive-buttons");
 
 
 // Set the page header (h1#step-name) from node["step-title"] when provided; otherwise fall back to the question text
@@ -707,6 +774,7 @@ function render() {
 
 
         legend.id = `legend-${current}`;
+        legend.tabIndex = -1;
         const baseText = (node && typeof node.q === "string") ? node.q.trim() : "";
         const requiredText = " (obligatorisk)";
         legend.textContent = (baseText || "Velg et alternativ") + requiredText;
@@ -966,6 +1034,12 @@ function render() {
         });
     }
 
+    function makeExportJsonButton() {
+        return createButton("button-tertiary-left-json", null, () => {
+            exportAnswersAsJson();
+        });
+    }
+
     // Back buttons
     if (pathHistory.length > 1) {
         buttonsEl.appendChild(makeBackButton());
@@ -973,17 +1047,13 @@ function render() {
         buttonsEl.appendChild(makeBackToIntroButton());
     }
 
-    // Main action button
+    // Main action button(s): Next on a question, or the end-node action row
     if (node.end) {
-        destructiveButtonsEl.appendChild(makeRestartButton());
+        buttonsEl.appendChild(makePrintButton());
+        buttonsEl.appendChild(makeExportJsonButton());
+        buttonsEl.appendChild(makeRestartButton());
     } else {
         buttonsEl.appendChild(makeNextButton());
-    }
-
-    // På resultatsiden: vis "Skriv ut"-knapp til høyre for "Forrige steg"-knappen
-    if (node.end) {
-        const printBtn = makePrintButton();
-        buttonsEl.appendChild(printBtn);
     }
 
     section.appendChild(questionFrag);
@@ -1007,7 +1077,9 @@ function mermaidSource(tree, pathHistory) {
     const isIntroDiagram = (pathHistory.length === 1 && !interacted);
 
     function drawNode(id, txt, shape = "rect") {
-        const esc = txt.replace(/"/g, '\\"').replace(/\n/g, " ");
+        // Markdown-string label (backtick-wrapped) so long questions auto-wrap instead of
+        // running on one line. Requires flowchart.htmlLabels: true in mermaid.initialize().
+        const esc = "`" + txt.replace(/`/g, "'").replace(/\n/g, " ") + "`";
         switch (shape) {
             case "round":
                 return `${id}("${esc}")`;
@@ -1057,6 +1129,11 @@ function mermaidSource(tree, pathHistory) {
             classLines.push(`class ${id} visited`);
         }
 
+        // End nodes also get the "outcome" look, in addition to current/visited if applicable
+        if (isEnd) {
+            classLines.push(`class ${id} outcome`);
+        }
+
 
         if (!n.end && n.options) {
             const optionEntries = Array.isArray(n.options) ? n.options : [];
@@ -1084,16 +1161,106 @@ function mermaidSource(tree, pathHistory) {
     visit("start");
 
     if (visitedEdges.size) {
-        edgeLines.push(`linkStyle ${[...visitedEdges].join(",")} stroke:#1844a3,stroke-width:4px;`);
+        edgeLines.push(`linkStyle ${[...visitedEdges].join(",")} stroke:#0056b4,stroke-width:3px;`);
     }
 
-    classLines.push("classDef current fill:#fff2b3,stroke:#333,stroke-width:4px", "classDef visited fill:#e6f0ff,stroke:#1844a3,stroke-width:2px");
+    classLines.push(
+        "classDef current fill:#e6f0ff,stroke:#0056b4,stroke-width:3px,color:#00347d,font-weight:700",
+        "classDef visited fill:#f3fcf5,stroke:#06893a,stroke-width:2px,color:#005519",
+        "classDef outcome fill:#fff7e6,stroke:#a35a00,stroke-width:2px,color:#4a2900"
+    );
 
     return `graph TD\n${nodeLines.join("\n")}\n${edgeLines.join("\n")}\n${classLines.join("\n")}`;
 }
 
+// Build { tree, exportedAt, steps, result } from the full answer path and download it as JSON
+function exportAnswersAsJson() {
+    if (!tree) return;
+
+    const steps = [];
+    for (let i = 0; i < pathHistory.length - 1; i++) {
+        const nodeId = pathHistory[i];
+        const nextId = pathHistory[i + 1];
+        const n = tree[nodeId];
+        const match = (n.options || []).find(([, opt]) => opt && opt.next === nextId);
+        const opt = match ? match[1] : null;
+        steps.push({
+            question: n["step-title"] || n.q,
+            answer: opt ? opt.label : null,
+            note: getNote(nodeId) || null
+        });
+    }
+
+    const finalId = pathHistory[pathHistory.length - 1];
+    const finalNode = tree[finalId] || {};
+    const data = {
+        tree: tree.title || "",
+        exportedAt: new Date().toISOString(),
+        serviceName: (introMeta && introMeta.serviceName) || null,
+        contactPerson: (introMeta && introMeta.contactPerson) || null,
+        steps,
+        result: finalNode["step-title"] || finalNode.q || null
+    };
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = "beslutt-svar.json";
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+}
+
+// Wire the "Vis beslutningsdiagram" expander. Collapsed by default; re-runs mermaid on open
+// since it was hidden (display:none) while collapsed and may not have sized itself correctly.
+function initDiagramToggle() {
+    const toggleBtn = document.getElementById("diagram-toggle");
+    const card = document.getElementById("diagram-card");
+    const content = document.getElementById("diagram-content");
+    if (!toggleBtn || !card || !content) return;
+
+    toggleBtn.addEventListener("click", () => {
+        const opening = !card.classList.contains("navds-expansioncard--open");
+        card.classList.toggle("navds-expansioncard--open", opening);
+        content.classList.toggle("navds-expansioncard__content--closed", !opening);
+        content.setAttribute("aria-hidden", String(!opening));
+        toggleBtn.setAttribute("aria-expanded", String(opening));
+        if (opening) drawMermaid(tree);
+    });
+}
+
+// Point "Åpne diagrammet" at a standalone HTML document holding a copy of the current SVG,
+// so it's a real, navigable link (native semantics: works with ctrl/cmd-click, "open in new
+// tab", copy link, etc.) rather than a JS-triggered popup.
+let diagramLinkUrl = null;
+
+function updateDiagramOpenLink(svg) {
+    const link = document.getElementById("diagram-open-new-tab");
+    if (!link || !svg) return;
+
+    const title = (tree && typeof tree.title === "string" && tree.title.trim()) || window.TREE_TITLE || "Beslutningsdiagram";
+    const doc = document.implementation.createHTMLDocument(title);
+    doc.documentElement.lang = "no";
+    const charsetMeta = doc.createElement("meta");
+    charsetMeta.setAttribute("charset", "UTF-8");
+    doc.head.insertBefore(charsetMeta, doc.head.firstChild);
+    doc.body.style.margin = "0";
+    doc.body.style.padding = "1rem";
+    doc.body.style.boxSizing = "border-box";
+    doc.body.appendChild(svg.cloneNode(true));
+
+    const html = "<!DOCTYPE html>\n" + doc.documentElement.outerHTML;
+    const blob = new Blob([html], {type: "text/html;charset=utf-8"});
+
+    if (diagramLinkUrl) URL.revokeObjectURL(diagramLinkUrl);
+    diagramLinkUrl = URL.createObjectURL(blob);
+    link.href = diagramLinkUrl;
+}
+
 // Render the Mermaid diagram
-function drawMermaid(tree) {
+async function drawMermaid(tree) {
     const el = document.getElementById('mermaid-container');
     if (!el) return;
 
@@ -1102,10 +1269,19 @@ function drawMermaid(tree) {
         return;
     }
 
+    // Mermaid trenger et synlig (ikke display:none) element for å beregne kantpunkter riktig.
+    // Diagrammet er skjult som standard; initDiagramToggle() tegner det når kortet åpnes.
+    const card = document.getElementById('diagram-card');
+    if (card && !card.classList.contains('navds-expansioncard--open')) {
+        return;
+    }
+
     el.textContent = mermaidSource(tree, pathHistory);
     el.removeAttribute("data-processed");
-    mermaid.run({nodes: [el]});
+    await mermaid.run({nodes: [el]});
+    updateDiagramOpenLink(el.querySelector("svg"));
 }
 
 
+initDiagramToggle();
 init();
