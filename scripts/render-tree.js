@@ -1063,7 +1063,7 @@ function render() {
 
 
 // Generate Mermaid source code from the tree
-function mermaidSource(tree, pathHistory) {
+function mermaidSource(tree, pathHistory, {useMarkdownLabels = true} = {}) {
     const nodeLines = [];
     const edgeLines = [];
     const classLines = [];
@@ -1077,33 +1077,33 @@ function mermaidSource(tree, pathHistory) {
     const isIntroDiagram = (pathHistory.length === 1 && !interacted);
 
     function drawNode(id, txt, shape = "rect") {
-        // Markdown-string label (backtick-wrapped) so long questions auto-wrap instead of
-        // running on one line. Requires flowchart.htmlLabels: true in mermaid.initialize().
-        const esc = "`" + txt.replace(/`/g, "'").replace(/\n/g, " ") + "`";
+        // Keep labels Mermaid-safe across versions; older bundles may not support markdown labels.
+        const clean = String(txt || "").replace(/`/g, "'").replace(/\r?\n/g, " ").replace(/"/g, '\\"');
+        const label = useMarkdownLabels ? `\`${clean}\`` : clean;
         switch (shape) {
             case "round":
-                return `${id}("${esc}")`;
+                return `${id}("${label}")`;
             case "circle":
-                return `${id}(("${esc}"))`;
+                return `${id}(("${label}"))`;
             case "stadium":
-                return `${id}(["${esc}"])`;
+                return `${id}(["${label}"])`;
             case "subroutine":
-                return `${id}[[${esc}]]`;
+                return `${id}[[${label}]]`;
             case "cylinder":
-                return `${id}[("${esc}")]`;
+                return `${id}[("${label}")]`;
             case "diamond":
             case "rhombus":
-                return `${id}{${esc}}`;
+                return `${id}{${label}}`;
             case "hex":
-                return `${id}{{${esc}}}`;
+                return `${id}{{${label}}}`;
             case "asymmetric":
-                return `${id}>${esc}]`;
+                return `${id}>${label}]`;
             case "parallelogram":
-                return `${id}[/"${esc}"/]`;
+                return `${id}[/"${label}"/]`;
             case "trapezoid":
-                return `${id}[/\"${esc}\"\\]`;
+                return `${id}[/\"${label}\"\\]`;
             default:
-                return `${id}["${esc}"]`;
+                return `${id}["${label}"]`;
         }
     }
 
@@ -1276,9 +1276,24 @@ async function drawMermaid(tree) {
         return;
     }
 
-    el.textContent = mermaidSource(tree, pathHistory);
-    el.removeAttribute("data-processed");
-    await mermaid.run({nodes: [el]});
+    try {
+        el.textContent = mermaidSource(tree, pathHistory, {useMarkdownLabels: true});
+        el.removeAttribute("data-processed");
+        await mermaid.run({nodes: [el]});
+    } catch (markdownErr) {
+        try {
+            console.warn("Mermaid render failed with markdown labels, retrying without markdown labels.", markdownErr);
+            el.textContent = mermaidSource(tree, pathHistory, {useMarkdownLabels: false});
+            el.removeAttribute("data-processed");
+            await mermaid.run({nodes: [el]});
+        } catch (fallbackErr) {
+            console.error("Mermaid render failed.", fallbackErr);
+            el.textContent = "Kunne ikke tegne beslutningsdiagrammet.";
+            el.removeAttribute("data-processed");
+            return;
+        }
+    }
+
     updateDiagramOpenLink(el.querySelector("svg"));
 }
 
