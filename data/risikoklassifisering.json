@@ -169,12 +169,12 @@
     "options": {
       "isReport": {
         "next": "lowrisk",
-        "buttonText": "Nei",
+        "buttonText": "Ja",
         "label": "KI-systemet brukes for å forberede en avgjørelse eller vurdering på et av områdene omtalt i Billag 3."
       },
       "notReport": {
         "next": "highrisk",
-        "buttonText": "Ja",
+        "buttonText": "Nei",
         "label": "KI-systemet *skal ikke* brukes for å forberede en avgjørelse eller vurdering på et av områdene omtalt i Billag 3."
       }
     },
