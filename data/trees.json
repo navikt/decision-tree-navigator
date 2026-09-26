@@ -18,6 +18,12 @@
     "file": "merking.json"
   },
   {
+    "id": "informasjonsplikt-ved-samhandling",
+    "title": "BETA: Må personer vite at de samhandler med KI?",
+    "desc": "Leverandører av KI-systemer som samhandler direkte med mennesker skal generelt sørge for at de som samhandler direkte med systemet, får vite at de samhandler med et KI-system. Kravet gjelder uansett systemets risikonivå. TREET ER IKKE ENNÅ KVALITETSSIKRET AV EN JURIST.",
+    "file": "informasjonsplikt-ved-samhandling.json"
+},
+  {
     "id": "forskning",
     "title": "Skal vi delta i forskningsprosjektet?",
     "desc": "Hjelper deg vurdere om dere skal delta i forskningsprosjektet, ut fra noen velvalgte kriterier.",

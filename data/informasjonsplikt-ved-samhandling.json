@@ -1,0 +1,155 @@
+{
+  "title": "Må personer vite at de samhandler med KI?",
+  "intro-text": "<p>Dette treet hjelper deg avgjøre om Nav som leverandør av et KI-system må sørge for at personer som samhandler med systemet, får vite at de samhandler med KI.</p><p>Er du usikker på om vi regnes som systemets leverandør?  Bruk treet «Rolle etter KI-forordning» for å sjekke. Og dersom du er usikker om systemet ditt teller som et KI-system, kan du sjekke ved å bruke treet «Regnes systemet som KI?».</p>",
+  "start": {
+    "step-title": "Samhandler systemet med fysiske personer?",
+    "q": "Er KI-systemet tiltenkt å samhandle med fysiske personer?",
+    "help": "<p>«Fysiske personer» kan være innbyggere, ansatte, profesjonelle brukere eller personer som handler på vegne av andre.</p><p>Systemer som bare kommuniserer maskin-til-maskin eller på en annen måte ikke er ment å samhandle med mennesker, faller utenfor.</p>",
+    "shape": "stadium",
+    "read-more": {
+      "read-more-about": "",
+      "read-more-text": ""
+    },
+    "options": {
+      "isReport": {
+        "next": "reellSamhandling",
+        "buttonText": "Ja, KI-systemet er tiltenkt å samhandle med fysiske personer.",
+        "label": "Ja"
+      },
+      "notReport": {
+        "next": "utenforVirkeomradet",
+        "buttonText": "Nei, KI-systemet samhandler <em>ikke</em> med fysiske personer.",
+        "label": "Nei"
+      }
+    },
+    "note": {
+      "label": "Begrunn svaret ditt",
+      "required": false
+    }
+  },
+  "reellSamhandling": {
+    "step-title": "Er samhandlingen reell og toveis?",
+    "q": "Kan personen og KI-systemet utveksle informasjon slik at KI-systemets respons påvirkes av personens input?",
+    "help": "<p>Reel toveis samhandling mellom en fysisk person og et KI-system kan skje gjennom tekst, tale, bilde eller fysisk handling, og én enkelt utveksling kan være nok. Eksempler på slik samhandling kan være KI-agenter eller chatbots.</p><p>Ren innsamling av data, oversettelse, transkribering, tekstfullføring eller -forslag, anbefalingssystemer og andre løsninger uten reell utveksling regnes normalt ikke som slik samhandling.</p>",
+    "read-more": {
+      "read-more-about": "",
+      "read-more-text": ""
+    },
+    "options": {
+      "isReport": {
+        "next": "direkteSamhandling",
+        "buttonText": "Ja, KI-ystemet har genuin dialog- eller toveis-samhandling med fysiske personer.",
+        "label": "Ja"
+      },
+      "notReport": {
+        "next": "utenforVirkeomradet",
+        "buttonText": "Nei, KI-systemet samler kun inn data eller gir personen automatiserte svar uten mulighet for samhandling.",
+        "label": "Nei"
+      }
+    },
+    "note": {
+      "label": "Begrunn svaret ditt",
+      "hint": "Beskriv hva slags input personen kan gi systemet, og hvordan systemets respons påvirkes av denne inputen.",
+      "required": true
+    }
+  },
+  "direkteSamhandling": {
+    "step-title": "Samhandler KI-systemet direkte med personen?",
+    "q": "Er KI-systemet selv part i kommunikasjonen med personen?",
+    "help": "<p>Samhandlingen regnes som direkte når KI-systemet selv kommuniserer med personen, for eksempel KI-agenter og chatbots. Hvis en ansatt mottar KI-systemets forslag, faktisk vurderer innholdet og står for kommunikasjonen med personen, er samhandlingen normalt ikke direkte. At en ansatt <em>kan</em> gripe inn ved behov er ikke nok.</p>",
+    "read-more": {
+      "read-more-about": "",
+      "read-more-text": ""
+    },
+    "options": {
+      "isReport": {
+        "next": "apenbart",
+        "buttonText": "Ja, den fysiske personen samhandler direkte med KI-systemet.",
+        "label": "Ja"
+      },
+      "notReport": {
+        "next": "utenforVirkeomradet",
+        "buttonText": "Nei, et annet menneske mottar, vurderer og videreformidler KI-systemets svar til den fysiske personen.",
+        "label": "Nei"
+      }
+    },
+    "note": {
+      "label": "Begrunn svaret ditt",
+      "hint": "Hvis samhandlingen skjer via et menneskelig mellomledd, fortell hvordan denne personen vurderer og videreformidler systemets svar.",
+      "required": false
+    }
+  },
+  "apenbart": {
+    "step-title": "Er det åpenbart at systemet er KI?",
+    "q": "Er det åpenbart for en rimelig velinformert, oppmerksom og aktsom person i den tiltenkte og rimelig forutsigbare målgruppen at vedkommende samhandler med et KI-system?",
+    "help": "<p>Vurder dette ut fra en gjennomsnittlig person i systemets tiltenkte og rimelig forutsigbare målgruppe som er rimelig velinformert, oppmerksom og aktsom. Ta hensyn til hvordan systemet fremstår, situasjonen det brukes i og kjennetegn ved målgruppen, for eksempel alder, funksjonsevne, språk, digital kompetanse og KI-kompetanse.</p><p>Unntaket skal tolkes restriktivt. Hvis dere er usikre på om det er åpenbart for personer at de samhandler med KI, svar Nei. At målgruppen er profesjonell eller spesialisert kan inngå i vurderingen, men er ikke i seg selv nok.</p>",
+    "read-more": {
+      "read-more-about": "",
+      "read-more-text": ""
+    },
+    "options": {
+      "isReport": {
+        "next": "unntatt",
+        "buttonText": "Ja, det er åpenbart for en velinformert, oppmerksom og aktsom person i KI-systemets målgruppe at vedkommende samhandler med et KI-system.",
+        "label": "Ja"
+      },
+      "notReport": {
+        "next": "straffesakstiltak",
+        "buttonText": "Nei / usikkert. Det er en fare for at personer i KI-systemets målgruppe ikke forstår at de samhandler med KI.",
+        "label": "Nei / usikkert"
+      }
+    },
+    "note": {
+      "label": "Begrunn svaret ditt",
+      "hint": "Fortell om systemets målgruppe og dine vurderinger av målgruppas mulighet til å forstå at de samhandler med KI.",
+      "required": true
+    }
+  },
+  "straffesakstiltak": {
+    "step-title": "Mulig unntak for kriminalitetsbekjempelse",
+    "q": "Har den aktuelle samhandlingen som formål å avdekke, forebygge, etterforske eller straffeforfølge straffbare forhold?",
+    "help": "Systemer som har som formål å avdekke, forebygge, etterforske eller straffeforfølge straffbare forhold kan være unntatt fra plikten til å informere personer at de samhandler med KI.  Unntaket krever en konkret juridisk vurdering av eksisterende hjemmelsgrunnlag. ",
+    "read-more": {
+      "read-more-about": "",
+      "read-more-text": ""
+    },
+    "options": {
+      "isReport": {
+        "next": "kontaktJuristStraffesaksformal",
+        "buttonText": "Ja, KI-systemet brukes for å avsløre, forebygge, etterforske eller straffeforfølge straffbare forhold.",
+        "label": "Ja"
+      },
+      "notReport": {
+        "next": "informasjonsplikt",
+        "buttonText": "Nei, den aktuelle samhandlingen har ikke som formål å avdekke, forebygge, etterforske eller straffeforfølge straffbare forhold.",
+        "label": "Nei"
+      }
+    },
+    "note": {
+      "label": "Begrunn svaret ditt",
+      "hint": "Beskriv den aktuelle samhandlingens formål.",
+      "required": false
+    }
+  },
+  "utenforVirkeomradet": {
+    "step-title": "Systemets aktuelle bruk omfattes ikke av informasjonsplikten i KI-forordningen artikkel 50 nr. 1.",
+    "q": "Den aktuelle bruken omfattes ikke av plikten til å informere personer om at de samhandler med et KI-system.",
+    "help": "<p>Andre åpenhetsforpliktelser kan likevel gjelde for systemet. Sørg for at du vurderer systemet opp mot beslutningstrærene X, Y og Z.</p><p><strong>Neste steg:</strong></p><ul><li>Oppdater ditt systems informasjon i Systemkatalogen med resultatene. Last opp PDF-en; den viser sporet du tok gjennom treet og begrunnelsene dine.</li><li>Les XXX for ofte stilte spørsmål om åpenhetsforpliktelser.</li><li>Kontakt en jurist ved spørsmål om beslutningstreets innhold eller resultatet.</li><li>Kontakt Innsikt &amp; KI ved problemer, kommentarer eller spørsmål om verktøyet Beslutt.</li></ul>",
+    "end": true
+  },
+  "unntatt": {
+    "step-title": "Systemets aktuelle bruk er unntatt fra informasjonsplikten i KI-forordningen artikkel 50 nr. 1.",
+    "help": "<p>Andre åpenhetsforpliktelser kan likevel gjelde for systemet. Sørg for at du vurderer systemet opp mot beslutningstrærene X, Y og Z.</p><p><strong>Neste steg:</strong></p><ul><li>Oppdater Systemkatalogen med resultatene om systemet ditt. Last opp PDF-en; den viser sporet du tok gjennom treet og begrunnelsene dine.</li><li>Les XXX for ofte stilte spørsmål om åpenhetsforpliktelser.</li><li>Kontakt en jurist ved spørsmål om beslutningstreets innhold eller resultatet.</li><li>Kontakt Innsikt &amp; KI ved problemer, kommentarer eller spørsmål om verktøyet Beslutt.</li></ul>",
+    "end": true
+  },
+  "kontaktJuristStraffesaksformal": {
+    "step-title": "Kontakt en jurist.",
+    "help": "<p>Systemer som har som formål å avdekke, forebygge, etterforske eller straffeforfølge straffbare forhold kan være unntatt fra plikten til å informere personer om at de samhandler med er KI, men dette krever vurdering av en jurist.</p><p>Juristen må blant annet vurdere:</p><ul><li>Om den aktuelle bruken er autorisert ved lov.</li><li>Om den rettslig autoriserte bruken har tilstrekkelig klart formål og vilkår, og om det finnes nødvendige garantier for tredjeparters rettigheter og friheter.</li></ul><p>Hvis systemet er tilgjengelig for allmennheten og tilbyr en funksjon for å rapportere straffbare forhold, gjelder unntaket ikke.</p><p>For mer informasjon, les avsnitt 46–49 i EU-kommisjonens veiledning om åpenhetsforpliktelser for leverandører og idriftsettere av KI-systemer.</p>",
+    "end": true
+  },
+  "informasjonsplikt": {
+    "step-title": "KI-systemets bruk er omfattet av informasjonsplikten i KI-forordningen artikkel 50 nr. 1.",
+    "help": "<p>Nav som leverandør skal sørge for at personer som samhandler direkte med systemet blir informert om at de samhandler med et KI-system. Informasjonen skal gis på en klar og tydelig måte, senest ved første samhandling og i samsvar med gjeldende tilgjengelighetskrav.</p><p><strong>Neste steg:</strong></p><ul><li>Oppdater Systemkatalogen med resultatene om systemet ditt. Last opp PDF-en; den viser sporet du tok gjennom treet og begrunnelsene dine.</li><li>Les XXX for ofte stilte spørsmål og konkret veiledning om hvordan du kan best sikre at personer som samhandler med systemet forstår informasjonen.</li><li>Kontakt en jurist ved spørsmål om beslutningstreets innhold eller resultatet.</li><li>Kontakt Innsikt &amp; KI ved problemer, kommentarer eller spørsmål om verktøyet Beslutt.</li></ul>",
+    "end": true
+  }
+}

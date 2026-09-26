@@ -575,7 +575,7 @@ function render() {
 
         const dd = document.createElement("dd");
         dd.className = "navds-form-summary__value navds-body-long navds-body-long--medium" + (extraDdClass ? " " + extraDdClass : "");
-        dd.textContent = valueText;
+        dd.innerHTML = valueText;
         row.appendChild(dd);
 
         return row;
@@ -664,7 +664,7 @@ function render() {
         if (introText) {
             const introTextEl = document.createElement("div");
             introTextEl.className = "navds-body-long";
-            introTextEl.textContent = introText;
+            introTextEl.innerHTML = introText;
             wrapper.appendChild(introTextEl);
         }
 
