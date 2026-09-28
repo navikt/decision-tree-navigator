@@ -134,27 +134,27 @@
   "utenforVirkeomradet": {
     "step-title": "Systemets aktuelle bruk omfattes ikke av informasjonsplikten i KI-forordningen artikkel 50 nr. 1.",
     "q": "Den aktuelle bruken omfattes ikke av plikten til å informere personer om at de samhandler med et KI-system.",
-    "help": "<p>Andre åpenhetsforpliktelser kan likevel gjelde for systemet. Sørg for at du vurderer systemet opp mot beslutningstrærene X, Y og Z.</p><p><strong>Neste steg:</strong></p><ul><li>Oppdater ditt systems informasjon i Systemkatalogen med resultatene. Last opp PDF-en; den viser sporet du tok gjennom treet og begrunnelsene dine.</li><li>Les XXX for ofte stilte spørsmål om åpenhetsforpliktelser.</li><li>Kontakt en jurist ved spørsmål om beslutningstreets innhold eller resultatet.</li><li>Kontakt Innsikt &amp; KI ved problemer, kommentarer eller spørsmål om verktøyet Beslutt.</li></ul>",
+    "help": "",
     "end": true,
     "shape": "stadium"
   },
   "unntatt": {
     "step-title": "Systemets aktuelle bruk er unntatt fra informasjonsplikten i KI-forordningen artikkel 50 nr. 1.",
-    "help": "<p>Andre åpenhetsforpliktelser kan likevel gjelde for systemet. Sørg for at du vurderer systemet opp mot beslutningstrærene X, Y og Z.</p><p><strong>Neste steg:</strong></p><ul><li>Oppdater Systemkatalogen med resultatene om systemet ditt. Last opp PDF-en; den viser sporet du tok gjennom treet og begrunnelsene dine.</li><li>Les XXX for ofte stilte spørsmål om åpenhetsforpliktelser.</li><li>Kontakt en jurist ved spørsmål om beslutningstreets innhold eller resultatet.</li><li>Kontakt Innsikt &amp; KI ved problemer, kommentarer eller spørsmål om verktøyet Beslutt.</li></ul>",
+    "help": "",
     "end": true,
     "q": "Systemets aktuelle bruk er unntatt fra informasjonsplikten i KI-forordningen artikkel 50 nr. 1.",
     "shape": "stadium"
   },
   "kontaktJuristStraffesaksformal": {
     "step-title": "Kontakt en jurist.",
-    "help": "<p>Systemer som har som formål å avdekke, forebygge, etterforske eller straffeforfølge straffbare forhold kan være unntatt fra plikten til å informere personer om at de samhandler med er KI, men dette krever vurdering av en jurist.</p><p>Juristen må blant annet vurdere:</p><ul><li>Om den aktuelle bruken er autorisert ved lov.</li><li>Om den rettslig autoriserte bruken har tilstrekkelig klart formål og vilkår, og om det finnes nødvendige garantier for tredjeparters rettigheter og friheter.</li></ul><p>Hvis systemet er tilgjengelig for allmennheten og tilbyr en funksjon for å rapportere straffbare forhold, gjelder unntaket ikke.</p><p>For mer informasjon, les avsnitt 46–49 i EU-kommisjonens veiledning om åpenhetsforpliktelser for leverandører og idriftsettere av KI-systemer.</p>",
+    "help": "<p>Systemer som har som formål å avdekke, forebygge, etterforske eller straffeforfølge straffbare forhold kan være unntatt fra plikten til å informere personer om at de samhandler med er KI, men dette krever vurdering av en jurist. Juristen må blant annet vurdere:</p><ul><li>Om den aktuelle bruken er autorisert ved lov.</li><li>Om den rettslig autoriserte bruken har tilstrekkelig klart formål og vilkår, og om det finnes nødvendige garantier for tredjeparters rettigheter og friheter.</li></ul><p>Hvis systemet er tilgjengelig for allmennheten og tilbyr en funksjon for å rapportere straffbare forhold, gjelder unntaket ikke.</p><p>For mer informasjon, les avsnitt 46–49 i <a href='https://digital-strategy.ec.europa.eu/en/library/guidelines-transparency-obligations-providers-and-deployers-ai-systems'>EU-kommisjonens veiledning om åpenhetsforpliktelser for leverandører og idriftsettere av KI-systemer</a>.</p>",
     "end": true,
     "q": "Kontakt en jurist for å vurdere om unntaket for kriminalitetsbekjempelse gjelder.",
     "shape": "stadium"
   },
   "informasjonsplikt": {
     "step-title": "KI-systemets bruk er omfattet av informasjonsplikten i KI-forordningen artikkel 50 nr. 1.",
-    "help": "<p>Nav som leverandør skal sørge for at personer som samhandler direkte med systemet blir informert om at de samhandler med et KI-system. Informasjonen skal gis på en klar og tydelig måte, senest ved første samhandling og i samsvar med gjeldende tilgjengelighetskrav.</p><p><strong>Neste steg:</strong></p><ul><li>Oppdater Systemkatalogen med resultatene om systemet ditt. Last opp PDF-en; den viser sporet du tok gjennom treet og begrunnelsene dine.</li><li>Les XXX for ofte stilte spørsmål og konkret veiledning om hvordan du kan best sikre at personer som samhandler med systemet forstår informasjonen.</li><li>Kontakt en jurist ved spørsmål om beslutningstreets innhold eller resultatet.</li><li>Kontakt Innsikt &amp; KI ved problemer, kommentarer eller spørsmål om verktøyet Beslutt.</li></ul>",
+    "help": "<p>Nav som leverandør skal sørge for at personer som samhandler direkte med systemet blir informert om at de samhandler med et KI-system. Informasjonen skal gis på en klar og tydelig måte, senest ved første samhandling og i samsvar med gjeldende tilgjengelighetskrav.</p>",
     "end": true,
     "q": "KI-systemets bruk er omfattet av informasjonsplikten i KI-forordningen artikkel 50 nr. 1.",
     "shape": "stadium"
