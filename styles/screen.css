@@ -45,7 +45,7 @@ main {
 /* Site footer */
 
 footer {
-    background: var(--ax-brand-blue-1000, rgb(0, 41, 66));
+    background: rgb(0, 37, 60);
     color: #fff;
 }
 
