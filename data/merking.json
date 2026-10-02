@@ -1,5 +1,8 @@
 {
-  "title": "Merking av KI-generert innhold",
+  "id": "merking",
+  "title": "Bør jeg merke KI-innholdet mitt?",
+  "description": "Går gjennom kontekst, realisme og bruksområde for å avgjøre om og hvordan innhold bør merkes.",
+  "type": "decision-support",
   "intro-text": "Dette treet hjelper deg å avgjøre om og hvordan KI-generert innhold bør merkes. Det går gjennom kontekst (saksbehandling, rapporter, offentlig vs. internt innhold), graden av realisme, og om innholdet er retningsgivende eller arkivpliktig. Målet er å gi en konsekvent, risikobasert praksis for merking.",
   "start": {
     "step-title": "Innhold brukt i forbindelse Navs myndighetsutøvelse",

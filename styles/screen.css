@@ -191,6 +191,11 @@ a.footer-logo:hover {
     margin: 0 0 1.5rem;
 }
 
+.tree-types-description {
+    max-width: 48em;
+    margin: -1rem 0 1.5rem;
+}
+
 #tree-list {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
@@ -253,6 +258,11 @@ a.footer-logo:hover {
     color: var(--a-text-subtle);
 }
 
+.tree-card-type {
+    color: var(--a-text-default);
+    font-weight: 600;
+}
+
 
 /* Tree page layout */
 
@@ -265,6 +275,10 @@ body.start #answers {
     margin-bottom: .25rem;
     font-weight: normal;
     }
+
+.tree-classification {
+    margin: 0 0 .5rem;
+}
 
 #step-name {
     margin-bottom: 1rem;
@@ -421,9 +435,7 @@ body.start #tree-title {
     padding: 2px 4px;
 }
 
-#mermaid-container .node foreignObject div {
+#mermaid-container .node div {
     text-align: center;
     line-height: 1.3;
 }
-
-

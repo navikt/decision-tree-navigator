@@ -43,6 +43,7 @@
         <header id="page-header">
             <div class="wrapper">
                 <p id="tree-title" class="navds-heading navds-heading--xsmall navds-typo--color-subtle"></p>
+                <p id="tree-classification" class="tree-classification navds-label"></p>
                 <h1 id="step-name" class="navds-heading navds-heading--large" tabindex="-1"></h1>
                 <p id="question-range" class="navds-label navds-typo--color-subtle"></p>
                 <div id="progress-section"></div>
@@ -126,8 +127,8 @@
 
 <template id="radio-option-template">
     <div class="navds-radio navds-radio--medium">
-        <input type="radio" class="navds-radio__input">
-        <label class="navds-radio__label">
+        <input id="tree-option" type="radio" class="navds-radio__input">
+        <label for="tree-option" class="navds-radio__label">
             <span class="navds-radio__content">
                 <span class="navds-body-short navds-body-short--medium"></span>
             </span>

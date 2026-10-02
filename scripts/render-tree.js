@@ -369,6 +369,25 @@ function clearTextFieldError(fieldWrap, inputEl, errId) {
 
 
 let treeId = "";
+let canonicalTreeId = "";
+const SAFE_TREE_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
+
+function getTreeTypeLabel(tree) {
+    if (tree.type === "decision-support") return "Beslutningsstøttetre";
+    if (tree.type !== "governing") return "Tretype ikke oppgitt";
+
+    switch (tree.governance?.status) {
+        case "approved":
+            return "Styrende beslutningstre";
+        case "draft":
+            return "Utkast – ikke godkjent";
+        case "deprecated":
+            return "Utgått – ikke gjeldende";
+        default:
+            return "Godkjenningsstatus ikke oppgitt";
+    }
+}
+
 let notes = {};
 let introMeta = {serviceName: "", contactPerson: ""};
 
@@ -420,20 +439,14 @@ async function init() {
         return;
     }
 
-    let entry = {title: treeId, file: `${treeId}.json`};
-
-    try {
-        const catalog = await fetch("data/trees.json").then(r => r.json());
-        const match = catalog.find(t => t.id === treeId);
-        if (match) entry = match;
-    } catch {
-        // still fall back silently
+    canonicalTreeId = treeId;
+    if (!SAFE_TREE_ID.test(canonicalTreeId)) {
+        document.getElementById("question").textContent = "Ugyldig beslutningstre-ID.";
+        return;
     }
 
-    window.TREE_FILE = `data/${entry.file}`;
-    window.TREE_TITLE = entry.title;
-
-    document.title = entry.title;
+    window.TREE_FILE = `data/${canonicalTreeId}.json`;
+    window.TREE_TITLE = canonicalTreeId;
 
     notes = JSON.parse(localStorage.getItem(NOTES_KEY(treeId)) || "{}");
     await loadTree();
@@ -444,24 +457,41 @@ async function init() {
 async function loadTree() {
     try {
         const response = await fetch(window.TREE_FILE);
+        if (!response.ok) {
+            console.error(`Failed to load tree: HTTP ${response.status}`);
+            showTreeLoadError();
+            return;
+        }
         tree = await response.json();
+        if (!tree || typeof tree !== "object" || tree.id !== canonicalTreeId) {
+            console.error("Failed to load tree: metadata does not match requested ID");
+            showTreeLoadError();
+            return;
+        }
+        window.TREE_TITLE = tree.title || canonicalTreeId;
+        document.title = window.TREE_TITLE;
         normalizeTreeOptions(tree);
         computeStepRange(tree);
         render();
     } catch (e) {
         console.error("Failed to load tree:", e);
-        document.getElementById("question").innerHTML = "<p>Kunne ikke laste beslutningstreet.</p>";
-        const diagramEl = document.getElementById("mermaid-container");
-        diagramEl.textContent = "";
-        diagramEl.removeAttribute("data-processed");
+        showTreeLoadError();
     }
 
+}
+
+function showTreeLoadError() {
+    document.getElementById("question").textContent = "Kunne ikke laste beslutningstreet.";
+    const diagramEl = document.getElementById("mermaid-container");
+    diagramEl.textContent = "";
+    diagramEl.removeAttribute("data-processed");
 }
 
 // Render the entire page for the current node
 function render() {
     const stepNameHeader = document.getElementById("step-name");
     const treeTitleEl = document.getElementById("tree-title");
+    const treeClassificationEl = document.getElementById("tree-classification");
 
     const customTitle = (tree && typeof tree.title === "string") ? tree.title.trim() : "";
     const effectiveTitle = customTitle || window.TREE_TITLE;
@@ -469,6 +499,9 @@ function render() {
     // Always show the tree title in the span above the H1
     if (treeTitleEl) {
         treeTitleEl.textContent = effectiveTitle || "";
+    }
+    if (treeClassificationEl) {
+        treeClassificationEl.textContent = getTreeTypeLabel(tree);
     }
 
     const section = document.getElementById("question");
