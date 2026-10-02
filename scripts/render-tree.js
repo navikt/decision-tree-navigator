@@ -94,6 +94,36 @@ function getNoteValue(wrapper, current) {
     return textarea ? textarea.value.trim() : "";
 }
 
+function isTreeNode(value) {
+    return value && typeof value === "object" && !Array.isArray(value) &&
+        ("question" in value || "q" in value || "options" in value || "result" in value || "end" in value || "step-title" in value);
+}
+
+function getTreeNode(treeObj, id) {
+    const value = treeObj[id];
+    return isTreeNode(value) ? value : null;
+}
+
+function validateTreeMetadata(candidate, requestedId) {
+    if (!candidate || typeof candidate !== "object" || Array.isArray(candidate) ||
+        candidate.id !== requestedId ||
+        typeof candidate.title !== "string" || !candidate.title.trim() ||
+        typeof candidate.description !== "string" ||
+        typeof candidate["intro-text"] !== "string" ||
+        !["governing", "decision-support"].includes(candidate.type)) {
+        throw new Error("Ugyldige eller manglende metadata i beslutningstreet.");
+    }
+
+    if (candidate.type === "governing" || candidate.governance !== undefined) {
+        const governance = candidate.governance;
+        if (!governance || typeof governance !== "object" || Array.isArray(governance) ||
+            !["approved", "draft", "deprecated"].includes(governance.status) ||
+            !["version", "approvedBy", "approvedDate"].every((key) => typeof governance[key] === "string")) {
+            throw new Error("Ugyldige eller manglende godkjenningsopplysninger i beslutningstreet.");
+        }
+    }
+}
+
 
 // Normalize each node’s options into a sorted array of [key, option] pairs.
 // Sorting rule: by option.order (if present), otherwise alphabetically.
@@ -106,7 +136,7 @@ function normalizeTreeOptions(treeObj) {
         return oa !== ob ? oa - ob : String(a[0]).localeCompare(String(b[0]));
     });
 
-    for (const node of Object.values(treeObj)) {
+    for (const node of Object.values(treeObj).filter(isTreeNode)) {
         if (node && node.options && typeof node.options === "object" && !Array.isArray(node.options)) {
             node.options = sortPairs(node.options);
         }
@@ -129,7 +159,13 @@ function computeStepRange(treeObj) {
             return;
         }
         visiting[id] = true;
-        const node = treeObj[id];
+        const node = getTreeNode(treeObj, id);
+        if (!node) {
+            visiting[id] = false;
+            maxMemo[id] = 0;
+            minMemo[id] = 0;
+            return;
+        }
         let maxR = 0;
         let minR = Infinity;
         if (node && !node.end && Array.isArray(node.options) && node.options.length) {
@@ -148,7 +184,7 @@ function computeStepRange(treeObj) {
         minMemo[id] = minR === Infinity ? 0 : minR;
     }
 
-    Object.keys(treeObj).forEach(walk);
+    Object.keys(treeObj).filter((id) => isTreeNode(treeObj[id])).forEach(walk);
     minRemaining = minMemo;
     maxRemaining = maxMemo;
 }
@@ -373,19 +409,106 @@ let canonicalTreeId = "";
 const SAFE_TREE_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
 function getTreeTypeLabel(tree) {
-    if (tree.type === "decision-support") return "Beslutningsstøttetre";
+    if (tree.type === "decision-support") return "Beslutningsstøtte";
     if (tree.type !== "governing") return "Tretype ikke oppgitt";
 
     switch (tree.governance?.status) {
         case "approved":
-            return "Styrende beslutningstre";
+            return "Styrende beslutningstre · Godkjent";
         case "draft":
-            return "Utkast – ikke godkjent";
+            return "Styrende beslutningstre · Utkast";
         case "deprecated":
-            return "Utgått – ikke gjeldende";
+            return "Styrende beslutningstre · Utgått";
         default:
-            return "Godkjenningsstatus ikke oppgitt";
+            return "Styrende beslutningstre · Godkjenningsstatus ikke oppgitt";
     }
+}
+
+function getGovernanceRows() {
+    const governance = tree.governance || {};
+    return [
+        ["Versjon", governance.version],
+        ["Godkjent av", governance.approvedBy],
+        ["Godkjent dato", formatApprovalDate(governance.approvedDate)]
+    ].filter(([, value]) => typeof value === "string" && value.trim());
+}
+
+function formatApprovalDate(value) {
+    if (typeof value !== "string" || !value.trim()) return "";
+    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value.trim());
+    if (!match) return value.trim();
+    const date = new Date(`${value.trim()}T00:00:00Z`);
+    if (Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== value.trim()) return value.trim();
+    return new Intl.DateTimeFormat("nb-NO", {day: "numeric", month: "long", year: "numeric", timeZone: "UTC"}).format(date);
+}
+
+function createGovernanceBlock() {
+    const block = document.createElement("section");
+    block.className = "tree-governance";
+
+    const explanation = document.createElement("p");
+    explanation.className = "navds-body-long";
+    if (tree.type === "decision-support") {
+        explanation.textContent = "Dette treet hjelper deg å strukturere vurderingen. Det er ikke en styrende beslutningsregel.";
+    } else if (tree.governance.status === "approved") {
+        explanation.textContent = "Dette er et godkjent beslutningstre for denne vurderingen.";
+    } else if (tree.governance.status === "draft") {
+        explanation.textContent = "Dette treet er under arbeid og er ikke godkjent som styrende beslutningstre.";
+    } else {
+        explanation.textContent = "Dette treet er utgått og skal ikke brukes som gjeldende beslutningsregel.";
+    }
+    block.appendChild(explanation);
+
+    if (tree.type === "governing") {
+        const rows = getGovernanceRows();
+        if (rows.length) {
+            const list = document.createElement("dl");
+            rows.forEach(([label, value]) => {
+                const term = document.createElement("dt");
+                term.className = "navds-label";
+                term.textContent = label;
+                const description = document.createElement("dd");
+                description.className = "navds-body-short";
+                description.textContent = value;
+                list.append(term, description);
+            });
+            block.appendChild(list);
+        }
+    }
+    return block;
+}
+
+function renderPrintProvenance() {
+    const container = document.getElementById("tree-provenance-print");
+    if (!container) return;
+    container.replaceChildren();
+
+    const heading = document.createElement("p");
+    heading.className = "navds-label";
+    heading.textContent = `Beslutningstre: ${tree.title}`;
+    container.appendChild(heading);
+
+    const rows = [
+        ["ID", tree.id],
+        ["Type", tree.type === "governing" ? "Styrende beslutningstre" : "Beslutningsstøtte"]
+    ];
+    if (tree.type === "governing") {
+        const statusLabels = {approved: "Godkjent", draft: "Utkast", deprecated: "Utgått"};
+        rows.push(["Status", statusLabels[tree.governance.status]]);
+        rows.push(...getGovernanceRows());
+    }
+
+    const list = document.createElement("dl");
+    rows.forEach(([label, value]) => {
+        const term = document.createElement("dt");
+        term.className = "navds-label";
+        term.textContent = label;
+        const description = document.createElement("dd");
+        description.className = "navds-body-short";
+        description.textContent = value;
+        list.append(term, description);
+    });
+    container.appendChild(list);
 }
 
 let notes = {};
@@ -435,12 +558,14 @@ async function init() {
     const params = new URLSearchParams(window.location.search);
     treeId = params.get("id");
     if (!treeId) {
+        console.error("Mangler beslutningstre-ID i URL-en.");
         document.body.innerHTML = "<p>Mangler <code>?id=</code> i URL-en.</p>";
         return;
     }
 
     canonicalTreeId = treeId;
     if (!SAFE_TREE_ID.test(canonicalTreeId)) {
+        console.error("Ugyldig beslutningstre-ID", canonicalTreeId);
         document.getElementById("question").textContent = "Ugyldig beslutningstre-ID.";
         return;
     }
@@ -458,30 +583,30 @@ async function loadTree() {
     try {
         const response = await fetch(window.TREE_FILE);
         if (!response.ok) {
-            console.error(`Failed to load tree: HTTP ${response.status}`);
-            showTreeLoadError();
+            const message = `Kunne ikke laste beslutningstreet "${canonicalTreeId}": HTTP ${response.status}`;
+            console.error(message);
+            showTreeLoadError("Kunne ikke laste beslutningstreet. Kontroller lenken eller prøv igjen senere.");
             return;
         }
         tree = await response.json();
-        if (!tree || typeof tree !== "object" || tree.id !== canonicalTreeId) {
-            console.error("Failed to load tree: metadata does not match requested ID");
-            showTreeLoadError();
-            return;
-        }
+        validateTreeMetadata(tree, canonicalTreeId);
         window.TREE_TITLE = tree.title || canonicalTreeId;
         document.title = window.TREE_TITLE;
         normalizeTreeOptions(tree);
         computeStepRange(tree);
+        renderPrintProvenance();
         render();
     } catch (e) {
-        console.error("Failed to load tree:", e);
-        showTreeLoadError();
+        console.error(`Kunne ikke laste beslutningstreet "${canonicalTreeId}"`, e);
+        showTreeLoadError(e.message === "Ugyldige eller manglende godkjenningsopplysninger i beslutningstreet."
+            ? "Beslutningstreet har ugyldige godkjenningsopplysninger og kan ikke vises."
+            : "Beslutningstreet har ugyldige metadata eller kunne ikke lastes.");
     }
 
 }
 
-function showTreeLoadError() {
-    document.getElementById("question").textContent = "Kunne ikke laste beslutningstreet.";
+function showTreeLoadError(message) {
+    document.getElementById("question").textContent = message;
     const diagramEl = document.getElementById("mermaid-container");
     diagramEl.textContent = "";
     diagramEl.removeAttribute("data-processed");
@@ -513,7 +638,7 @@ function render() {
 
     // 2) Finn gjeldende node og sjekk om vi er i intro-modus (startside før første interaksjon)
     const current = pathHistory[pathHistory.length - 1];
-    const node = tree[current];
+    const node = getTreeNode(tree, current);
     const introMode = (current === "start" && !interacted);
 
     // Progress indicator: "N–M spørsmål" on the intro page, "Steg N av M" (or "av inntil M"
@@ -586,7 +711,8 @@ function render() {
     for (let i = 0; i < pathHistory.length - 1; i++) {
         const nodeId = pathHistory[i];
         const nextId = pathHistory[i + 1];
-        const n = tree[nodeId];
+        const n = getTreeNode(tree, nodeId);
+        if (!n || !Array.isArray(n.options)) continue;
 
         const match = n.options.find(([, opt]) => opt && opt.next === nextId);
         if (match) {
@@ -634,7 +760,8 @@ function render() {
         // Besvarte spørsmål: bruk valgt alternativ sin label + notat,
         // og kun for ferdig besvarte steg (alle unntatt siste i pathHistory).
         completedIds.forEach((nodeId) => {
-            const n = tree[nodeId];
+            const n = getTreeNode(tree, nodeId);
+            if (!n) return;
             const opt = chosenForNode[nodeId];
             const labelText = opt && opt.label ? opt.label : "";
             const noteText = (getNote(nodeId) || "").trim();
@@ -693,6 +820,8 @@ function render() {
 
         const wrapper = document.createElement("div");
         wrapper.className = "question-wrapper";
+
+        wrapper.appendChild(createGovernanceBlock());
 
         if (introText) {
             const introTextEl = document.createElement("div");
@@ -1144,7 +1273,8 @@ function mermaidSource(tree, pathHistory, {useMarkdownLabels = true} = {}) {
         if (visitedNodes.has(id)) return;
         visitedNodes.add(id);
 
-        const n = tree[id];
+        const n = getTreeNode(tree, id);
+        if (!n) return;
         const isEnd = !!n.end;
 
         // Defaulting logic:
@@ -1171,7 +1301,7 @@ function mermaidSource(tree, pathHistory, {useMarkdownLabels = true} = {}) {
         if (!n.end && n.options) {
             const optionEntries = Array.isArray(n.options) ? n.options : [];
             for (const [, opt] of optionEntries) {
-                if (!opt) continue;
+                if (!opt || !getTreeNode(tree, opt.next)) continue;
                 const label = (opt.buttonText || "").replace(/"/g, '\\"');
                 const edgeKey = `${id}->${opt.next}`;
 
@@ -1214,7 +1344,10 @@ function exportAnswersAsJson() {
     for (let i = 0; i < pathHistory.length - 1; i++) {
         const nodeId = pathHistory[i];
         const nextId = pathHistory[i + 1];
-        const n = tree[nodeId];
+        const n = getTreeNode(tree, nodeId);
+        if (!n) {
+            throw new Error(`Fant ikke beslutningssteget "${nodeId}" i treet.`);
+        }
         const match = (n.options || []).find(([, opt]) => opt && opt.next === nextId);
         const opt = match ? match[1] : null;
         steps.push({
@@ -1225,9 +1358,15 @@ function exportAnswersAsJson() {
     }
 
     const finalId = pathHistory[pathHistory.length - 1];
-    const finalNode = tree[finalId] || {};
+    const finalNode = getTreeNode(tree, finalId) || {};
+    const treeMetadata = {
+        id: tree.id,
+        title: tree.title,
+        type: tree.type
+    };
+    if (tree.type === "governing") treeMetadata.governance = tree.governance;
     const data = {
-        tree: tree.title || "",
+        tree: treeMetadata,
         exportedAt: new Date().toISOString(),
         serviceName: (introMeta && introMeta.serviceName) || null,
         contactPerson: (introMeta && introMeta.contactPerson) || null,

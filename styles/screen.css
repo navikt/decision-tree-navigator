@@ -191,15 +191,32 @@ a.footer-logo:hover {
     margin: 0 0 1.5rem;
 }
 
-.tree-types-description {
-    max-width: 48em;
-    margin: -1rem 0 1.5rem;
+.tree-group + .tree-group {
+    margin-top: 2.5rem;
 }
 
-#tree-list {
+.tree-group h3,
+#other-governing-trees h4 {
+    margin: 0 0 .75rem;
+}
+
+.tree-types-description {
+    max-width: 48em;
+    margin: 0 0 1.5rem;
+}
+
+.tree-list {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.25rem;
+}
+
+#other-governing-trees {
+    margin-top: 2rem;
+}
+
+.tree-load-error {
+    color: var(--a-text-danger);
 }
 
 .tree-card {
@@ -261,6 +278,43 @@ a.footer-logo:hover {
 .tree-card-type {
     color: var(--a-text-default);
     font-weight: 600;
+}
+
+.tree-governance {
+    padding: 1rem;
+    border-left: 4px solid var(--a-border-strong);
+    background: var(--a-surface-subtle);
+}
+
+.tree-governance p {
+    margin: 0;
+}
+
+.tree-governance dl {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: .25rem .75rem;
+    margin: .75rem 0 0;
+}
+
+.tree-governance dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.tree-provenance-print {
+    display: none;
+}
+
+@media (max-width: 480px) {
+    .tree-governance dl {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0;
+    }
+
+    .tree-governance dd {
+        margin-bottom: .5rem;
+    }
 }
 
 

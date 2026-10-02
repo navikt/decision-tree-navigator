@@ -34,28 +34,37 @@
         <div class="wrapper">
             <h1 class="navds-heading navds-heading--large">Om dette verktøyet</h1>
 
-            <p class="navds-body-long">Dette er et veiledningsverktøy som hjelper deg å vurdere og dokumentere
-                beslutninger
-                steg for steg. Svarene dine,
-                inkludert det du skriver i fritekstfelt, lagres bare lokalt i nettleseren din mens du bruker siden.
-                Ingen
-                annet
-                enn deg får tilgang til dataene, og de slettes automatisk hvis du lukker siden eller starter på
-                nytt.</p>
+            <p class="navds-body-long">Beslutt hjelper deg å gjøre og dokumentere vurderinger steg for steg. Noen
+                beslutningstrær er styrende, mens andre er beslutningsstøtte. Det går tydelig fram av hvert tre
+                hvilken type det er.</p>
+            <p class="navds-body-long">Svarene dine, inkludert det du skriver i fritekstfelt, lagres bare lokalt i
+                nettleseren mens du bruker siden. Ingen andre får tilgang til dataene, og de slettes automatisk hvis
+                du lukker siden eller starter på nytt.</p>
 
-            <p class="navds-body-long">Når du er ferdig, lagre resultatet som PDF for å ta vare på vurderingene dine.
-                Det er
-                den eneste måten å lagre
-                arbeidet på.</p>
+            <p class="navds-body-long">Når du er ferdig, kan du lagre vurderingene som PDF eller JSON.</p>
         </div>
     </section>
 
     <section id="tree-section">
         <div class="wrapper">
             <h2 class="navds-heading navds-heading--medium">Hva trenger du å beslutte?</h2>
-            <p class="tree-types-description navds-body-short">Et styrende beslutningstre viser Navs godkjente metode for å gjøre og dokumentere en definert vurdering. Et beslutningsstøttetre hjelper deg å vurdere systematisk, men er ikke i seg selv en bindende beslutningsregel.</p>
-
-            <nav id="tree-list"></nav>
+            <section aria-labelledby="governing-title" class="tree-group">
+                <h3 id="governing-title" class="navds-heading navds-heading--small">Styrende beslutningstrær</h3>
+                <p class="tree-types-description navds-body-short">Godkjente beslutningstrær som skal brukes for å gjøre og dokumentere bestemte vurderinger.</p>
+                <nav id="governing-tree-list" class="tree-list" aria-label="Godkjente styrende beslutningstrær"></nav>
+                <div id="other-governing-trees" hidden>
+                    <h4 class="navds-heading navds-heading--xsmall">Andre styrende beslutningstrær</h4>
+                    <p class="tree-types-description navds-body-short">Disse trærne er ikke godkjent som styrende beslutningsregler.</p>
+                    <nav id="other-governing-tree-list" class="tree-list" aria-label="Styrende beslutningstrær som ikke er godkjent"></nav>
+                </div>
+                <p id="governing-tree-error" class="tree-load-error navds-body-short" role="alert" hidden></p>
+            </section>
+            <section aria-labelledby="decision-support-title" class="tree-group">
+                <h3 id="decision-support-title" class="navds-heading navds-heading--small">Beslutningsstøtte</h3>
+                <p class="tree-types-description navds-body-short">Verktøy som hjelper deg å strukturere en vurdering. De er ikke i seg selv styrende beslutningsregler.</p>
+                <nav id="decision-support-tree-list" class="tree-list" aria-label="Beslutningsstøtte"></nav>
+                <p id="decision-support-tree-error" class="tree-load-error navds-body-short" role="alert" hidden></p>
+            </section>
         </div>
     </section>
 </main>
