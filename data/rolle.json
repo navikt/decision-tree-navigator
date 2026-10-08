@@ -1,8 +1,8 @@
 {
   "id": "rolle",
-  "title": "Rolle etter KI-forordningen: Er vi leverandør eller idriftsetter?",
-  "description": "Avklarer hvilken rolle Nav har etter KI-forordningen, og hvilke plikter som gjelder.",
-  "type": "governing",
+  "title": "Er vi leverandør eller idriftsetter?",
+  "description": "Avklarer Navs rolle etter KI-forordningen.",
+  "type": "official",
   "governance": {
     "status": "approved",
     "version": "",

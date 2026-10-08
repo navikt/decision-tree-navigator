@@ -2,8 +2,8 @@
   "id": "forskningsprosjekt",
   "title": "Skal vi delta i forskningsprosjektet?",
   "description": "Hjelper deg vurdere om dere skal delta i forskningsprosjektet, ut fra noen velvalgte kriterier.",
-  "type": "decision-support",
-  "intro-text": "Du har motttatt en forslag til å inngå i et forskningsprosjekt. Denne veilederen hjelper deg med å vurdere om du skal med eller ikke med utgangspunkt i noen velvalgte kriterier",  
+  "type": "advisory",
+  "intro-text": "Du har motttatt en forslag til å inngå i et forskningsprosjekt. Denne veilederen hjelper deg med å vurdere om du skal med eller ikke med utgangspunkt i noen velvalgte kriterier.",
   "start": {
     "step-title": "Strategisk fit / Prioritert område",
     "q": "Kan forskningsprosjektet kobles til minst ett av de prioriterte strategiområdene?",

@@ -13,8 +13,8 @@ Forsiden ligger i [index.html](https://github.com/navikt/decision-tree-navigator
 
 ## Legg til et tre
 1. Opprett `data/<id>.json`. Bruk en ID med små bokstaver, tall og bindestreker.
-2. Legg inn `id`, `title`, `description` og `type` øverst i fila, sammen med treets noder. `type` må være `governing` eller `decision-support`.
-3. For `governing`-trær legger du også inn `governance` med status `approved`, `draft` eller `deprecated`, og feltene `version`, `approvedBy` og `approvedDate`.
+2. Legg inn `id`, `title`, `description` og `type` øverst i fila, sammen med treets noder. `type` må være `official` eller `advisory`.
+3. For `official`-trær legger du også inn `governance` med status `approved`, `draft` eller `deprecated`, og feltene `version`, `approvedBy` og `approvedDate`.
 4. Hvis du ikke kjenner versjon, godkjenner eller dato ennå, lar du verdien stå som en tom streng. Grensesnittet viser bare felt som har en verdi.
 5. Legg ID-en inn i `data/manifest.json` der du vil at treet skal vises.
 
@@ -22,12 +22,12 @@ Forsiden ligger i [index.html](https://github.com/navikt/decision-tree-navigator
 
 `type` sier hva slags beslutninger treet brukes til. Det finnes to typer:
 
-- `type: "decision-support"` er for trær som brukes som beslutningsstøtte. Slike trær tilbyr en strukturert måte å gå gjennom og dokumentere vurderinger på, men representerer ikke Navs offisielt godkjente beslutningslogikk. Disse trærne trenger ikke et `governance`-objekt.
-- `type: "governing"` er for trær som representerer Navs offisielt godkjente, eller planlagte offisielle, beslutningslogikk. Disse må ha et `governance`-objekt.
+- `type: "advisory"` er for veiledende trær som tilbyr en strukturert måte å gå gjennom og dokumentere vurderinger på, men ikke representerer Navs offisielt godkjente beslutningslogikk. Disse trærne trenger ikke et `governance`-objekt.
+- `type: "official"` er for trær som representerer Navs offisielt godkjente, eller planlagte offisielle, beslutningslogikk. Disse må ha et `governance`-objekt.
 
 #### `governance`-objektet
 
-`governance`-objektet inneholder informasjon om godkjenning og versjonering av et styrende beslutningstre.
+`governance`-objektet inneholder informasjon om godkjenning og versjonering av et offisielt beslutningstre.
 
 Eksempel:
 
@@ -43,12 +43,12 @@ Eksempel:
 ```
 
 - `governance.status` kan være:
-    - `"approved"` - denne versjonen er godkjent som styrende beslutningstre.
+    - `"approved"` - denne versjonen er godkjent som offisielt beslutningstre.
     - `"draft"` - treet er under arbeid eller venter på nødvendig godkjenning.
     - `"deprecated"` - treet skal ikke lenger brukes til nye vurderinger.
 - `governance.version` er treets versjonsnummer.
-- `governance.approvedBy` er hvem som har godkjent den styrende beslutningslogikken.
-- `governance.approvedDate` er datoen den styrende beslutningslogikken sist ble formelt godkjent.
+- `governance.approvedBy` er hvem som har godkjent den offisielle beslutningslogikken.
+- `governance.approvedDate` er datoen den offisielle beslutningslogikken sist ble formelt godkjent.
 
 La feltene `version`, `approvedBy` og `approvedDate` stå som tomme strenger dersom opplysningene ikke er kjent ennå. Feltene fungerer også som en mal for hvilke opplysninger som kan fylles inn senere.  Grensesnittet viser bare governance-felt som har en verdi. JSON-eksporten tar med feltene også når de er tomme.
 
@@ -88,7 +88,9 @@ Er det tvil om en endring kan påvirke forståelsen, beslutningsforløpet eller 
 Når det gjøres en endring som krever ny godkjenning, settes:
 
 ```json
-"status": "draft"
+{
+  "status": "draft"
+}
 ```
 
 mens endringen arbeides med og behandles.
@@ -96,14 +98,16 @@ mens endringen arbeides med og behandles.
 Når den nye versjonen er godkjent, settes status tilbake til:
 
 ```json
-"status": "approved"
+{
+  "status": "approved"
+}
 ```
 
 og `approvedBy` og `approvedDate` oppdateres.
 
 Endringer som ikke krever ny godkjenning kan publiseres som minor- eller patch-versjoner uten at `approvedBy` eller `approvedDate` endres.
 
-`approvedBy` og `approvedDate` viser dermed den siste formelle godkjenningen av den styrende beslutningslogikken, ikke nødvendigvis tidspunktet for den siste redaksjonelle eller tekniske endringen.
+`approvedBy` og `approvedDate` viser dermed den siste formelle godkjenningen av den offisielle beslutningslogikken, ikke nødvendigvis tidspunktet for den siste redaksjonelle eller tekniske endringen.
 
 
 

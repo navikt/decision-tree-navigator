@@ -3,16 +3,20 @@ const ARROW_RIGHT_PATH = "M14.0878 6.87338C14.3788 6.68148 14.774 6.7139 15.0302
 
 const SAFE_TREE_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const GOVERNANCE_STATUSES = new Set(['approved', 'draft', 'deprecated']);
+const TREE_STATUS_TAGS = {
+    approved: { label: 'Godkjent', variant: 'success-moderate' },
+    draft: { label: 'Utkast', variant: 'neutral-moderate' }
+};
 
 function validateTree(tree, id) {
     if (!tree || typeof tree !== 'object' || Array.isArray(tree) ||
         tree.id !== id || typeof tree.title !== 'string' || !tree.title.trim() ||
         typeof tree.description !== 'string' ||
         typeof tree['intro-text'] !== 'string' ||
-        !['governing', 'decision-support'].includes(tree.type)) {
+        !['official', 'advisory'].includes(tree.type)) {
         throw new Error(`Ugyldige metadata for beslutningstreet "${id}".`);
     }
-    if (tree.type === 'governing' || tree.governance !== undefined) {
+    if (tree.type === 'official' || tree.governance !== undefined) {
         const governance = tree.governance;
         if (!governance || typeof governance !== 'object' || Array.isArray(governance) ||
             !GOVERNANCE_STATUSES.has(governance.status) ||
@@ -20,16 +24,6 @@ function validateTree(tree, id) {
             throw new Error(`Ugyldige godkjenningsopplysninger for beslutningstreet "${id}".`);
         }
     }
-}
-
-function getTreeTypeLabel(tree) {
-    if (tree.type === 'decision-support') return 'Beslutningsstøtte';
-    const statusLabels = {
-        approved: 'Godkjent',
-        draft: 'Utkast',
-        deprecated: 'Utgått'
-    };
-    return `Styrende · ${statusLabels[tree.governance.status]}`;
 }
 
 function createTreeCard(tree) {
@@ -43,10 +37,23 @@ function createTreeCard(tree) {
     const titleRow = document.createElement('span');
     titleRow.className = 'tree-card-row';
 
+    const heading = document.createElement('span');
+    heading.className = 'tree-card-heading';
+
+    const statusTag = tree.type === 'official' ? TREE_STATUS_TAGS[tree.governance.status] : null;
+    if (statusTag) {
+        const tagEl = document.createElement('span');
+        tagEl.className = `navds-tag navds-tag--xsmall navds-tag--${statusTag.variant}`;
+        tagEl.textContent = statusTag.label;
+        heading.appendChild(tagEl);
+    }
+
     const titleEl = document.createElement('span');
     titleEl.className = 'tree-card-title navds-heading navds-heading--small';
     titleEl.textContent = tree.title;
-    titleRow.appendChild(titleEl);
+    heading.appendChild(titleEl);
+
+    titleRow.appendChild(heading);
 
     const arrow = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
     arrow.setAttribute('class', 'tree-card-arrow');
@@ -63,11 +70,6 @@ function createTreeCard(tree) {
 
     a.appendChild(titleRow);
 
-    const typeEl = document.createElement('span');
-    typeEl.className = 'tree-card-type navds-label';
-    typeEl.textContent = getTreeTypeLabel(tree);
-    a.appendChild(typeEl);
-
     if (tree.description) {
         const descEl = document.createElement('span');
         descEl.className = 'navds-body-short navds-body-short--medium tree-card-desc';
@@ -79,13 +81,12 @@ function createTreeCard(tree) {
 }
 
 async function loadList() {
-    const governingNav = document.getElementById('governing-tree-list');
-    const supportNav = document.getElementById('decision-support-tree-list');
-    const otherGoverningNav = document.getElementById('other-governing-tree-list');
-    if (!governingNav || !supportNav || !otherGoverningNav) return;
+    const officialNav = document.getElementById('official-tree-list');
+    const advisoryNav = document.getElementById('advisory-tree-list');
+    if (!officialNav || !advisoryNav) return;
 
     function showError(type, message) {
-        const errorEl = document.getElementById(type === 'decision-support' ? 'decision-support-tree-error' : 'governing-tree-error');
+        const errorEl = document.getElementById(type === 'advisory' ? 'advisory-tree-error' : 'official-tree-error');
         errorEl.textContent = message;
         errorEl.hidden = false;
     }
@@ -94,54 +95,55 @@ async function loadList() {
         const response = await fetch('data/manifest.json');
         if (!response.ok) {
             console.error(`Kunne ikke laste manifest.json: HTTP ${response.status}`);
-            showError('governing', 'Kunne ikke laste beslutningstrærne. Prøv å laste siden på nytt.');
-            showError('decision-support', 'Kunne ikke laste beslutningstrærne. Prøv å laste siden på nytt.');
+            showError('official', 'Kunne ikke laste beslutningstrærne. Prøv å laste siden på nytt.');
+            showError('advisory', 'Kunne ikke laste beslutningstrærne. Prøv å laste siden på nytt.');
             return;
         }
         const treeIds = await response.json();
         if (!Array.isArray(treeIds)) {
             console.error('Ugyldig manifest.json: forventet en liste med tre-ID-er');
-            showError('governing', 'Beslutningstrærne kunne ikke vises fordi listen over trær er ugyldig.');
-            showError('decision-support', 'Beslutningstrærne kunne ikke vises fordi listen over trær er ugyldig.');
+            showError('official', 'Beslutningstrærne kunne ikke vises fordi listen over trær er ugyldig.');
+            showError('advisory', 'Beslutningstrærne kunne ikke vises fordi listen over trær er ugyldig.');
             return;
         }
 
         const entries = await Promise.all(treeIds.map(async (id) => {
             if (typeof id !== 'string' || !SAFE_TREE_ID.test(id)) {
                 console.error('Ugyldig tre-ID i manifest.json', id);
-                showError('governing', 'Ett eller flere beslutningstrær kunne ikke lastes fordi en tre-ID er ugyldig.');
-                showError('decision-support', 'Ett eller flere beslutningstrær kunne ikke lastes fordi en tre-ID er ugyldig.');
+                showError('official', 'Ett eller flere beslutningstrær kunne ikke lastes fordi en tre-ID er ugyldig.');
+                showError('advisory', 'Ett eller flere beslutningstrær kunne ikke lastes fordi en tre-ID er ugyldig.');
                 return null;
             }
 
             try {
                 const treeResponse = await fetch(`data/${id}.json`);
                 if (!treeResponse.ok) {
-                    throw new Error(`Kunne ikke laste beslutningstreet "${id}": HTTP ${treeResponse.status}`);
+                    console.error(`Kunne ikke laste beslutningstreet "${id}": HTTP ${treeResponse.status}`);
+                    showError('official', 'Ett eller flere beslutningstrær kunne ikke lastes. Se konsollen for detaljer.');
+                    showError('advisory', 'Ett eller flere beslutningstrær kunne ikke lastes. Se konsollen for detaljer.');
+                    return null;
                 }
                 const tree = await treeResponse.json();
                 validateTree(tree, id);
                 return tree;
             } catch (e) {
                 console.error(`Kunne ikke laste beslutningstreet "${id}"`, e);
-                showError('governing', 'Ett eller flere beslutningstrær kunne ikke lastes. Se konsollen for detaljer.');
-                showError('decision-support', 'Ett eller flere beslutningstrær kunne ikke lastes. Se konsollen for detaljer.');
+                showError('official', 'Ett eller flere beslutningstrær kunne ikke lastes. Se konsollen for detaljer.');
+                showError('advisory', 'Ett eller flere beslutningstrær kunne ikke lastes. Se konsollen for detaljer.');
                 return null;
             }
         }));
 
         entries.filter(Boolean).forEach((tree) => {
-            const isApprovedGoverning = tree.type === 'governing' && tree.governance.status === 'approved';
-            const list = tree.type === 'decision-support'
-                ? supportNav
-                : isApprovedGoverning ? governingNav : otherGoverningNav;
+            const list = tree.type === 'advisory'
+                ? advisoryNav
+                : officialNav;
             list.appendChild(createTreeCard(tree));
         });
-        document.getElementById('other-governing-trees').hidden = otherGoverningNav.childElementCount === 0;
     } catch (e) {
         console.error('Kunne ikke laste manifest.json', e);
-        showError('governing', 'Kunne ikke laste beslutningstrærne. Prøv å laste siden på nytt.');
-        showError('decision-support', 'Kunne ikke laste beslutningstrærne. Prøv å laste siden på nytt.');
+        showError('official', 'Kunne ikke laste beslutningstrærne. Prøv å laste siden på nytt.');
+        showError('advisory', 'Kunne ikke laste beslutningstrærne. Prøv å laste siden på nytt.');
     }
 }
 

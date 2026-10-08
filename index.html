@@ -32,38 +32,27 @@
 <main>
     <section id="hero">
         <div class="wrapper">
-            <h1 class="navds-heading navds-heading--large">Om dette verktøyet</h1>
+            <h1 class="navds-heading navds-heading--large">Steg for steg, fra vurdering til dokumentasjon.</h1>
 
-            <p class="navds-body-long">Beslutt hjelper deg å gjøre og dokumentere vurderinger steg for steg. Noen
-                beslutningstrær er styrende, mens andre er beslutningsstøtte. Det går tydelig fram av hvert tre
-                hvilken type det er.</p>
-            <p class="navds-body-long">Svarene dine, inkludert det du skriver i fritekstfelt, lagres bare lokalt i
-                nettleseren mens du bruker siden. Ingen andre får tilgang til dataene, og de slettes automatisk hvis
-                du lukker siden eller starter på nytt.</p>
-
-            <p class="navds-body-long">Når du er ferdig, kan du lagre vurderingene som PDF eller JSON.</p>
+            <p class="navds-body-long">Beslutt hjelper deg gjennom beslutningstrær, med forklaringer og veiledning underveis. Du får støtte til å forstå alternativene og gjøre begrunnede valg. Når du er ferdig, kan du lagre valgene dine og den endelige vurderingen som dokumentasjon i PDF eller JSON.</p>
+            <p class="navds-body-long">Svarene dine lagres bare lokalt i nettleseren mens du bruker siden. Ingen andre får tilgang til dataene, og de slettes automatisk hvis du lukker siden eller starter på nytt.</p>
         </div>
     </section>
 
     <section id="tree-section">
         <div class="wrapper">
             <h2 class="navds-heading navds-heading--medium">Hva trenger du å beslutte?</h2>
-            <section aria-labelledby="governing-title" class="tree-group">
-                <h3 id="governing-title" class="navds-heading navds-heading--small">Styrende beslutningstrær</h3>
-                <p class="tree-types-description navds-body-short">Godkjente beslutningstrær som skal brukes for å gjøre og dokumentere bestemte vurderinger.</p>
-                <nav id="governing-tree-list" class="tree-list" aria-label="Godkjente styrende beslutningstrær"></nav>
-                <div id="other-governing-trees" hidden>
-                    <h4 class="navds-heading navds-heading--xsmall">Andre styrende beslutningstrær</h4>
-                    <p class="tree-types-description navds-body-short">Disse trærne er ikke godkjent som styrende beslutningsregler.</p>
-                    <nav id="other-governing-tree-list" class="tree-list" aria-label="Styrende beslutningstrær som ikke er godkjent"></nav>
-                </div>
-                <p id="governing-tree-error" class="tree-load-error navds-body-short" role="alert" hidden></p>
+            <section class="tree-group">
+                <h3 id="official-title" class="navds-heading navds-heading--small">Offisielle beslutningstrær</h3>
+                <p class="tree-types-description navds-body-short">Kvalitetssikrede beslutningstrær som representerer Navs offisielle tolkning av regelverk og fremgangsmåte for bestemte vurderinger.</p>
+                <nav id="official-tree-list" class="tree-list" aria-labelledby="official-title"></nav>
+                <p id="official-tree-error" class="tree-load-error navds-body-short" hidden></p>
             </section>
-            <section aria-labelledby="decision-support-title" class="tree-group">
-                <h3 id="decision-support-title" class="navds-heading navds-heading--small">Beslutningsstøtte</h3>
-                <p class="tree-types-description navds-body-short">Verktøy som hjelper deg å strukturere en vurdering. De er ikke i seg selv styrende beslutningsregler.</p>
-                <nav id="decision-support-tree-list" class="tree-list" aria-label="Beslutningsstøtte"></nav>
-                <p id="decision-support-tree-error" class="tree-load-error navds-body-short" role="alert" hidden></p>
+            <section class="tree-group">
+                <h3 id="advisory-title" class="navds-heading navds-heading--small">Veiledende beslutningstrær</h3>
+                <p class="tree-types-description navds-body-short">Beslutningstrær som gir støtte til ulike vurderinger, men som ikke er formelt godkjent som Navs offisielle fremgangsmåte.</p>
+                <nav id="advisory-tree-list" class="tree-list" aria-labelledby="advisory-title"></nav>
+                <p id="advisory-tree-error" class="tree-load-error navds-body-short" hidden></p>
             </section>
         </div>
     </section>

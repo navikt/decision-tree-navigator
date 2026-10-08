@@ -110,11 +110,11 @@ function validateTreeMetadata(candidate, requestedId) {
         typeof candidate.title !== "string" || !candidate.title.trim() ||
         typeof candidate.description !== "string" ||
         typeof candidate["intro-text"] !== "string" ||
-        !["governing", "decision-support"].includes(candidate.type)) {
+        !["official", "advisory"].includes(candidate.type)) {
         throw new Error("Ugyldige eller manglende metadata i beslutningstreet.");
     }
 
-    if (candidate.type === "governing" || candidate.governance !== undefined) {
+    if (candidate.type === "official" || candidate.governance !== undefined) {
         const governance = candidate.governance;
         if (!governance || typeof governance !== "object" || Array.isArray(governance) ||
             !["approved", "draft", "deprecated"].includes(governance.status) ||
@@ -408,22 +408,6 @@ let treeId = "";
 let canonicalTreeId = "";
 const SAFE_TREE_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 
-function getTreeTypeLabel(tree) {
-    if (tree.type === "decision-support") return "Beslutningsstøtte";
-    if (tree.type !== "governing") return "Tretype ikke oppgitt";
-
-    switch (tree.governance?.status) {
-        case "approved":
-            return "Styrende beslutningstre · Godkjent";
-        case "draft":
-            return "Styrende beslutningstre · Utkast";
-        case "deprecated":
-            return "Styrende beslutningstre · Utgått";
-        default:
-            return "Styrende beslutningstre · Godkjenningsstatus ikke oppgitt";
-    }
-}
-
 function getGovernanceRows() {
     const governance = tree.governance || {};
     return [
@@ -442,24 +426,75 @@ function formatApprovalDate(value) {
     return new Intl.DateTimeFormat("nb-NO", {day: "numeric", month: "long", year: "numeric", timeZone: "UTC"}).format(date);
 }
 
+function getGovernanceMessageType() {
+    if (tree.type === "advisory") return "neutral";
+
+    switch (tree.governance.status) {
+        case "approved":
+            return "success";
+        case "draft":
+            return "warning";
+        case "deprecated":
+            return "danger";
+        default:
+            throw new Error("Ugyldig godkjenningsstatus i beslutningstreet.");
+    }
+}
+
 function createGovernanceBlock() {
+    const messageType = getGovernanceMessageType();
     const block = document.createElement("section");
     block.className = "tree-governance";
+    block.dataset.color = messageType;
+    block.setAttribute("role", "note");
+
+    const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    icon.setAttribute("class", "tree-governance__icon");
+    icon.setAttribute("viewBox", "0 0 24 24");
+    icon.setAttribute("aria-hidden", "true");
+    const iconPaths = {
+        neutral: [
+            ["M4 3h16a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z", "currentColor"],
+            ["M11 10h2v7h-2zm0-3h2v2h-2z", "var(--a-surface-default)"]
+        ],
+        success: [
+            ["M12 1a11 11 0 1 0 0 22 11 11 0 0 0 0-22Z", "currentColor"],
+            ["m10.1 16.7-4-4 1.4-1.4 2.6 2.6 6.4-6.4 1.4 1.4-7.8 7.8Z", "var(--a-surface-default)"]
+        ],
+        warning: [
+            ["M10.3 3.5a2 2 0 0 1 3.4 0l9 15.3a2 2 0 0 1-1.7 3H3a2 2 0 0 1-1.7-3l9-15.3Z", "currentColor"],
+            ["M11 9h2v6h-2zm0 8h2v2h-2z", "var(--a-surface-default)"]
+        ],
+        danger: [
+            ["M8 2h8l6 6v8l-6 6H8l-6-6V8l6-6Z", "currentColor"],
+            ["m8.5 7.1 3.5 3.5 3.5-3.5 1.4 1.4-3.5 3.5 3.5 3.5-1.4 1.4-3.5-3.5-3.5 3.5-1.4-1.4 3.5-3.5-3.5-3.5 1.4-1.4Z", "var(--a-surface-default)"]
+        ]
+    }[messageType];
+    iconPaths.forEach(([pathData, fill]) => {
+        const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+        path.setAttribute("d", pathData);
+        path.setAttribute("fill", fill);
+        icon.appendChild(path);
+    });
+    block.appendChild(icon);
+
+    const content = document.createElement("div");
+    content.className = "tree-governance__content";
 
     const explanation = document.createElement("p");
     explanation.className = "navds-body-long";
-    if (tree.type === "decision-support") {
-        explanation.textContent = "Dette treet hjelper deg å strukturere vurderingen. Det er ikke en styrende beslutningsregel.";
+    if (tree.type === "advisory") {
+        explanation.textContent = "Dette er et veiledende beslutningstre. Det hjelper deg å strukturere vurderingen, men viser ikke Navs offisielle beslutningsregel.";
     } else if (tree.governance.status === "approved") {
-        explanation.textContent = "Dette er et godkjent beslutningstre for denne vurderingen.";
+        explanation.textContent = "Dette er Navs offisielle beslutningstre for denne vurderingen. Det er godkjent for bruk.";
     } else if (tree.governance.status === "draft") {
-        explanation.textContent = "Dette treet er under arbeid og er ikke godkjent som styrende beslutningstre.";
+        explanation.textContent = "Dette er et utkast til Navs offisielle beslutningstre. Det er ikke godkjent for bruk ennå.";
     } else {
-        explanation.textContent = "Dette treet er utgått og skal ikke brukes som gjeldende beslutningsregel.";
+        explanation.textContent = "Dette beslutningstreet er utgått og skal ikke brukes i nye vurderinger.";
     }
-    block.appendChild(explanation);
+    content.appendChild(explanation);
 
-    if (tree.type === "governing") {
+    if (tree.type === "official") {
         const rows = getGovernanceRows();
         if (rows.length) {
             const list = document.createElement("dl");
@@ -472,9 +507,10 @@ function createGovernanceBlock() {
                 description.textContent = value;
                 list.append(term, description);
             });
-            block.appendChild(list);
+            content.appendChild(list);
         }
     }
+    block.appendChild(content);
     return block;
 }
 
@@ -490,9 +526,9 @@ function renderPrintProvenance() {
 
     const rows = [
         ["ID", tree.id],
-        ["Type", tree.type === "governing" ? "Styrende beslutningstre" : "Beslutningsstøtte"]
+        ["Type", tree.type === "official" ? "Offisielt beslutningstre" : "Veiledende beslutningstre"]
     ];
-    if (tree.type === "governing") {
+    if (tree.type === "official") {
         const statusLabels = {approved: "Godkjent", draft: "Utkast", deprecated: "Utgått"};
         rows.push(["Status", statusLabels[tree.governance.status]]);
         rows.push(...getGovernanceRows());
@@ -616,7 +652,6 @@ function showTreeLoadError(message) {
 function render() {
     const stepNameHeader = document.getElementById("step-name");
     const treeTitleEl = document.getElementById("tree-title");
-    const treeClassificationEl = document.getElementById("tree-classification");
 
     const customTitle = (tree && typeof tree.title === "string") ? tree.title.trim() : "";
     const effectiveTitle = customTitle || window.TREE_TITLE;
@@ -624,9 +659,6 @@ function render() {
     // Always show the tree title in the span above the H1
     if (treeTitleEl) {
         treeTitleEl.textContent = effectiveTitle || "";
-    }
-    if (treeClassificationEl) {
-        treeClassificationEl.textContent = getTreeTypeLabel(tree);
     }
 
     const section = document.getElementById("question");
@@ -820,7 +852,6 @@ function render() {
 
         const wrapper = document.createElement("div");
         wrapper.className = "question-wrapper";
-
         wrapper.appendChild(createGovernanceBlock());
 
         if (introText) {
@@ -1364,7 +1395,7 @@ function exportAnswersAsJson() {
         title: tree.title,
         type: tree.type
     };
-    if (tree.type === "governing") treeMetadata.governance = tree.governance;
+    if (tree.type === "official") treeMetadata.governance = tree.governance;
     const data = {
         tree: treeMetadata,
         exportedAt: new Date().toISOString(),

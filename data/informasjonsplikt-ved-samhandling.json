@@ -1,9 +1,15 @@
 {
   "id": "informasjonsplikt-ved-samhandling",
-  "title": "BETA: Må personer vite at de samhandler med KI?",
-  "description": "Leverandører av KI-systemer som samhandler direkte med mennesker skal generelt sørge for at de som samhandler direkte med systemet, får vite at de samhandler med et KI-system. Kravet gjelder uansett systemets risikonivå. TREET ER IKKE ENNÅ KVALITETSSIKRET AV EN JURIST.",
-  "type": "decision-support",
-  "intro-text": "<p>Dette treet hjelper deg avgjøre om Nav som leverandør av et KI-system må sørge for at personer som samhandler med systemet, får vite at de samhandler med KI.</p><p>Er du usikker på om vi regnes som systemets leverandør?  Bruk treet «Rolle etter KI-forordning» for å sjekke. Og dersom du er usikker om systemet ditt teller som et KI-system, kan du sjekke ved å bruke treet «Regnes systemet som KI?».</p>",
+  "title": "Må personer vite at de samhandler med KI?",
+  "description": "Etter KI-forordningen, avgjør om Nav som leverandør av et KI-system må informere personer som samhandler med systemet, at de samhandler med KI.",
+  "type": "official",
+  "governance": {
+    "status": "draft",
+    "version": "",
+    "approvedBy": "",
+    "approvedDate": ""
+  },
+  "intro-text": "Leverandører av KI-systemer som samhandler direkte med mennesker generelt sørge for at de som samhandler direkte med systemet, får vite at de samhandler med et KI-system. Kravet gjelder uansett systemets risikonivå.Dette treet hjelper deg avgjøre om Nav som leverandør av et KI-system må sørge for at personer som samhandler med systemet, får vite at de samhandler med KI.  Dersom du er usikker på om Nav regnes som systemets leverandør, bruk treet «Rolle etter KI-forordning» for å sjekke.",
   "start": {
     "step-title": "Samhandler systemet med fysiske personer?",
     "q": "Er KI-systemet tiltenkt å samhandle med fysiske personer?",

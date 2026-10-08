@@ -196,7 +196,7 @@ a.footer-logo:hover {
 }
 
 .tree-group h3,
-#other-governing-trees h4 {
+#other-official-trees h4 {
     margin: 0 0 .75rem;
 }
 
@@ -211,7 +211,7 @@ a.footer-logo:hover {
     gap: 1.25rem;
 }
 
-#other-governing-trees {
+#other-official-trees {
     margin-top: 2rem;
 }
 
@@ -250,7 +250,21 @@ a.footer-logo:hover {
     gap: 1rem;
 }
 
+.tree-card-heading {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: .25rem;
+    min-width: 0;
+}
+
+.tree-card .navds-tag {
+    font-size: 1rem;
+}
+
 .tree-card-title {
+    min-width: 0;
     color: #000;
     text-decoration: underline;
 }
@@ -275,15 +289,60 @@ a.footer-logo:hover {
     color: var(--a-text-subtle);
 }
 
-.tree-card-type {
+.tree-governance {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--a-spacing-3);
+    padding: var(--a-spacing-4);
+    border: 1px solid;
+    border-radius: var(--a-border-radius-large);
     color: var(--a-text-default);
-    font-weight: 600;
 }
 
-.tree-governance {
-    padding: 1rem;
-    border-left: 4px solid var(--a-border-strong);
-    background: var(--a-surface-subtle);
+.tree-governance[data-color="neutral"] {
+    border-color: var(--a-border-info);
+    background: var(--a-surface-info-subtle);
+}
+
+.tree-governance[data-color="neutral"] .tree-governance__icon {
+    color: var(--a-icon-info);
+}
+
+.tree-governance[data-color="success"] {
+    border-color: var(--a-border-success);
+    background: var(--a-surface-success-subtle);
+}
+
+.tree-governance[data-color="success"] .tree-governance__icon {
+    color: var(--a-icon-success);
+}
+
+.tree-governance[data-color="warning"] {
+    border-color: var(--a-border-warning);
+    background: var(--a-surface-warning-subtle);
+}
+
+.tree-governance[data-color="warning"] .tree-governance__icon {
+    color: var(--a-icon-warning);
+}
+
+.tree-governance[data-color="danger"] {
+    border-color: var(--a-border-danger);
+    background: var(--a-surface-danger-subtle);
+}
+
+.tree-governance[data-color="danger"] .tree-governance__icon {
+    color: var(--a-icon-danger);
+}
+
+.tree-governance__icon {
+    flex: 0 0 1.5rem;
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+.tree-governance__content {
+    min-width: 0;
 }
 
 .tree-governance p {
@@ -329,10 +388,6 @@ body.start #answers {
     margin-bottom: .25rem;
     font-weight: normal;
     }
-
-.tree-classification {
-    margin: 0 0 .5rem;
-}
 
 #step-name {
     margin-bottom: 1rem;
