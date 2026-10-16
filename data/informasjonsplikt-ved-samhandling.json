@@ -9,7 +9,7 @@
     "approvedBy": "",
     "approvedDate": ""
   },
-  "intro-text": "Leverandører av KI-systemer som samhandler direkte med mennesker generelt sørge for at de som samhandler direkte med systemet, får vite at de samhandler med et KI-system. Kravet gjelder uansett systemets risikonivå.Dette treet hjelper deg avgjøre om Nav som leverandør av et KI-system må sørge for at personer som samhandler med systemet, får vite at de samhandler med KI.  Dersom du er usikker på om Nav regnes som systemets leverandør, bruk treet «Rolle etter KI-forordning» for å sjekke.",
+  "intro-text": "Leverandører av KI-systemer som er ment å samhandle direkte med mennesker, skal som hovedregel sørge for at disse får vite at de samhandler med KI. Kravet gjelder uavhengig av systemets risikonivå. Dette beslutningstreet hjelper deg å vurdere om Nav som leverandør har plikt til å informere dem som samhandler med systemet.",
   "start": {
     "step-title": "Samhandler systemet med fysiske personer?",
     "q": "Er KI-systemet tiltenkt å samhandle med fysiske personer?",
