@@ -491,6 +491,18 @@ h1:focus, h2:focus, legend:focus {
     margin-top: 0;
 }
 
+.question-read-more {
+    margin-bottom: var(--a-spacing-4);
+}
+
+.question-read-more .navds-read-more__content > :first-child {
+    margin-top: 0;
+}
+
+.question-read-more .navds-read-more__content > :last-child {
+    margin-bottom: 0;
+}
+
 .navds-textarea__input {
     width: 100%;
     resize: both;

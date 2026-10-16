@@ -18,6 +18,10 @@ Forsiden ligger i [index.html](https://github.com/navikt/decision-tree-navigator
 4. Hvis du ikke kjenner versjon, godkjenner eller dato ennå, lar du verdien stå som en tom streng. Grensesnittet viser bare felt som har en verdi.
 5. Legg ID-en inn i `data/manifest.json`. Offisielle trær vises bare på forsiden når `governance.status` er `"approved"`. Trær med status `"draft"` vises heller ikke blant veiledende trær. Trær som ikke vises på forsiden, kan fortsatt åpnes direkte med `tree.html?id=<id>`.
 
+`intro-text` støtter HTML, for eksempel avsnitt, lister og lenker. Ren tekst pakkes automatisk inn i et `<p>`-element.
+
+Hver node kan ha et `read-more`-objekt med `read-more-about` (knappetekst) og `read-more-text` (innhold som støtter HTML). Når begge feltene har innhold, vises en utvidbar forklaring mellom hjelpeteksten og spørsmålet.
+
 ### `type` og `governance`
 
 `type` sier hva slags beslutninger treet brukes til. Det finnes to typer:

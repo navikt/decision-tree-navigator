@@ -885,6 +885,11 @@ function render() {
             const introTextEl = document.createElement("div");
             introTextEl.className = "navds-body-long";
             introTextEl.innerHTML = introText;
+            if (introTextEl.children.length === 0) {
+                const paragraph = document.createElement("p");
+                paragraph.textContent = introTextEl.textContent;
+                introTextEl.replaceChildren(paragraph);
+            }
             wrapper.appendChild(introTextEl);
         }
 
@@ -977,6 +982,27 @@ function render() {
         helpEl.innerHTML = node.help;
     } else {
         helpEl.remove();
+    }
+
+    const readMoreEl = questionFrag.querySelector(".question-read-more");
+    const readMore = node["read-more"];
+    const readMoreTitle = typeof readMore?.["read-more-about"] === "string" ? readMore["read-more-about"].trim() : "";
+    const readMoreText = typeof readMore?.["read-more-text"] === "string" ? readMore["read-more-text"].trim() : "";
+    if (readMoreTitle && readMoreText) {
+        const readMoreButton = readMoreEl.querySelector("button");
+        const readMoreContent = readMoreEl.querySelector(".navds-read-more__content");
+        readMoreEl.querySelector(".question-read-more-title").textContent = readMoreTitle;
+        readMoreContent.id = `read-more-${current}`;
+        readMoreContent.innerHTML = readMoreText;
+        readMoreButton.setAttribute("aria-controls", readMoreContent.id);
+        readMoreButton.addEventListener("click", () => {
+            const expanded = readMoreButton.getAttribute("aria-expanded") !== "true";
+            readMoreButton.setAttribute("aria-expanded", String(expanded));
+            readMoreContent.hidden = !expanded;
+            readMoreEl.classList.toggle("navds-read-more--open", expanded);
+        });
+    } else {
+        readMoreEl.remove();
     }
 
     // 4) Radio-gruppe (alternativer)

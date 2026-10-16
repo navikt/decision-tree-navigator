@@ -1,0 +1,288 @@
+{
+  "id": "risikoklassifisering-update",
+  "title": "Hvilken risikoklasse har KI-systemet mitt?",
+  "description": "Vurderer om systemet er forbudt eller høy risiko etter KI-forordningen.",
+  "type": "official",
+  "governance": {
+    "status": "draft",
+    "version": "3.0.0",
+    "approvedBy": "",
+    "approvedDate": ""
+  },
+  "intro-text": "<p>Dette beslutningstreet hjelper deg å vurdere om et KI-system omfattes av forbudene i artikkel 5 eller skal klassifiseres som høyrisiko etter artikkel 6 i KI-forordningen.  Treet forutsetter at systemet du vurderer er et KI-system omfattet av KI-forordningen, og at du kjenner systemets tiltenkte formål og bruksområde.  Resultatet gjelder kun de konkrete bruksområder som du vurderer, og er ikke en godkjenning av selve systemet eller bruken. Resultatet utelukker ikke at andre krav i KI-forordningen eller annet regelverk gjelder.</p>",
+
+  "start": {
+    "step-title": "Forbudt KI-praksis",
+    "q": "Kan den konkrete bruken omfattes av et forbud i artikkel 5?",
+    "help": "<p>Gå gjennom hele . Særlig aktuelle grupper er:</p><ul><li>manipulasjon eller utnyttelse av sårbarheter på den måten bestemmelsen beskriver (bokstav a–b)</li><li>sosial poengsetting med de lovbestemte negative konsekvensene (c)</li><li>vurdering av risiko for lovbrudd kun ut fra profilering eller personlighetstrekk (d)</li><li>ikke-målrettet innhenting av ansiktsbilder for ansiktsgjenkjenningsdatabaser (e)</li><li>følelsesgjenkjenning på arbeidsplass eller i utdanningsinstitusjoner, med særskilte unntak (f)</li><li>biometrisk kategorisering for å utlede nærmere angitte beskyttede egenskaper (g)</li><li>biometrisk fjernidentifikasjon i sanntid på offentlig sted til håndheving av loven, med strenge særunntak (h)</li><li>nye forbud knyttet til visse seksualiserte KI-manipulasjoner og materiale med overgrep mot barn (ba–bb; anvendes i EU fra 2. desember 2026)</li></ul><p>Spørsmålet er kun en kontroll for mulige forbud; «Ja» gir ikke automatisk et rettslig fastslått forbud.</p>",
+    "read-more": {
+      "read-more-about": "KI-forordningens forbudte praksis",
+      "read-more-text": "<p>Du finner detaljer om alle praksisene som er forbudte under KI-forordningen i <a href=\"https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-5\">artikkel 5</a>."
+    },
+    "options": {
+      "ja": {
+        "next": "mulig_forbud",
+        "buttonText": "Ja",
+        "label": "Det er identifisert en mulig forbudt KI-praksis.",
+        "order": 1
+      },
+      "nei": {
+        "next": "vedlegg1",
+        "buttonText": "Nei",
+        "label": "Ingen av forbudene i artikkel 5 synes å omfatte bruken.",
+        "order": 2
+      },
+      "usikker": {
+        "next": "avklaring",
+        "buttonText": "Usikker",
+        "label": "Det er behov for nærmere vurdering.",
+        "order": 3
+      }
+    },
+    "note": {
+      "label": "Begrunn svaret ditt",
+      "hint": "Oppgi artikkel 5 nr. 1 og bokstav, eller hvorfor bestemmelsene ikke treffer. Et Ja skal kvalitetssikres juridisk.",
+      "required": true
+    }
+  },
+  "vedlegg1": {
+    "step-title": "Produkt og sikkerhetskomponent – vedlegg I",
+    "q": "Er KI-systemet selv et produkt, eller en sikkerhetskomponent i et produkt, som omfattes av harmoniseringsregelverket i vedlegg I?",
+    "help": "<p>Det første vilkåret etter artikkel 6 nr. 1 er at systemet er et produkt, eller en sikkerhetskomponent i et produkt, som omfattes av <a href=\"https://ai-act-service-desk.ec.europa.eu/en/ai-act/annex-1\">vedlegg I</a>. Et rent effektivitets-, komfort-, assistanse- eller kvalitetskontrollsystem er ikke en sikkerhetskomponent når det bare ivaretar forhold uten betydning for sikkerhet (artikkel 6 nr. 1a). Dersom feil kan sette helse og sikkerhet i fare, kan det likevel være en sikkerhetskomponent (nr. 1b).</p><p>Ja betyr ikke automatisk høy risiko: også kravet om tredjeparts samsvarsvurdering må være oppfylt.</p>",
+    "read-more": {
+      "read-more-about": "",
+      "read-more-text": ""
+    },
+    "options": {
+      "ja": {
+        "next": "tredjepart",
+        "buttonText": "Ja",
+        "label": "Systemet faller inn under produkttilknytningen i vedlegg I.",
+        "order": 1
+      },
+      "nei": {
+        "next": "vedlegg3",
+        "buttonText": "Nei",
+        "label": "Systemet omfattes ikke av artikkel 6 nr. 1 bokstav a.",
+        "order": 2
+      },
+      "usikker": {
+        "next": "avklaring",
+        "buttonText": "Usikker",
+        "label": "Det er behov for nærmere vurdering.",
+        "order": 3
+      }
+    },
+    "note": {
+      "label": "Begrunn svaret ditt",
+      "hint": "Oppgi produktregelverk, relevant funksjon og hvorfor KI er (eller ikke er) en sikkerhetskomponent.",
+      "required": true
+    }
+  },
+  "tredjepart": {
+    "step-title": "Tredjeparts samsvarsvurdering",
+    "q": "Krever regelverket i vedlegg I at produktet eller KI-systemet gjennomgår tredjeparts samsvarsvurdering på grunn av helse- eller sikkerhetsrisiko?",
+    "help": "<p>Begge vilkår i artikkel 6 nr. 1 må være oppfylt. Artikkel 6 nr. 1c presiserer at en tredjeparts samsvarsvurdering som <em>utelukkende</em> skyldes risiko som ikke gjelder helse eller sikkerhet, blant annet visse forstyrrelser av radiospektrum, ikke oppfyller kravet. Hvis svaret er «Nei», må systemet fortsatt vurderes etter vedlegg III.</p>",
+    "read-more": {
+      "read-more-about": "",
+      "read-more-text": ""
+    },
+    "options": {
+      "ja": {
+        "next": "hoy_vedlegg1",
+        "buttonText": "Ja",
+        "label": "Relevant tredjeparts samsvarsvurdering er påkrevd.",
+        "order": 1
+      },
+      "nei": {
+        "next": "vedlegg3",
+        "buttonText": "Nei",
+        "label": "Relevant tredjeparts samsvarsvurdering er ikke påkrevd.",
+        "order": 2
+      },
+      "usikker": {
+        "next": "avklaring",
+        "buttonText": "Usikker",
+        "label": "Det er behov for nærmere vurdering.",
+        "order": 3
+      }
+    },
+    "note": {
+      "label": "Begrunn svaret ditt",
+      "hint": "Oppgi hjemmel for tredjeparts samsvarsvurdering og hvorfor den er sikkerhetsrelatert.",
+      "required": true
+    }
+  },
+  "vedlegg3": {
+    "step-title": "Bruksområder – vedlegg III",
+    "q": "Omfattes KI-systemets tiltenkte bruk av ett eller flere konkrete bruksområder i vedlegg III?",
+    "help": "<p>Les <a href=\"https://ai-act-service-desk.ec.europa.eu/en/ai-act/annex-3\">vedlegg III</a> og kontroller de <em>konkrete beskrivelsene</em>, ikke bare overskriftene. De åtte områdene er:</p><ol><li><strong>1. Biometri:</strong> nærmere angitte systemer for biometrisk fjernidentifikasjon, kategorisering og følelsesgjenkjenning (med unntak og avgrensninger)</li><li><strong>2. Kritisk infrastruktur:</strong> sikkerhetskomponenter i nærmere angitt kritisk digital infrastruktur, trafikk og forsyning</li><li><strong>3. Utdanning og yrkesopplæring:</strong> opptak, plassering, vurdering av læringsutbytte eller visse former for kontroll under prøver</li><li><strong>4. Arbeidsliv:</strong> rekruttering, målrettede stillingsannonser, utvelgelse, ansettelsesvilkår, oppgavefordeling etter personlige forhold, prestasjons- og atferdsvurdering</li><li><strong>5. Vesentlige offentlige og private tjenester:</strong> bl.a. vurdering av rett til vesentlige offentlige støtteytelser/tjenester, kredittverdighet, livs- og helseforsikring, nødmeldinger og pasienttriage</li><li><strong>6. Strafferettspleie / rettshåndheving:</strong> nærmere angitte risikovurderinger, bevisvurderinger, profilering og lignende</li><li><strong>7. Migrasjon, asyl og grensekontroll:</strong> nærmere angitt risikovurdering, søknadsvurdering og identifisering</li><li><strong>8. Rettspleie og demokratiske prosesser:</strong> KI til rettslig saksforberedelse og visse former for påvirkning av valg</li></ol><p>For Nav er særlig punkt 4 (arbeidsliv) og 5(a) (vesentlige offentlige støtteytelser og tjenester) aktuelle. Ikke all myndighetsutøvelse eller alt offentlig arbeid omfattes automatisk. Oppgi alle relevante underpunkter dersom flere treffer.</p>",
+    "read-more": {
+      "read-more-about": "",
+      "read-more-text": ""
+    },
+    "options": {
+      "ja": {
+        "next": "profilering",
+        "buttonText": "Ja",
+        "label": "Minst ett konkret bruksområde i vedlegg III omfatter systemets tiltenkte bruk.",
+        "order": 1
+      },
+      "nei": {
+        "next": "ikke_hoy_annen",
+        "buttonText": "Nei",
+        "label": "Ingen konkrete bruksområder i vedlegg III omfatter systemets tiltenkte bruk.",
+        "order": 2
+      },
+      "usikker": {
+        "next": "avklaring",
+        "buttonText": "Usikker",
+        "label": "Det er behov for nærmere vurdering.",
+        "order": 3
+      }
+    },
+    "note": {
+      "label": "Begrunn svaret ditt",
+      "hint": "Oppgi punkt og bokstav i vedlegg III og hvordan formålet med KI-systemet passer (eller ikke passer).",
+      "required": true
+    }
+  },
+  "profilering": {
+    "step-title": "Profilering ved bruk i vedlegg III",
+    "q": "Utfører systemet profilering av fysiske personer innenfor bruksområdet som omfattes av vedlegg III?",
+    "help": "<p>Artikkel 6 nr. 3 siste del bestemmer at systemer i vedlegg III <em>alltid</em> skal regnes som høy risiko når de profilerer fysiske personer. Dette gjelder selv om systemet ellers bare utfører en avgrenset prosessoppgave. Profilering er automatisert behandling av personopplysninger for å evaluere bestemte personlige forhold, se personvernforordningen artikkel 4 nr. 4.</p><p>Profilering <em>utenfor</em> vedlegg III fører ikke i seg selv til klassifisering som høy risiko etter denne bestemmelsen.</p>",
+    "read-more": {
+      "read-more-about": "",
+      "read-more-text": ""
+    },
+    "options": {
+      "ja": {
+        "next": "hoy_vedlegg3",
+        "buttonText": "Ja",
+        "label": "Systemet utfører profilering innenfor et vedlegg III-bruksområde.",
+        "order": 1
+      },
+      "nei": {
+        "next": "unntak_oppgave",
+        "buttonText": "Nei",
+        "label": "Systemet utfører ikke slik profilering.",
+        "order": 2
+      },
+      "usikker": {
+        "next": "avklaring",
+        "buttonText": "Usikker",
+        "label": "Det er behov for nærmere vurdering.",
+        "order": 3
+      }
+    },
+    "note": {
+      "label": "Begrunn svaret ditt",
+      "hint": "Beskriv personopplysningene, hva som vurderes eller forutsies, og tilhørende bruksområde.",
+      "required": true
+    }
+  },
+  "unntak_oppgave": {
+    "step-title": "Mulig unntak etter artikkel 6 nr. 3",
+    "q": "Er KI-systemets tiltenkte funksjon omfattet av minst ett av de fire oppgavevilkårene i artikkel 6 nr. 3 bokstav a–d?",
+    "help": "<p>Unntak kan vurderes dersom systemet utfører:</p><ol><li><strong>a:</strong> en snever prosessuell oppgave</li><li><strong>b:</strong> forbedring av resultatet fra en allerede fullført menneskelig aktivitet</li><li><strong>c:</strong> påvisning av beslutningsmønstre eller avvik uten å erstatte eller påvirke tidligere fullført menneskelig vurdering uten egnet menneskelig kontroll</li><li><strong>d:</strong> en forberedende oppgave til en vurdering på et område i vedlegg III</li></ol><p>Dette er ikke fire alternative «frikort». I tillegg må systemet <em>ikke</em> medføre en betydelig risiko for skade på helse, sikkerhet eller grunnleggende rettigheter, jf. artikkel 6 nr. 3 første del. Hvis ingen av oppgavevilkårene treffer, skal et system i vedlegg III anses som høy risiko.</p>",
+    "read-more": {
+      "read-more-about": "",
+      "read-more-text": ""
+    },
+    "options": {
+      "ja": {
+        "next": "betydelig_risiko",
+        "buttonText": "Ja",
+        "label": "Minst ett spesifikt oppgavevilkår i artikkel 6 nr. 3 bokstav a–d er oppfylt.",
+        "order": 1
+      },
+      "nei": {
+        "next": "hoy_vedlegg3",
+        "buttonText": "Nei",
+        "label": "Ingen av oppgavevilkårene er oppfylt.",
+        "order": 2
+      },
+      "usikker": {
+        "next": "avklaring",
+        "buttonText": "Usikker",
+        "label": "Det er behov for nærmere vurdering.",
+        "order": 3
+      }
+    },
+    "note": {
+      "label": "Begrunn svaret ditt",
+      "hint": "Oppgi nøyaktig bokstav og forklar hvorfor oppgaven faller innenfor.",
+      "required": true
+    }
+  },
+  "betydelig_risiko": {
+    "step-title": "Betydelig risiko og påvirkning på beslutninger",
+    "q": "Medfører systemet en betydelig risiko for skade på personers helse, sikkerhet eller grunnleggende rettigheter, blant annet gjennom vesentlig påvirkning av beslutningsresultatet?",
+    "help": "<p>Artikkel 6 nr. 3 krever at systemet <em>ikke</em> utgjør en betydelig risiko for skade, blant annet ved at det ikke vesentlig påvirker beslutningsutfallet. En formell «menneske i løkken» er ikke alene nok til å dokumentere dette. Vurder den faktiske bruken, mulige feil, hvem som rammes og hvordan KI-resultatet påvirker beslutningen.</p><p>Svar «Nei» bare dersom en konkret vurdering begrunner at systemet ikke utgjør slik betydelig risiko. Ved tvil: «Usikker».</p>",
+    "read-more": {
+      "read-more-about": "",
+      "read-more-text": ""
+    },
+    "options": {
+      "ja": {
+        "next": "hoy_vedlegg3",
+        "buttonText": "Ja",
+        "label": "Bruken medfører betydelig risiko for skade eller vesentlig påvirkning av beslutningen.",
+        "order": 1
+      },
+      "nei": {
+        "next": "ikke_hoy_unntak",
+        "buttonText": "Nei",
+        "label": "Bruken er konkret vurdert og utgjør ikke betydelig risiko for skade.",
+        "order": 2
+      },
+      "usikker": {
+        "next": "avklaring",
+        "buttonText": "Usikker",
+        "label": "Det er behov for nærmere vurdering.",
+        "order": 3
+      }
+    },
+    "note": {
+      "label": "Begrunn svaret ditt",
+      "hint": "Dokumenter vurderingen av risiko, vesentlig påvirkning på beslutningsutfall og faktiske kontrolltiltak.",
+      "required": true
+    }
+  },
+  "mulig_forbud": {
+    "step-title": "Mulig forbudt KI-praksis – juridisk avklaring",
+    "q": "Den planlagte bruken kan omfattes av et forbud i KI-forordningen artikkel 5.",
+    "help": "<p>Ikke konkluder med at bruken er lovlig eller ulovlig ut fra dette svaret alene. Gjennomgå ordlyd, formål, relevante unntak, anvendelsestidspunkt og rettslig grunnlag med juridisk ansvarlig før systemet tas i bruk. Enkelte nye forbud får anvendelse i EU først 2. desember 2026.</p>",
+    "end": true
+  },
+  "hoy_vedlegg1": {
+    "step-title": "Høy risiko – artikkel 6 nr. 1",
+    "q": "KI-systemet klassifiseres som høy risiko etter artikkel 6 nr. 1 og vedlegg I.",
+    "help": "<p>Begge produktvilkårene er vurdert oppfylt. Unntakene i artikkel 6 nr. 3 gjelder <em>ikke</em> for klassifisering etter nr. 1. De konkrete kravene kan variere med produktregelverket og type produkt, blant annet vedlegg I del A eller B. Undersøk også om systemet omfattes av vedlegg III.</p><p>Dette er en klassifisering av KI-systemet etter artikkel 6, ikke en full vurdering av alle plikter. Vurder blant annet transparenskravene i <a href=\"https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50\">artikkel 50</a> uavhengig av risikoklassifiseringen. For samhandling direkte med personer finnes et <a href=\"tree.html?id=informasjonsplikt-ved-samhandling\">eget beslutningstre</a>.</p>",
+    "end": true
+  },
+  "hoy_vedlegg3": {
+    "step-title": "Høy risiko – artikkel 6 nr. 2",
+    "q": "KI-systemet klassifiseres som høy risiko etter artikkel 6 nr. 2 og vedlegg III.",
+    "help": "<p>Et bruksområde i vedlegg III er identifisert. Profilering gjør systemet alltid til høy risiko i dette sporet. Ellers gjelder høy-risiko-klassifiseringen dersom vilkårene for unntak etter artikkel 6 nr. 3 ikke samlet er oppfylt. Vurder også om andre punkter i vedlegg III er aktuelle.</p><p>Dette er en klassifisering av KI-systemet etter artikkel 6, ikke en full vurdering av alle plikter. Vurder blant annet transparenskravene i <a href=\"https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50\">artikkel 50</a> uavhengig av risikoklassifiseringen. For samhandling direkte med personer finnes et <a href=\"tree.html?id=informasjonsplikt-ved-samhandling\">eget beslutningstre</a>.</p>",
+    "end": true
+  },
+  "ikke_hoy_unntak": {
+    "step-title": "Ikke høy risiko etter artikkel 6 nr. 3",
+    "q": "KI-systemet er omfattet av vedlegg III, men vilkårene for unntak fra høy-risiko-klassifisering er vurdert oppfylt.",
+    "help": "<p>Dette er ikke en generell «lavrisiko-godkjenning». Dokumenter både hvilken bokstav (a–d) som er oppfylt og hvorfor systemet ikke utgjør betydelig risiko for skade. Leverandører som påberoper seg unntaket, må dokumentere vurderingen før systemet markedsføres eller tas i bruk og forholde seg til registreringsplikten etter <a href=\"https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-49\">artikkel 49 nr. 2</a>.</p><p>Dette er en klassifisering av KI-systemet etter artikkel 6, ikke en full vurdering av alle plikter. Vurder blant annet transparenskravene i <a href=\"https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50\">artikkel 50</a> uavhengig av risikoklassifiseringen. For samhandling direkte med personer finnes et <a href=\"tree.html?id=informasjonsplikt-ved-samhandling\">eget beslutningstre</a>.</p>",
+    "end": true
+  },
+  "ikke_hoy_annen": {
+    "step-title": "Ikke høy risiko etter artikkel 6",
+    "q": "Ingen av klassifiseringsgrunnlagene for høy risiko i artikkel 6 er identifisert for den vurderte bruken.",
+    "help": "<p>Dette er ikke en bekreftelse på at systemet er ufarlig, eller at det ikke finnes rettslige plikter. Ny eller endret tiltenkt bruk kan kreve ny vurdering.</p><p>Dette er en klassifisering av KI-systemet etter artikkel 6, ikke en full vurdering av alle plikter. Vurder blant annet transparenskravene i <a href=\"https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50\">artikkel 50</a> uavhengig av risikoklassifiseringen. For samhandling direkte med personer finnes et <a href=\"tree.html?id=informasjonsplikt-ved-samhandling\">eget beslutningstre</a>.</p>",
+    "end": true
+  },
+  "avklaring": {
+    "step-title": "Krever nærmere vurdering",
+    "q": "Det er ikke tilstrekkelig grunnlag for å klassifisere KI-systemet sikkert.",
+    "help": "<p>Dokumenter hva som er uavklart, og innhent nødvendige opplysninger eller juridisk vurdering. Ikke bruk «ikke høy risiko» som standard når faktagrunnlaget er usikkert. Ved behov kontrolleres også øvrige relevante plikter, herunder <a href=\"https://ai-act-service-desk.ec.europa.eu/en/ai-act/article-50\">artikkel 50</a>.</p>",
+    "end": true
+  }
+}
