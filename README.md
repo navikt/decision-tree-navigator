@@ -104,11 +104,12 @@ Eksempel på en spørsmålsnode:
 - Minst ett ordinært valg må finnes. Spørsmål uten et eksklusivt valg passer bare når minst ett ordinært valg må gjelde. Når null treff er et gyldig svar, legg til et eksklusivt valg som «Ingen av disse».
 - `routing.anySelectedExceptExclusive` er obligatorisk og angir nøkkelen i `options` som brukes når ett eller flere ordinære valg er valgt.
 - `routing.exclusiveSelected` er obligatorisk når et eksklusivt valg finnes. Feltet angir nøkkelen i `options` som brukes når dette valget er valgt. Hvis feltet er oppgitt uten et eksklusivt valg, må det fortsatt vise til en gyldig nøkkel.
+- Nøklene i `options` må være nøyaktig de nøklene som rutingsfeltene viser til. Ubrukte alternativer avvises; når et rutingsutfall fjernes, må det tilhørende alternativet også fjernes hvis ingen andre rutingsfelt bruker det.
 - Minst ett valg kreves før «Neste steg». Tomt svar betyr aldri «Ingen av disse». Navigasjonen skjer først med «Neste steg», ikke ved avkryssing. Feilmeldinger vises ikke før brukeren forsøker å fortsette.
 
 Ruting er konfigurert per spørsmål og tolker ikke ord som «Ja», «Nei» eller «Ingen av disse». `options` beholder grenmålene, grenetikettene og knappetekstene for diagrammet. Diagrammet får én kant per rutingsutfall i `options`, ikke per avkryssingsvalg, og markerer den bekreftede ruten.
 
-Treinnlastingen validerer spørsmålsformatet og avviser blant annet dupliserte valg-ID-er, flere eksklusive valg, manglende ruting, ukjente `options`-nøkler og grenmål som ikke finnes. Ugyldige trær viser en feilmelding i stedet for å velge en gren automatisk.
+Treinnlastingen validerer spørsmålsformatet og avviser blant annet dupliserte valg-ID-er, flere eksklusive valg, manglende ruting, ukjente eller ubrukte `options`-nøkler og grenmål som ikke finnes. Ugyldige trær viser en feilmelding i stedet for å velge en gren automatisk.
 
 ### Navigasjon, begrunnelser og dokumentasjon
 

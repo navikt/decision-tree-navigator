@@ -410,6 +410,7 @@ await test("Plain-text labels and checkbox questions without an exclusive choice
     const candidate = structuredClone(example);
     candidate.start.choices = [{id: "plain", label: "<b>Literal label</b>"}];
     delete candidate.start.routing.exclusiveSelected;
+    delete candidate.start.options.none;
     await load(candidate);
     start();
     assert(!query("fieldset label b"), "Label markup not parsed");
@@ -465,6 +466,9 @@ for (const [name, mutate] of [
     ["nonexistent exclusive routing key", (tree) => { tree.start.routing.exclusiveSelected = "missing"; }],
     ["missing ordinary routing", (tree) => { delete tree.start.routing.anySelectedExceptExclusive; }],
     ["missing exclusive routing", (tree) => { delete tree.start.routing.exclusiveSelected; }],
+    ["unused option", (tree) => {
+        tree.start.options.unused = {next: "done", buttonText: "Unused", label: "Unused outcome"};
+    }],
     ["multiple exclusive choices", (tree) => { tree.start.choices[0].exclusive = true; }],
     ["duplicate choice IDs", (tree) => { tree.start.choices[1].id = "a"; }],
     ["empty choices", (tree) => { tree.start.choices = []; }],
@@ -481,6 +485,10 @@ for (const [name, mutate] of [
         assert(query("#question").textContent.includes('Ugyldig spørsmålskonfigurasjon i "start"'),
             "Visible error identifies invalid node");
         assert(!query("#intro-service-name"), "Invalid tree cannot start");
+        if (name === "unused option") {
+            assert(query("#question").textContent.includes("options.unused brukes ikke av routing."),
+                "Error identifies the unused option");
+        }
     });
 }
 

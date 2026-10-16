@@ -165,7 +165,11 @@ function validateQuestionTypes(candidate) {
                 fail(`routing.${field} må vise til en nøkkel i options.`);
             }
         }
+        const outcomeKeys = new Set(routingFields.map((field) => node.routing[field]));
         for (const [key, option] of Object.entries(node.options)) {
+            if (!outcomeKeys.has(key)) {
+                fail(`options.${key} brukes ikke av routing.`);
+            }
             if (!isObject(option) || !isText(option.next) || !getTreeNode(candidate, option.next)) {
                 fail(`options.${key}.next må vise til et eksisterende steg.`);
             }
