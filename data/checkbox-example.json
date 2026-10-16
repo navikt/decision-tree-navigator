@@ -1,0 +1,59 @@
+{
+  "id": "checkbox-example",
+  "title": "Eksempel: flere svar",
+  "description": "Teknisk eksempel på avkryssing, ruting og begrunnelser. Ikke en juridisk vurdering.",
+  "type": "advisory",
+  "intro-text": "<p>Dette er et testtre uten godkjent beslutningslogikk. Velg flere svar og prøv å endre tidligere svar.</p>",
+  "start": {
+    "step-title": "Bruksområder",
+    "q": "Hvilke formål gjelder? Velg alle som passer.",
+    "answerType": "checkbox",
+    "choices": [
+      {"id": "a", "label": "Formål A"},
+      {"id": "b", "label": "Formål B"},
+      {"id": "c", "label": "Formål C"},
+      {"id": "none", "label": "Ingen av disse", "exclusive": true}
+    ],
+    "routing": {
+      "anySelectedExceptExclusive": "matching",
+      "exclusiveSelected": "none"
+    },
+    "options": {
+      "matching": {"next": "details", "buttonText": "Minst ett formål", "label": "Ett eller flere formål gjelder."},
+      "none": {"next": "alternative", "buttonText": "Ingen formål", "label": "Ingen formål gjelder."}
+    },
+    "note": {"label": "Begrunn valgene", "required": true}
+  },
+  "details": {
+    "step-title": "Oppfølging",
+    "q": "Vil du følge opp formålene?",
+    "options": {
+      "yes": {"next": "review", "buttonText": "Ja", "label": "Formålene følges opp."},
+      "no": {"next": "review", "buttonText": "Nei", "label": "Formålene følges ikke opp."}
+    },
+    "note": {"label": "Tilleggsopplysninger", "required": false}
+  },
+  "alternative": {
+    "step-title": "Alternativ",
+    "q": "Vil du vurdere andre formål?",
+    "options": {
+      "yes": {"next": "review", "buttonText": "Ja", "label": "Andre formål vurderes."},
+      "no": {"next": "review", "buttonText": "Nei", "label": "Ingen andre formål vurderes."}
+    },
+    "note": {"label": "Tilleggsopplysninger", "required": false}
+  },
+  "review": {
+    "step-title": "Kontroll",
+    "q": "Er opplysningene kontrollert?",
+    "options": {
+      "yes": {"next": "done", "buttonText": "Ja", "label": "Opplysningene er kontrollert."},
+      "no": {"next": "done", "buttonText": "Nei", "label": "Opplysningene er ikke kontrollert."}
+    },
+    "note": {"label": "Merknad", "required": false}
+  },
+  "done": {
+    "step-title": "Eksempelet er fullført",
+    "q": "Eksempelet er fullført.",
+    "end": true
+  }
+}

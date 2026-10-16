@@ -429,6 +429,10 @@ body.start #answers {
     margin-bottom: 2rem;
 }
 
+#path .navds-form-summary__value > ul {
+    margin: 0;
+}
+
 #diagram-section {
     padding-top: 2rem;
     padding-bottom: 3rem;
