@@ -537,10 +537,10 @@ function renderPrintApproval() {
     const approvedDate = approved
         ? formatCompactApprovalDate(governance.approvedDate)
         : "";
-    const details = [`Beslutningstre${version ? ` versjon ${version}` : ""}`];
+    const details = [version ? `Treversjon: ${version}` : "Beslutningstre"];
     if (approved) {
         details.push(approvedDate
-            ? `Beslutningslogikk godkjent ${approvedDate}`
+            ? `Beslutningslogikkens godkjenningsdato: ${approvedDate}`
             : "Beslutningslogikk godkjent");
     } else if (governance && governance.status === "draft") {
         details.push("Utkast");
@@ -616,7 +616,7 @@ async function init() {
     treeId = params.get("id");
     if (!treeId) {
         console.error("Mangler beslutningstre-ID i URL-en.");
-        document.body.innerHTML = "<p>Mangler <code>?id=</code> i URL-en.</p>";
+        document.body.innerHTML = '<p>Mangler <code>?id=</code> i URL-en. <a href="/index.html">Gå til forsiden.</a></p>';
         return;
     }
 
