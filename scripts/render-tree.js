@@ -514,37 +514,58 @@ function createGovernanceBlock() {
     return block;
 }
 
-function renderPrintProvenance() {
-    const container = document.getElementById("tree-provenance-print");
-    if (!container) return;
-    container.replaceChildren();
-
-    const heading = document.createElement("p");
-    heading.className = "navds-label";
-    heading.textContent = `Beslutningstre: ${tree.title}`;
-    container.appendChild(heading);
-
-    const rows = [
-        ["ID", tree.id],
-        ["Type", tree.type === "official" ? "Offisielt beslutningstre" : "Veiledende beslutningstre"]
-    ];
-    if (tree.type === "official") {
-        const statusLabels = {approved: "Godkjent", draft: "Utkast", deprecated: "Utgått"};
-        rows.push(["Status", statusLabels[tree.governance.status]]);
-        rows.push(...getGovernanceRows());
+function formatCompactApprovalDate(value) {
+    if (typeof value !== "string" || !value.trim()) return "";
+    const trimmed = value.trim();
+    const isoDate = /^(\d{4})-(\d{2})-(\d{2})$/.exec(trimmed);
+    if (isoDate) {
+        const date = new Date(`${trimmed}T00:00:00Z`);
+        if (Number.isNaN(date.getTime()) || date.toISOString().slice(0, 10) !== trimmed) return "";
+        return `${isoDate[3]}.${isoDate[2]}.${isoDate[1]}`;
     }
+    const localizedDate = /^(\d{1,2})\.(\d{1,2})\.(\d{4})$/.exec(trimmed);
+    if (!localizedDate) return "";
+    return `${localizedDate[1].padStart(2, "0")}.${localizedDate[2].padStart(2, "0")}.${localizedDate[3]}`;
+}
 
-    const list = document.createElement("dl");
-    rows.forEach(([label, value]) => {
-        const term = document.createElement("dt");
-        term.className = "navds-label";
-        term.textContent = label;
-        const description = document.createElement("dd");
-        description.className = "navds-body-short";
-        description.textContent = value;
-        list.append(term, description);
-    });
-    container.appendChild(list);
+function renderPrintApproval() {
+    const element = document.getElementById("tree-approval-print");
+    if (!element) return;
+    const governance = tree.type === "official" ? tree.governance : null;
+    const version = governance && typeof governance.version === "string" ? governance.version.trim() : "";
+    const approved = governance && governance.status === "approved";
+    const approvedDate = approved
+        ? formatCompactApprovalDate(governance.approvedDate)
+        : "";
+    const details = [`Beslutningstre${version ? ` versjon ${version}` : ""}`];
+    if (approved) {
+        details.push(approvedDate
+            ? `Beslutningslogikk godkjent ${approvedDate}`
+            : "Beslutningslogikk godkjent");
+    } else if (governance && governance.status === "draft") {
+        details.push("Utkast");
+    } else if (governance && governance.status === "deprecated") {
+        details.push("Utgått");
+    }
+    element.textContent = details.join(" · ");
+    element.hidden = details.length === 0;
+}
+
+function renderPrintAssessmentMetadata(node) {
+    const serviceName = document.getElementById("print-service-name");
+    const documentDate = document.getElementById("print-document-date");
+    if (serviceName) {
+        const name = (introMeta && typeof introMeta.serviceName === "string") ? introMeta.serviceName.trim() : "";
+        serviceName.textContent = name ? `Tjeneste: ${name}` : "";
+        serviceName.hidden = !name;
+    }
+    if (documentDate) {
+        const dateText = node && node.end
+            ? new Intl.DateTimeFormat("nb-NO").format(new Date())
+            : "";
+        documentDate.textContent = dateText ? `Dokumentdato: ${dateText}` : "";
+        documentDate.hidden = !dateText;
+    }
 }
 
 let notes = {};
@@ -630,7 +651,7 @@ async function loadTree() {
         document.title = window.TREE_TITLE;
         normalizeTreeOptions(tree);
         computeStepRange(tree);
-        renderPrintProvenance();
+        renderPrintApproval();
         render();
     } catch (e) {
         console.error(`Kunne ikke laste beslutningstreet "${canonicalTreeId}"`, e);
@@ -779,14 +800,19 @@ function render() {
         if (!introMeta || ((!introMeta.serviceName) && treeId)) {
             loadIntroMeta();
         }
+        renderPrintAssessmentMetadata(node);
 
         // Saks-metadata (navn til tjenesten / kontaktperson) som egne rader øverst
         if (introMeta && introMeta.serviceName) {
-            rows.push(makeAnswerRow("Navn til tjenesten", introMeta.serviceName));
+            const serviceRow = makeAnswerRow("Navn til tjenesten", introMeta.serviceName);
+            serviceRow.classList.add("assessment-metadata");
+            rows.push(serviceRow);
         }
         const hasContact = !!(introMeta && typeof introMeta.contactPerson === 'string' && introMeta.contactPerson.trim());
         if (hasContact) {
-            rows.push(makeAnswerRow("Kontaktperson", introMeta.contactPerson.trim()));
+            const contactRow = makeAnswerRow("Kontaktperson", introMeta.contactPerson.trim());
+            contactRow.classList.add("assessment-metadata");
+            rows.push(contactRow);
         }
 
         // Besvarte spørsmål: bruk valgt alternativ sin label + notat,
@@ -795,7 +821,9 @@ function render() {
             const n = getTreeNode(tree, nodeId);
             if (!n) return;
             const opt = chosenForNode[nodeId];
-            const labelText = opt && opt.label ? opt.label : "";
+            const labelText = opt && typeof opt.label === "string"
+                ? opt.label.replace(/^\s*label:\s*/i, "").trim()
+                : "";
             const noteText = (getNote(nodeId) || "").trim();
 
             // Ikke vis noe hvis vi verken har label fra JSON eller notat
@@ -819,7 +847,10 @@ function render() {
                 const noteDd = document.createElement("dd");
                 noteDd.className = "navds-form-summary__value navds-body-short navds-typo--color-subtle";
                 noteDd.textContent = noteText;
-                row.appendChild(noteDd);
+                const noteLabel = document.createElement("dt");
+                noteLabel.className = "navds-label";
+                noteLabel.textContent = "Begrunnelse";
+                row.append(noteLabel, noteDd);
             }
 
             rows.push(row);
@@ -969,8 +1000,7 @@ function render() {
         legend.id = `legend-${current}`;
         legend.tabIndex = -1;
         const baseText = (node && typeof node.q === "string") ? node.q.trim() : "";
-        const requiredText = " (obligatorisk)";
-        legend.textContent = (baseText || "Velg et alternativ") + requiredText;
+        legend.textContent = `${baseText || "Velg et alternativ"} (obligatorisk)`;
 
 
         node.options.forEach(([key, opt], idx) => {

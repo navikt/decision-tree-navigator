@@ -5,10 +5,11 @@
   "type": "official",
   "governance": {
     "status": "approved",
-    "version": "",
+    "version": "2.0",
     "approvedBy": "",
-    "approvedDate": ""
+    "approvedDate": "17.08.2026"
   },
+
   "intro-text": "Dette treet hjelper deg å avgjøre om et KI-system skal klassifiseres som høy risiko etter KI-forordningen. I treet ledes du gjennom faktiske bruksområder (hjelpemiddelområdet, myndighetsutøvelse, ansatt-oppfølging, profilering, smale prosessteg osv.) slik at du ender med en klassifisering som kan brukes i etterlevelsesløsningen når KI-forordningen trer i kraft.",
   "start": {
     "step-title": "Offentlig myndighetsutøvelse",

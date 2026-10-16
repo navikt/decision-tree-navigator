@@ -5,9 +5,9 @@
   "type": "official",
   "governance": {
     "status": "approved",
-    "version": "",
+    "version": "1.1",
     "approvedBy": "",
-    "approvedDate": ""
+    "approvedDate": "24.11.2025"
   },
   "intro-text": "Dette treet avklarer hvilken rolle Nav har etter KI-forordningen: leverandør (provider) eller idriftsetter (deployer). I treet ser vi på hvor KI-løsningen kommer fra, hva slags endringer Nav gjør, hvilken bruk som er planlagt og om systemet fremstår som Navs eget produkt. Resultatet avgjør hvilke plikter som gjelder.",
   "start": {

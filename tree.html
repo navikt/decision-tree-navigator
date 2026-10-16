@@ -42,9 +42,14 @@
     <article>
         <header id="page-header">
             <div class="wrapper">
-                <p id="tree-title" class="navds-heading navds-heading--xsmall navds-typo--color-subtle"></p>
-                <div id="tree-provenance-print" class="tree-provenance-print"></div>
-                <h1 id="step-name" class="navds-heading navds-heading--large" tabindex="-1"></h1>
+                <p id="tree-approval-print" class="navds-heading navds-heading--xsmall navds-typo--color-subtle"></p>
+                <h1 id="tree-title" class="navds-heading navds-heading--xsmall navds-typo--color-subtle"></h1>
+                <p id="print-service-name" class="navds-body-short" hidden></p>
+                <p id="print-document-date" class="navds-body-short" hidden></p>
+                <section id="print-result-panel">
+                    <h2 id="print-result-heading" class="navds-heading navds-heading--medium" hidden>Resultat av vurderingen</h2>
+                    <p id="step-name" class="navds-heading navds-heading--large" tabindex="-1"></p>
+                </section>
                 <p id="question-range" class="navds-label navds-typo--color-subtle"></p>
                 <div id="progress-section"></div>
             </div>
@@ -59,6 +64,7 @@
                     <div id="answers" class="navds-form-summary">
                         <div class="navds-form-summary__header">
                             <h2 class="navds-heading navds-heading--medium">Dine svar</h2>
+                            <h2 id="print-answers-heading" class="navds-heading navds-heading--medium" hidden>Grunnlag for resultatet</h2>
                         </div>
                         <dl id="path" class="navds-form-summary__answers"></dl>
                     </div>

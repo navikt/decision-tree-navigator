@@ -16,7 +16,7 @@ Forsiden ligger i [index.html](https://github.com/navikt/decision-tree-navigator
 2. Legg inn `id`, `title`, `description` og `type` øverst i fila, sammen med treets noder. `type` må være `official` eller `advisory`.
 3. For `official`-trær legger du også inn `governance` med status `approved`, `draft` eller `deprecated`, og feltene `version`, `approvedBy` og `approvedDate`.
 4. Hvis du ikke kjenner versjon, godkjenner eller dato ennå, lar du verdien stå som en tom streng. Grensesnittet viser bare felt som har en verdi.
-5. Legg ID-en inn i `data/manifest.json` der du vil at treet skal vises.
+5. Legg ID-en inn i `data/manifest.json`. Trær med `governance.status: "draft"` vises ikke på forsiden, men kan fortsatt åpnes direkte med treets URL.
 
 ### `type` og `governance`
 
@@ -44,7 +44,7 @@ Eksempel:
 
 - `governance.status` kan være:
     - `"approved"` - denne versjonen er godkjent som offisielt beslutningstre.
-    - `"draft"` - treet er under arbeid eller venter på nødvendig godkjenning.
+    - `"draft"` - treet er under arbeid eller venter på nødvendig godkjenning. Det vises ikke på forsiden, men kan åpnes med direkte URL.
     - `"deprecated"` - treet skal ikke lenger brukes til nye vurderinger.
 - `governance.version` er treets versjonsnummer.
 - `governance.approvedBy` er hvem som har godkjent den offisielle beslutningslogikken.

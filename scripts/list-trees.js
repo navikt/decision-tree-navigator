@@ -3,10 +3,6 @@ const ARROW_RIGHT_PATH = "M14.0878 6.87338C14.3788 6.68148 14.774 6.7139 15.0302
 
 const SAFE_TREE_ID = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
 const GOVERNANCE_STATUSES = new Set(['approved', 'draft', 'deprecated']);
-const TREE_STATUS_TAGS = {
-    approved: { label: 'Godkjent', variant: 'success-moderate' },
-    draft: { label: 'Utkast', variant: 'neutral-moderate' }
-};
 
 function validateTree(tree, id) {
     if (!tree || typeof tree !== 'object' || Array.isArray(tree) ||
@@ -39,14 +35,6 @@ function createTreeCard(tree) {
 
     const heading = document.createElement('span');
     heading.className = 'tree-card-heading';
-
-    const statusTag = tree.type === 'official' ? TREE_STATUS_TAGS[tree.governance.status] : null;
-    if (statusTag) {
-        const tagEl = document.createElement('span');
-        tagEl.className = `navds-tag navds-tag--xsmall navds-tag--${statusTag.variant}`;
-        tagEl.textContent = statusTag.label;
-        heading.appendChild(tagEl);
-    }
 
     const titleEl = document.createElement('span');
     titleEl.className = 'tree-card-title navds-heading navds-heading--small';
@@ -135,6 +123,8 @@ async function loadList() {
         }));
 
         entries.filter(Boolean).forEach((tree) => {
+            if (tree.governance && tree.governance.status === 'draft') return;
+
             const list = tree.type === 'advisory'
                 ? advisoryNav
                 : officialNav;

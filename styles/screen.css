@@ -361,8 +361,15 @@ a.footer-logo:hover {
     overflow-wrap: anywhere;
 }
 
-.tree-provenance-print {
-    display: none;
+#tree-approval-print {
+    display: none !important;
+}
+
+#print-service-name,
+#print-document-date,
+#print-result-heading,
+#print-answers-heading {
+    display: none !important;
 }
 
 @media (max-width: 480px) {
@@ -493,8 +500,16 @@ body.question .question-wrapper {
     background: no-repeat top left/2.5rem url("../images/QuestionmarkDiamond.svg")
 }
 */
-body.start #tree-title {
+body.start #step-name {
     display: none;
+}
+
+body.start #tree-title {
+    margin: 0 0 1rem;
+    color: var(--a-text-default);
+    font-size: var(--a-font-size-heading-large);
+    line-height: var(--a-font-line-height-heading-large);
+    font-weight: var(--a-font-weight-bold);
 }
 
 
