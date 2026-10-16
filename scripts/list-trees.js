@@ -124,6 +124,7 @@ async function loadList() {
 
         entries.filter(Boolean).forEach((tree) => {
             if (tree.governance && tree.governance.status === 'draft') return;
+            if (tree.type === 'official' && tree.governance.status !== 'approved') return;
 
             const list = tree.type === 'advisory'
                 ? advisoryNav
