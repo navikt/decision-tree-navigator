@@ -537,33 +537,41 @@ function renderPrintApproval() {
     const approvedDate = approved
         ? formatCompactApprovalDate(governance.approvedDate)
         : "";
-    const details = [`Beslutningstre${version ? ` versjon ${version}` : ""}`];
+    const details = [version ? `Treversjon: ${version}` : "Beslutningstre"];
     if (approved) {
         details.push(approvedDate
-            ? `Beslutningslogikk godkjent ${approvedDate}`
+            ? `Beslutningslogikkens godkjenningsdato: ${approvedDate}`
             : "Beslutningslogikk godkjent");
     } else if (governance && governance.status === "draft") {
         details.push("Utkast");
     } else if (governance && governance.status === "deprecated") {
         details.push("Utgått");
     }
-    element.textContent = details.join(" · ");
+    element.textContent = details.join(" · ") + (approved ? "*" : "");
     element.hidden = details.length === 0;
+    const disclaimer = document.getElementById("print-approval-disclaimer");
+    if (disclaimer) disclaimer.hidden = !approved;
 }
 
 function renderPrintAssessmentMetadata(node) {
     const serviceName = document.getElementById("print-service-name");
+    const contactPerson = document.getElementById("print-contact-person");
     const documentDate = document.getElementById("print-document-date");
     if (serviceName) {
         const name = (introMeta && typeof introMeta.serviceName === "string") ? introMeta.serviceName.trim() : "";
         serviceName.textContent = name ? `Tjeneste: ${name}` : "";
         serviceName.hidden = !name;
     }
+    if (contactPerson) {
+        const contact = (introMeta && typeof introMeta.contactPerson === "string") ? introMeta.contactPerson.trim() : "";
+        contactPerson.textContent = contact ? `Kontaktperson: ${contact}` : "";
+        contactPerson.hidden = !contact;
+    }
     if (documentDate) {
         const dateText = node && node.end
             ? new Intl.DateTimeFormat("nb-NO").format(new Date())
             : "";
-        documentDate.textContent = dateText ? `Dokumentdato: ${dateText}` : "";
+        documentDate.textContent = dateText ? `Utskriftsdato: ${dateText}` : "";
         documentDate.hidden = !dateText;
     }
 }
@@ -616,7 +624,7 @@ async function init() {
     treeId = params.get("id");
     if (!treeId) {
         console.error("Mangler beslutningstre-ID i URL-en.");
-        document.body.innerHTML = "<p>Mangler <code>?id=</code> i URL-en.</p>";
+        document.body.innerHTML = '<p>Mangler <code>?id=</code> i URL-en. <a href="/index.html">Gå til forsiden.</a></p>';
         return;
     }
 
@@ -759,21 +767,6 @@ function render() {
     // og kun for ferdig besvarte steg (alle unntatt siste i pathHistory).
     const completedIds = pathHistory.slice(0, -1); // alle tidligere steg
 
-    // Lag et oppslagskart: nodeId -> valgt alternativ-objekt
-    const chosenForNode = {};
-    for (let i = 0; i < pathHistory.length - 1; i++) {
-        const nodeId = pathHistory[i];
-        const nextId = pathHistory[i + 1];
-        const n = getTreeNode(tree, nodeId);
-        if (!n || !Array.isArray(n.options)) continue;
-
-        const match = n.options.find(([, opt]) => opt && opt.next === nextId);
-        if (match) {
-            const [, opt] = match;
-            chosenForNode[nodeId] = opt;
-        }
-    }
-
     // Bygg en enkelt dt/dd-rad (Aksel FormSummary-mønster) for gjenbruk
     // mellom saks-metadata (navn/kontaktperson) og besvarte spørsmål.
     function makeAnswerRow(labelText, valueText, extraDdClass) {
@@ -787,7 +780,7 @@ function render() {
 
         const dd = document.createElement("dd");
         dd.className = "navds-form-summary__value navds-body-long navds-body-long--medium" + (extraDdClass ? " " + extraDdClass : "");
-        dd.innerHTML = valueText;
+        dd.textContent = valueText;
         row.appendChild(dd);
 
         return row;
@@ -820,7 +813,10 @@ function render() {
         completedIds.forEach((nodeId) => {
             const n = getTreeNode(tree, nodeId);
             if (!n) return;
-            const opt = chosenForNode[nodeId];
+            const selected = Array.isArray(n.options)
+                ? n.options.find(([key]) => key === selectedByNode[nodeId])
+                : null;
+            const opt = selected ? selected[1] : null;
             const labelText = opt && typeof opt.label === "string"
                 ? opt.label.replace(/^\s*label:\s*/i, "").trim()
                 : "";
@@ -1404,13 +1400,14 @@ function exportAnswersAsJson() {
     const steps = [];
     for (let i = 0; i < pathHistory.length - 1; i++) {
         const nodeId = pathHistory[i];
-        const nextId = pathHistory[i + 1];
         const n = getTreeNode(tree, nodeId);
         if (!n) {
             throw new Error(`Fant ikke beslutningssteget "${nodeId}" i treet.`);
         }
-        const match = (n.options || []).find(([, opt]) => opt && opt.next === nextId);
-        const opt = match ? match[1] : null;
+        const selected = Array.isArray(n.options)
+            ? n.options.find(([key]) => key === selectedByNode[nodeId])
+            : null;
+        const opt = selected ? selected[1] : null;
         steps.push({
             question: n["step-title"] || n.q,
             answer: opt ? opt.label : null,

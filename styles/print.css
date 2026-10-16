@@ -140,12 +140,13 @@
     body.end #print-result-heading,
     body.end #print-answers-heading,
     body.end #print-service-name:not([hidden]),
+    body.end #print-contact-person:not([hidden]),
     body.end #print-document-date:not([hidden]) {
         display: block !important;
     }
 
     body.end #tree-title {
-        margin: 0 0 .3rem;
+        margin: 0 0 1rem;
         color: #111 !important;
         font-size: var(--a-font-size-heading-large);
         letter-spacing: -.004em;
@@ -161,13 +162,21 @@
         font-weight: 600;
     }
 
+    body.end #print-approval-disclaimer:not([hidden]) {
+        display: block !important;
+        margin: 1.5rem 0 0;
+        break-inside: avoid;
+        page-break-inside: avoid;
+    }
+
     body.end #print-service-name,
+    body.end #print-contact-person,
     body.end #print-document-date {
         margin: .15rem 0;
     }
 
     body.end #print-result-panel {
-        margin: .75rem 0 0;
+        margin: 1.5em 0;
         padding: 0 0 0 .8rem;
         border-left: 4px solid #222;
         break-inside: avoid;

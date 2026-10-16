@@ -17,6 +17,7 @@
     <link rel="stylesheet" href="styles/navikt-ds-index.min.css"/>
     <link rel="stylesheet" href="styles/screen.css"/>
     <link rel="stylesheet" href="styles/print.css" media="print">
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg">
     <script type="module" src="scripts/render-tree.js"></script>
 </head>
 
@@ -45,6 +46,7 @@
                 <p id="tree-approval-print" class="navds-heading navds-heading--xsmall navds-typo--color-subtle"></p>
                 <h1 id="tree-title" class="navds-heading navds-heading--xsmall navds-typo--color-subtle"></h1>
                 <p id="print-service-name" class="navds-body-short" hidden></p>
+                <p id="print-contact-person" class="navds-body-short" hidden></p>
                 <p id="print-document-date" class="navds-body-short" hidden></p>
                 <section id="print-result-panel">
                     <h2 id="print-result-heading" class="navds-heading navds-heading--medium" hidden>Resultat av vurderingen</h2>
@@ -64,7 +66,7 @@
                     <div id="answers" class="navds-form-summary">
                         <div class="navds-form-summary__header">
                             <h2 class="navds-heading navds-heading--medium">Dine svar</h2>
-                            <h2 id="print-answers-heading" class="navds-heading navds-heading--medium" hidden>Grunnlag for resultatet</h2>
+                            <h2 id="print-answers-heading" class="navds-heading navds-heading--medium" hidden>Oppgitte svar og begrunnelser</h2>
                         </div>
                         <dl id="path" class="navds-form-summary__answers"></dl>
                     </div>
@@ -113,6 +115,9 @@
             </section>
         </div>
 
+        <div class="wrapper">
+            <p id="print-approval-disclaimer" class="navds-body-short" hidden>* Godkjenningen gjelder beslutningstreets logikk, ikke opplysningene som er lagt inn, eller resultatet av denne vurderingen.</p>
+        </div>
     </article>
 </main>
 
