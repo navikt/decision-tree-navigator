@@ -191,10 +191,32 @@ a.footer-logo:hover {
     margin: 0 0 1.5rem;
 }
 
-#tree-list {
+.tree-group + .tree-group {
+    margin-top: 2.5rem;
+}
+
+.tree-group h3,
+#other-official-trees h4 {
+    margin: 0 0 .75rem;
+}
+
+.tree-types-description {
+    max-width: 48em;
+    margin: 0 0 1.5rem;
+}
+
+.tree-list {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
     gap: 1.25rem;
+}
+
+#other-official-trees {
+    margin-top: 2rem;
+}
+
+.tree-load-error {
+    color: var(--a-text-danger);
 }
 
 .tree-card {
@@ -228,7 +250,21 @@ a.footer-logo:hover {
     gap: 1rem;
 }
 
+.tree-card-heading {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: .25rem;
+    min-width: 0;
+}
+
+.tree-card .navds-tag {
+    font-size: 1rem;
+}
+
 .tree-card-title {
+    min-width: 0;
     color: #000;
     text-decoration: underline;
 }
@@ -251,6 +287,100 @@ a.footer-logo:hover {
 
 .tree-card-desc {
     color: var(--a-text-subtle);
+}
+
+.tree-governance {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--a-spacing-3);
+    padding: var(--a-spacing-4);
+    border: 1px solid;
+    border-radius: var(--a-border-radius-large);
+    color: var(--a-text-default);
+}
+
+.tree-governance[data-color="neutral"] {
+    border-color: var(--a-border-info);
+    background: var(--a-surface-info-subtle);
+}
+
+.tree-governance[data-color="neutral"] .tree-governance__icon {
+    color: var(--a-icon-info);
+}
+
+.tree-governance[data-color="success"] {
+    border-color: var(--a-border-success);
+    background: var(--a-surface-success-subtle);
+}
+
+.tree-governance[data-color="success"] .tree-governance__icon {
+    color: var(--a-icon-success);
+}
+
+.tree-governance[data-color="warning"] {
+    border-color: var(--a-border-warning);
+    background: var(--a-surface-warning-subtle);
+}
+
+.tree-governance[data-color="warning"] .tree-governance__icon {
+    color: var(--a-icon-warning);
+}
+
+.tree-governance[data-color="danger"] {
+    border-color: var(--a-border-danger);
+    background: var(--a-surface-danger-subtle);
+}
+
+.tree-governance[data-color="danger"] .tree-governance__icon {
+    color: var(--a-icon-danger);
+}
+
+.tree-governance__icon {
+    flex: 0 0 1.5rem;
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+.tree-governance__content {
+    min-width: 0;
+}
+
+.tree-governance p {
+    margin: 0;
+}
+
+.tree-governance dl {
+    display: grid;
+    grid-template-columns: max-content minmax(0, 1fr);
+    gap: .25rem .75rem;
+    margin: .75rem 0 0;
+}
+
+.tree-governance dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+#tree-approval-print {
+    display: none !important;
+}
+
+#print-service-name,
+#print-document-date,
+#print-result-heading,
+#print-answers-heading {
+    display: none !important;
+}
+
+@media (max-width: 480px) {
+    .tree-governance dl {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0;
+    }
+
+    .tree-governance dd {
+        margin-bottom: .5rem;
+    }
 }
 
 
@@ -370,8 +500,16 @@ body.question .question-wrapper {
     background: no-repeat top left/2.5rem url("../images/QuestionmarkDiamond.svg")
 }
 */
-body.start #tree-title {
+body.start #step-name {
     display: none;
+}
+
+body.start #tree-title {
+    margin: 0 0 1rem;
+    color: var(--a-text-default);
+    font-size: var(--a-font-size-heading-large);
+    line-height: var(--a-font-line-height-heading-large);
+    font-weight: var(--a-font-weight-bold);
 }
 
 
@@ -421,9 +559,7 @@ body.start #tree-title {
     padding: 2px 4px;
 }
 
-#mermaid-container .node foreignObject div {
+#mermaid-container .node div {
     text-align: center;
     line-height: 1.3;
 }
-
-

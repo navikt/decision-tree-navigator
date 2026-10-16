@@ -1,0 +1,11 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Beslutt tree manifest",
+  "description": "Ordered list of tree IDs used to load decision trees.",
+  "type": "array",
+  "uniqueItems": true,
+  "items": {
+    "type": "string",
+    "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+  }
+}

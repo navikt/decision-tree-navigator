@@ -42,8 +42,14 @@
     <article>
         <header id="page-header">
             <div class="wrapper">
-                <p id="tree-title" class="navds-heading navds-heading--xsmall navds-typo--color-subtle"></p>
-                <h1 id="step-name" class="navds-heading navds-heading--large" tabindex="-1"></h1>
+                <p id="tree-approval-print" class="navds-heading navds-heading--xsmall navds-typo--color-subtle"></p>
+                <h1 id="tree-title" class="navds-heading navds-heading--xsmall navds-typo--color-subtle"></h1>
+                <p id="print-service-name" class="navds-body-short" hidden></p>
+                <p id="print-document-date" class="navds-body-short" hidden></p>
+                <section id="print-result-panel">
+                    <h2 id="print-result-heading" class="navds-heading navds-heading--medium" hidden>Resultat av vurderingen</h2>
+                    <p id="step-name" class="navds-heading navds-heading--large" tabindex="-1"></p>
+                </section>
                 <p id="question-range" class="navds-label navds-typo--color-subtle"></p>
                 <div id="progress-section"></div>
             </div>
@@ -58,6 +64,7 @@
                     <div id="answers" class="navds-form-summary">
                         <div class="navds-form-summary__header">
                             <h2 class="navds-heading navds-heading--medium">Dine svar</h2>
+                            <h2 id="print-answers-heading" class="navds-heading navds-heading--medium" hidden>Grunnlag for resultatet</h2>
                         </div>
                         <dl id="path" class="navds-form-summary__answers"></dl>
                     </div>
@@ -126,8 +133,8 @@
 
 <template id="radio-option-template">
     <div class="navds-radio navds-radio--medium">
-        <input type="radio" class="navds-radio__input">
-        <label class="navds-radio__label">
+        <input id="tree-option" type="radio" class="navds-radio__input">
+        <label for="tree-option" class="navds-radio__label">
             <span class="navds-radio__content">
                 <span class="navds-body-short navds-body-short--medium"></span>
             </span>

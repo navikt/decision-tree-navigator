@@ -1,5 +1,15 @@
 {
-  "title": "Hvilket risikonivå har KI-systemet mitt?",
+  "id": "risikoklassifisering",
+  "title": "Hvilken risikoklasse har KI-systemet mitt?",
+  "description": "Avgjør om et KI-system skal klassifiseres som høy risiko etter KI-forordningen.",
+  "type": "official",
+  "governance": {
+    "status": "approved",
+    "version": "2.0",
+    "approvedBy": "",
+    "approvedDate": "17.08.2026"
+  },
+
   "intro-text": "Dette treet hjelper deg å avgjøre om et KI-system skal klassifiseres som høy risiko etter KI-forordningen. I treet ledes du gjennom faktiske bruksområder (hjelpemiddelområdet, myndighetsutøvelse, ansatt-oppfølging, profilering, smale prosessteg osv.) slik at du ender med en klassifisering som kan brukes i etterlevelsesløsningen når KI-forordningen trer i kraft.",
   "start": {
     "step-title": "Offentlig myndighetsutøvelse",
