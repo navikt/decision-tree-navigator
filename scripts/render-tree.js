@@ -25,6 +25,8 @@ let interacted = false;
 let attemptedSubmit = false; // becomes true after user clicks Next on a node
 let lastRenderedNodeId = null; // track node to reset attemptedSubmit when node changes
 let selectedByNode = {};
+let committedByNode = {};
+let committedPath = ["start"];
 let minRemaining = {}; // node id -> shortest path (in steps) to any end node
 let maxRemaining = {}; // node id -> longest path (in steps) to any end node
 
@@ -122,6 +124,109 @@ function validateTreeMetadata(candidate, requestedId) {
             throw new Error("Ugyldige eller manglende godkjenningsopplysninger i beslutningstreet.");
         }
     }
+}
+
+function validateQuestionTypes(candidate) {
+    const isObject = (value) => value && typeof value === "object" && !Array.isArray(value);
+    const isText = (value) => typeof value === "string" && value.trim().length > 0;
+
+    for (const [nodeId, node] of Object.entries(candidate).filter(([, value]) => isTreeNode(value))) {
+        const fail = (detail) => {
+            throw new Error(`Ugyldig spørsmålskonfigurasjon i "${nodeId}": ${detail}`);
+        };
+        if (node.answerType !== undefined && !["radio", "checkbox"].includes(node.answerType)) {
+            fail("answerType må være radio eller checkbox.");
+        }
+        if (node.answerType !== "checkbox") continue;
+        if (node.end || !Array.isArray(node.choices) || !node.choices.length) {
+            fail("Checkbox-spørsmål må ha en choices-liste og kan ikke være et sluttsteg.");
+        }
+        const ids = new Set();
+        let exclusiveCount = 0;
+        for (const choice of node.choices) {
+            if (!isObject(choice) || !isText(choice.id) || !isText(choice.label) || ids.has(choice.id) ||
+                (choice.exclusive !== undefined && typeof choice.exclusive !== "boolean")) {
+                fail("Hvert valg må ha unik id, label og eventuelt en boolsk exclusive-verdi.");
+            }
+            ids.add(choice.id);
+            if (choice.exclusive) exclusiveCount++;
+        }
+        if (exclusiveCount > 1 || exclusiveCount === node.choices.length) {
+            fail("Tillat høyst ett eksklusivt valg og minst ett ordinært valg.");
+        }
+        if (!isObject(node.options) || !Object.keys(node.options).length || !isObject(node.routing)) {
+            fail("Checkbox-spørsmål må ha options og routing.");
+        }
+        const routingFields = ["anySelectedExceptExclusive"];
+        if (exclusiveCount || node.routing.exclusiveSelected !== undefined) routingFields.push("exclusiveSelected");
+        for (const field of routingFields) {
+            const key = node.routing[field];
+            if (!isText(key) || !Object.hasOwn(node.options, key)) {
+                fail(`routing.${field} må vise til en nøkkel i options.`);
+            }
+        }
+        const outcomeKeys = new Set(routingFields.map((field) => node.routing[field]));
+        for (const [key, option] of Object.entries(node.options)) {
+            if (!outcomeKeys.has(key)) {
+                fail(`options.${key} brukes ikke av routing.`);
+            }
+            if (!isObject(option) || !isText(option.next) || !getTreeNode(candidate, option.next)) {
+                fail(`options.${key}.next må vise til et eksisterende steg.`);
+            }
+        }
+    }
+}
+
+function resolveOptionKey(node, answer) {
+    if (node.answerType !== "checkbox") return answer;
+    if (!Array.isArray(answer) || !answer.length) return null;
+    const exclusive = node.choices.find((choice) => choice.exclusive);
+    return exclusive && answer.includes(exclusive.id)
+        ? node.routing.exclusiveSelected
+        : node.routing.anySelectedExceptExclusive;
+}
+
+function selectedOption(node, answer) {
+    return Array.isArray(node.options)
+        ? node.options.find(([key]) => key === resolveOptionKey(node, answer))?.[1]
+        : null;
+}
+
+function selectedChoices(node, answer) {
+    return node.choices.filter((choice) => Array.isArray(answer) && answer.includes(choice.id));
+}
+
+function answersEqual(left, right) {
+    if (!Array.isArray(left) || !Array.isArray(right)) return left === right;
+    const ids = new Set(left);
+    const otherIds = new Set(right);
+    return ids.size === otherIds.size && [...otherIds].every((id) => ids.has(id));
+}
+
+function restoreCommittedSelection(nodeId) {
+    const answer = committedByNode[nodeId];
+    if (answer === undefined) {
+        delete selectedByNode[nodeId];
+    } else {
+        selectedByNode[nodeId] = Array.isArray(answer) ? [...answer] : answer;
+    }
+}
+
+function commitAnswer(nodeId, next) {
+    const answer = selectedByNode[nodeId];
+    const index = pathHistory.length - 1;
+    if (!answersEqual(answer, committedByNode[nodeId])) {
+        for (const laterId of committedPath.slice(index + 1)) {
+            delete selectedByNode[laterId];
+            delete committedByNode[laterId];
+            delete notes[laterId];
+        }
+        localStorage.setItem(NOTES_KEY(treeId), JSON.stringify(notes));
+        committedPath = [...pathHistory, next];
+    } else if (committedPath.length <= index + 1) {
+        committedPath.push(next);
+    }
+    committedByNode[nodeId] = Array.isArray(answer) ? [...answer] : answer;
 }
 
 
@@ -269,17 +374,17 @@ function removeDescribedBy(input, id) {
 }
 
 
-// Inline error message for radio buttons
 function showOptionError(fieldset, groupName, optErrId) {
     fieldset.classList.add("navds-fieldset--error");
     fieldset.setAttribute("aria-invalid", "true");
 
-    const radios = fieldset.querySelectorAll(".navds-radio");
+    const radios = fieldset.querySelectorAll(".navds-radio, .navds-checkbox");
     radios.forEach((wrap) => {
-        wrap.classList.add("navds-radio--error");
+        wrap.classList.add(wrap.classList.contains("navds-checkbox") ? "navds-checkbox--error" : "navds-radio--error");
         wrap.setAttribute("data-color", "danger");
-        const input = wrap.querySelector('input[type="radio"]');
+        const input = wrap.querySelector("input");
         if (input) {
+            input.setAttribute("aria-invalid", "true");
             addDescribedBy(input, optErrId);
         }
     });
@@ -292,10 +397,11 @@ function showOptionError(fieldset, groupName, optErrId) {
         errContainer.setAttribute("aria-live", "polite");
         errContainer.setAttribute("aria-relevant", "additions removals");
 
-        const p = makeAkselErrorMessage(`${optErrId}-msg`, "Du må velge et alternativ.");
+        const p = makeAkselErrorMessage(`${optErrId}-msg`, fieldset.classList.contains("navds-checkbox-group")
+            ? "Du må velge minst ett alternativ." : "Du må velge et alternativ.");
         errContainer.appendChild(p);
 
-        const radioList = fieldset.querySelector(".navds-radio-buttons");
+        const radioList = fieldset.querySelector(".navds-radio-buttons, .navds-checkboxes");
         if (radioList && radioList.parentNode === fieldset) {
             fieldset.insertBefore(errContainer, radioList.nextSibling);
         } else {
@@ -311,12 +417,13 @@ function clearOptionError(fieldset, optErrId) {
     const container = fieldset.querySelector(`#${optErrId}`);
     if (container) container.remove();
 
-    const radios = fieldset.querySelectorAll(".navds-radio");
+    const radios = fieldset.querySelectorAll(".navds-radio, .navds-checkbox");
     radios.forEach((wrap) => {
-        wrap.classList.remove("navds-radio--error");
+        wrap.classList.remove("navds-radio--error", "navds-checkbox--error");
         wrap.removeAttribute("data-color");
-        const input = wrap.querySelector('input[type="radio"]');
+        const input = wrap.querySelector("input");
         if (input) {
+            input.removeAttribute("aria-invalid");
             removeDescribedBy(input, optErrId);
         }
     });
@@ -655,6 +762,7 @@ async function loadTree() {
         }
         tree = await response.json();
         validateTreeMetadata(tree, canonicalTreeId);
+        validateQuestionTypes(tree);
         window.TREE_TITLE = tree.title || canonicalTreeId;
         document.title = window.TREE_TITLE;
         normalizeTreeOptions(tree);
@@ -663,7 +771,9 @@ async function loadTree() {
         render();
     } catch (e) {
         console.error(`Kunne ikke laste beslutningstreet "${canonicalTreeId}"`, e);
-        showTreeLoadError(e.message === "Ugyldige eller manglende godkjenningsopplysninger i beslutningstreet."
+        showTreeLoadError(e.message.startsWith("Ugyldig spørsmålskonfigurasjon")
+            ? e.message
+            : e.message === "Ugyldige eller manglende godkjenningsopplysninger i beslutningstreet."
             ? "Beslutningstreet har ugyldige godkjenningsopplysninger og kan ikke vises."
             : "Beslutningstreet har ugyldige metadata eller kunne ikke lastes.");
     }
@@ -813,21 +923,28 @@ function render() {
         completedIds.forEach((nodeId) => {
             const n = getTreeNode(tree, nodeId);
             if (!n) return;
-            const selected = Array.isArray(n.options)
-                ? n.options.find(([key]) => key === selectedByNode[nodeId])
-                : null;
-            const opt = selected ? selected[1] : null;
+            const opt = selectedOption(n, committedByNode[nodeId]);
+            const choices = n.answerType === "checkbox" ? selectedChoices(n, committedByNode[nodeId]) : [];
             const labelText = opt && typeof opt.label === "string"
                 ? opt.label.replace(/^\s*label:\s*/i, "").trim()
                 : "";
             const noteText = (getNote(nodeId) || "").trim();
 
             // Ikke vis noe hvis vi verken har label fra JSON eller notat
-            if (!labelText && !noteText) return;
+            if (!labelText && !choices.length && !noteText) return;
 
             const questionTitle = (n && (n["step-title"] || n.q)) || "";
             let row;
-            if (labelText) {
+            if (choices.length) {
+                row = makeAnswerRow(questionTitle, "");
+                const list = document.createElement("ul");
+                choices.forEach((choice) => {
+                    const item = document.createElement("li");
+                    item.textContent = choice.label;
+                    list.appendChild(item);
+                });
+                row.querySelector("dd").appendChild(list);
+            } else if (labelText) {
                 row = makeAnswerRow(questionTitle, labelText);
             } else {
                 row = document.createElement("div");
@@ -885,6 +1002,11 @@ function render() {
             const introTextEl = document.createElement("div");
             introTextEl.className = "navds-body-long";
             introTextEl.innerHTML = introText;
+            if (introTextEl.children.length === 0) {
+                const paragraph = document.createElement("p");
+                paragraph.textContent = introTextEl.textContent;
+                introTextEl.replaceChildren(paragraph);
+            }
             wrapper.appendChild(introTextEl);
         }
 
@@ -979,15 +1101,36 @@ function render() {
         helpEl.remove();
     }
 
-    // 4) Radio-gruppe (alternativer)
+    const readMoreEl = questionFrag.querySelector(".question-read-more");
+    const readMore = node["read-more"];
+    const readMoreTitle = typeof readMore?.["read-more-about"] === "string" ? readMore["read-more-about"].trim() : "";
+    const readMoreText = typeof readMore?.["read-more-text"] === "string" ? readMore["read-more-text"].trim() : "";
+    if (readMoreTitle && readMoreText) {
+        const readMoreButton = readMoreEl.querySelector("button");
+        const readMoreContent = readMoreEl.querySelector(".navds-read-more__content");
+        readMoreEl.querySelector(".question-read-more-title").textContent = readMoreTitle;
+        readMoreContent.id = `read-more-${current}`;
+        readMoreContent.innerHTML = readMoreText;
+        readMoreButton.setAttribute("aria-controls", readMoreContent.id);
+        readMoreButton.addEventListener("click", () => {
+            const expanded = readMoreButton.getAttribute("aria-expanded") !== "true";
+            readMoreButton.setAttribute("aria-expanded", String(expanded));
+            readMoreContent.hidden = !expanded;
+            readMoreEl.classList.toggle("navds-read-more--open", expanded);
+        });
+    } else {
+        readMoreEl.remove();
+    }
+
     let fieldset = null;
     let selectedNext = null;
 
     if (!introMode && !node.end && Array.isArray(node.options) && node.options.length > 0) {
-        const fieldsetFrag = cloneTemplate("radio-group-template");
+        const checkbox = node.answerType === "checkbox";
+        const fieldsetFrag = cloneTemplate(checkbox ? "checkbox-group-template" : "radio-group-template");
         fieldset = fieldsetFrag.querySelector("fieldset");
         const legend = fieldsetFrag.querySelector("legend");
-        const radioContainer = fieldsetFrag.querySelector(".navds-radio-buttons");
+        const optionContainer = fieldsetFrag.querySelector(".navds-radio-buttons, .navds-checkboxes");
 
         const groupName = `opt-${current}`;
         const optErrId = `fieldset-error-${current}`;
@@ -996,13 +1139,15 @@ function render() {
         legend.id = `legend-${current}`;
         legend.tabIndex = -1;
         const baseText = (node && typeof node.q === "string") ? node.q.trim() : "";
-        legend.textContent = `${baseText || "Velg et alternativ"} (obligatorisk)`;
+        legend.textContent = `${baseText || (checkbox ? "Velg alle alternativer som passer" : "Velg et alternativ")} (obligatorisk)`;
 
+        selectedNext = selectedOption(node, selectedByNode[current])?.next || null;
+        const entries = checkbox ? node.choices.map((choice) => [choice.id, choice]) : node.options;
 
-        node.options.forEach(([key, opt], idx) => {
-            const optFrag = cloneTemplate("radio-option-template");
+        entries.forEach(([key, opt], idx) => {
+            const optFrag = cloneTemplate(checkbox ? "checkbox-option-template" : "radio-option-template");
             const input = optFrag.querySelector("input");
-            const labelEl = optFrag.querySelector("label.navds-radio__label");
+            const labelEl = optFrag.querySelector("label");
             const labelSpan = optFrag.querySelector(".navds-body-short");
             const id = `${groupName}-${idx}`;
 
@@ -1010,22 +1155,36 @@ function render() {
             input.name = groupName;
             input.value = key;
             labelEl.htmlFor = id;
-            labelSpan.innerHTML = opt.buttonText || key;
-
-            const previouslySelectedKey = selectedByNode[current];
-            if (previouslySelectedKey === key) {
-                input.checked = true;
-                selectedNext = opt.next;
+            if (checkbox) {
+                labelSpan.textContent = opt.label;
+                input.checked = Array.isArray(selectedByNode[current]) && selectedByNode[current].includes(key);
+            } else {
+                labelSpan.innerHTML = opt.buttonText || key;
+                input.checked = selectedByNode[current] === key;
             }
 
             input.addEventListener("change", () => {
-                selectedByNode[current] = key;
-                selectedNext = opt.next;
-                clearOptionError(fieldset, optErrId);
+                if (checkbox) {
+                    if (input.checked) {
+                        fieldset.querySelectorAll("input").forEach((other) => {
+                            const choice = node.choices.find((item) => item.id === other.value);
+                            if (other !== input && (opt.exclusive || choice.exclusive)) other.checked = false;
+                        });
+                    }
+                    selectedByNode[current] = [...fieldset.querySelectorAll("input:checked")].map((item) => item.value);
+                } else {
+                    selectedByNode[current] = key;
+                }
+                selectedNext = selectedOption(node, selectedByNode[current])?.next || null;
+                if (selectedNext) {
+                    clearOptionError(fieldset, optErrId);
+                } else if (attemptedSubmit) {
+                    showOptionError(fieldset, groupName, optErrId);
+                }
                 updateErrorSummary(wrapper);
             });
 
-            radioContainer.appendChild(optFrag);
+            optionContainer.appendChild(optFrag);
         });
 
 
@@ -1098,7 +1257,8 @@ function render() {
         // Radio required unless end node
         if (!selectedNext && !node.end) {
             errors.push({
-                text: "Velg et alternativ.", href: `#legend-${current}`,
+                text: node.answerType === "checkbox" ? "Velg minst ett alternativ." : "Velg et alternativ.",
+                href: `#legend-${current}`,
             });
         }
 
@@ -1136,7 +1296,7 @@ function render() {
         // Clear intro meta in memory
         introMeta = {serviceName: "", contactPerson: ""};
 
-        // Clear stored radio selections
+        // Clear stored selections
         for (const key in selectedByNode) {
             delete selectedByNode[key];
         }
@@ -1147,6 +1307,8 @@ function render() {
         attemptedSubmit = false;
         lastRenderedNodeId = null;
         selectedByNode = {};
+        committedByNode = {};
+        committedPath = ["start"];
     }
 
     function focusStepTitle() {
@@ -1179,6 +1341,7 @@ function render() {
                 return;
             }
 
+            commitAnswer(current, selectedNext);
             pathHistory.push(selectedNext);
             render();
             focusStepTitle();
@@ -1222,6 +1385,7 @@ function render() {
     function makeBackButton() {
         return createButton("button-secondary-left", "Forrige steg", () => {
             if (pathHistory.length > 1) {
+                restoreCommittedSelection(current);
                 pathHistory.pop();
                 render();
                 focusStepTitle();
@@ -1231,8 +1395,10 @@ function render() {
 
     function makeBackToIntroButton() {
         return createButton("button-secondary-left", "Tilbake til start", () => {
+            restoreCommittedSelection(current);
             pathHistory.length = 1;
             interacted = false;
+            attemptedSubmit = false;
             render();
             focusStepTitle();
         });
@@ -1357,10 +1523,10 @@ function mermaidSource(tree, pathHistory, {useMarkdownLabels = true} = {}) {
 
         if (!n.end && n.options) {
             const optionEntries = Array.isArray(n.options) ? n.options : [];
-            for (const [, opt] of optionEntries) {
+            for (const [key, opt] of optionEntries) {
                 if (!opt || !getTreeNode(tree, opt.next)) continue;
                 const label = (opt.buttonText || "").replace(/"/g, '\\"');
-                const edgeKey = `${id}->${opt.next}`;
+                const edgeKey = n.answerType === "checkbox" ? `${id}:${key}->${opt.next}` : `${id}->${opt.next}`;
 
                 if (!drawnEdges.has(edgeKey)) {
                     edgeNo++;
@@ -1368,7 +1534,10 @@ function mermaidSource(tree, pathHistory, {useMarkdownLabels = true} = {}) {
                     drawnEdges.add(edgeKey);
 
                     // Highlight edge if it's part of the actual clicked path
-                    if (pathHistory.some((h, i) => i && pathHistory[i - 1] === id && h === opt.next)) {
+                    if (pathHistory.some((h, i) => i && pathHistory[i - 1] === id && h === opt.next) &&
+                        (n.answerType === "checkbox"
+                            ? key === resolveOptionKey(n, committedByNode[id])
+                            : selectedOption(n, committedByNode[id])?.next === opt.next)) {
                         visitedEdges.add(edgeNo);
                     }
                 }
@@ -1404,13 +1573,17 @@ function exportAnswersAsJson() {
         if (!n) {
             throw new Error(`Fant ikke beslutningssteget "${nodeId}" i treet.`);
         }
-        const selected = Array.isArray(n.options)
-            ? n.options.find(([key]) => key === selectedByNode[nodeId])
-            : null;
-        const opt = selected ? selected[1] : null;
+        const answer = committedByNode[nodeId];
+        const opt = selectedOption(n, answer);
         steps.push({
             question: n["step-title"] || n.q,
-            answer: opt ? opt.label : null,
+            answer: n.answerType === "checkbox"
+                ? selectedChoices(n, answer).map((choice) => choice.label)
+                : opt ? opt.label : null,
+            ...(n.answerType === "checkbox" ? {
+                choiceIds: selectedChoices(n, answer).map((choice) => choice.id),
+                routingOption: resolveOptionKey(n, answer)
+            } : {}),
             note: getNote(nodeId) || null
         });
     }

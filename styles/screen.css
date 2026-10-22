@@ -429,6 +429,14 @@ body.start #answers {
     margin-bottom: 2rem;
 }
 
+#path .navds-form-summary__value > ul {
+    margin: 0;
+}
+
+#path .navds-form-summary__value + dt {
+    margin-top: var(--a-spacing-2);
+}
+
 #diagram-section {
     padding-top: 2rem;
     padding-bottom: 3rem;
@@ -489,6 +497,18 @@ h1:focus, h2:focus, legend:focus {
 }
 .question-help p {
     margin-top: 0;
+}
+
+.question-read-more {
+    margin-bottom: var(--a-spacing-4);
+}
+
+.question-read-more .navds-read-more__content > :first-child {
+    margin-top: 0;
+}
+
+.question-read-more .navds-read-more__content > :last-child {
+    margin-bottom: 0;
 }
 
 .navds-textarea__input {
