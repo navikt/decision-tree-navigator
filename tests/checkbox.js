@@ -173,6 +173,189 @@ await test("Required selection and note errors appear only after Next and clear 
     assert(!query("#error-summary") && !query("[aria-invalid]"), "Intro return resets validation attempt");
 });
 
+for (const answerType of ["radio", "checkbox"]) {
+    await test(`${answerType} question and note hints preserve descriptions through validation and navigation`, async () => {
+        const candidate = structuredClone(example);
+        if (answerType === "radio") {
+            delete candidate.start.answerType;
+            delete candidate.start.choices;
+            delete candidate.start.routing;
+        }
+        candidate.start["q.hint"] = " <b>Question guidance</b> ";
+        candidate.start.note.hint = " <b>Note guidance</b> ";
+        candidate.details["q.hint"] = "Next question guidance";
+        candidate.details.note.hint = "Next note guidance";
+        await load(candidate);
+        start();
+
+        function checkHints(nodeId, questionHint, noteHint) {
+            const fieldset = query("#question fieldset");
+            const legend = fieldset.querySelector("legend");
+            const hint = fieldset.querySelector(".hint");
+            const textarea = query("#question textarea");
+            const label = query(`label[for="${textarea.id}"]`);
+            equal(hint.textContent, questionHint, "Question hint is trimmed plain text");
+            equal(query(`#hint-${nodeId}`).textContent, noteHint, "Note hint is trimmed plain text");
+            assert(!hint.querySelector("b") && !query(`#hint-${nodeId} b`), "Hint markup is not parsed");
+            assert(legend.nextElementSibling === hint, "Question hint follows legend");
+            equal(fieldset.getAttribute("aria-describedby"), `question-hint-${nodeId}`, "Fieldset describes hint");
+            assert(!legend.hasAttribute("aria-describedby"), "Legend does not duplicate the group description");
+            assert(!label.hasAttribute("aria-describedby"), "Label does not duplicate the textarea description");
+            fieldset.querySelectorAll("input").forEach((input) => {
+                assert(!input.hasAttribute("aria-describedby"), "Options do not repeat the question hint");
+            });
+            equal(textarea.getAttribute("aria-describedby"), `hint-${nodeId} maxlen-${nodeId}`,
+                "Textarea describes hint and character limit");
+            const ids = all("#question [id]").map((element) => element.id);
+            equal(new Set(ids).size, ids.length, "Hint IDs are unique");
+            all("#question [aria-describedby]").forEach((element) => {
+                element.getAttribute("aria-describedby").split(/\s+/).forEach((id) => {
+                    assert(frame.contentDocument.getElementById(id), `Description target exists: ${id}`);
+                });
+            });
+        }
+
+        checkHints("start", "<b>Question guidance</b>", "<b>Note guidance</b>");
+        button("Neste steg");
+        const textarea = query("#question textarea");
+        equal(textarea.getAttribute("aria-describedby"), "hint-start maxlen-start note-err-start",
+            "Validation adds note error without losing descriptions");
+        const option = query("#question fieldset input");
+        equal(option.getAttribute("aria-describedby"), "fieldset-error-start", "Option error is associated");
+        const summaryLink = query('#error-summary a[href="#legend-start"]');
+        summaryLink.href = `${frame.contentWindow.location.href}#legend-start`;
+        summaryLink.click();
+        await waitFor(() => frame.contentDocument.activeElement === query("#legend-start"),
+            "Summary link focuses legend in srcdoc frame");
+        equal(query("#question fieldset").getAttribute("aria-describedby"), "question-hint-start",
+            "Group retains hint association after focusing its legend");
+        choose(answerType === "checkbox" ? "a" : "matching");
+        assert(!option.hasAttribute("aria-describedby"), "Clearing option error removes its association");
+        note("Purpose");
+        checkHints("start", "<b>Question guidance</b>", "<b>Note guidance</b>");
+        button("Neste steg");
+        checkHints("details", "Next question guidance", "Next note guidance");
+        assert(!query("#question-hint-start") && !query("#hint-start"), "Previous hints removed");
+        button("Forrige steg");
+        checkHints("start", "<b>Question guidance</b>", "<b>Note guidance</b>");
+    });
+}
+
+for (const hint of [undefined, "", " \n\t "]) {
+    await test(`Absent or blank hints use only checkbox guidance: ${JSON.stringify(hint)}`, async () => {
+        const candidate = structuredClone(example);
+        candidate.start["q.hint"] = hint;
+        candidate.start.note.hint = hint;
+        candidate.details["q.hint"] = hint;
+        candidate.details.note.hint = hint;
+        await load(candidate);
+        start();
+
+        function checkHints(checkbox) {
+            equal(all("#question .hint").length, checkbox ? 1 : 0, "Only checkbox fallback hint remains");
+            const fieldset = query("#question fieldset");
+            if (checkbox) {
+                equal(fieldset.querySelector(".hint").textContent, "Velg minst ett alternativ.",
+                    "Checkbox minimum selection instruction");
+                equal(fieldset.getAttribute("aria-describedby"), "question-hint-start",
+                    "Checkbox instruction describes group");
+            } else {
+                assert(!fieldset.hasAttribute("aria-describedby"), "No redundant radio instruction");
+            }
+            assert(!query("#question legend").hasAttribute("aria-describedby"), "No legend description");
+            const textarea = query("#question textarea");
+            assert(!query(`label[for="${textarea.id}"]`).hasAttribute("aria-describedby"),
+                "No note label description");
+            equal(textarea.getAttribute("aria-describedby"), `maxlen-${textarea.id.slice("note-".length)}`,
+                "Character limit still described");
+        }
+
+        checkHints(true);
+        choose("a");
+        note("Purpose");
+        button("Neste steg");
+        checkHints(false);
+    });
+}
+
+for (const answerType of ["radio", "checkbox"]) {
+    for (const noteType of ["absent", "optional", "required"]) {
+        await test(`${answerType} with ${noteType} note uses minimal required-field presentation`, async () => {
+            const candidate = structuredClone(example);
+            if (answerType === "radio") {
+                delete candidate.start.answerType;
+                delete candidate.start.choices;
+                delete candidate.start.routing;
+            }
+            if (noteType === "absent") {
+                delete candidate.start.note;
+            } else {
+                candidate.start.note.required = noteType === "required";
+            }
+            await load(candidate);
+            const serviceLabel = query('label[for="intro-service-name"]');
+            equal(serviceLabel.firstChild.textContent, "Navn til tjenesten", "Intro label starts with field name");
+            const serviceIndicator = serviceLabel.querySelector('span[aria-hidden="true"]');
+            assert(serviceIndicator && serviceLabel.lastChild === serviceIndicator,
+                "Intro label ends with an indicator hidden from assistive technology");
+            equal(serviceIndicator.textContent, " (må besvares)", "Intro label has required indicator");
+            equal(query("#intro-service-name").getAttribute("aria-required"), "true",
+                "Required text input exposes required state without native constraint validation");
+            assert(!query("#intro-service-name").required, "No browser-controlled required error");
+            assert(!query(".form-instructions"), "Intro has no general required-field instruction");
+            start();
+
+            const fieldset = query("#question fieldset");
+            const legend = fieldset.querySelector("legend");
+            equal(legend.firstChild.textContent, candidate.start.q, "Legend starts with question text");
+            const legendIndicator = legend.querySelector('span[aria-hidden="true"]');
+            assert(legendIndicator && legend.lastChild === legendIndicator,
+                "Legend ends with an indicator hidden from assistive technology");
+            equal(legendIndicator.textContent, " (må besvares)", "Legend has required indicator");
+            equal(fieldset.getAttribute("role"), answerType === "radio" ? "radiogroup" : null,
+                "Only radio fieldsets have the radiogroup role");
+            equal(fieldset.getAttribute("aria-required"), answerType === "radio" ? "true" : null,
+                "Required state applies to the radio group, not individual options or checkbox groups");
+            const inputs = [...fieldset.querySelectorAll("input")];
+            assert(inputs.every((input) => !input.required && !input.hasAttribute("aria-required")),
+                "No per-option required attributes");
+            assert(inputs.every((input) => input.type === answerType && input.labels.length === 1),
+                "Native input types and associated labels preserved");
+            assert(inputs.every((input) => !input.hasAttribute("aria-describedby")),
+                "Descriptions are not repeated on every option");
+            assert(!query("#question .form-instructions"), "Question has no general required-field instruction");
+            if (noteType === "absent") {
+                assert(!query("#question textarea"), "Question without note has no textarea");
+            } else {
+                const textarea = query("#question textarea");
+                const label = query(`label[for="${textarea.id}"]`);
+                const indicator = label.querySelector('span[aria-hidden="true"]');
+                assert(indicator, "Note label indicator is hidden from assistive technology");
+                equal(indicator.textContent, noteType === "optional" ? " (valgfritt)" : " (må besvares)",
+                    "Note label has the correct visible indicator");
+                equal(label.firstChild.textContent, candidate.start.note.label, "Label text precedes indicator");
+                assert(label.lastChild === indicator, "Indicator follows label text inside label");
+                equal(textarea.getAttribute("aria-required"), noteType === "required" ? "true" : null,
+                    "Only required notes expose required state");
+                assert(!textarea.required, "No native required constraint to override custom validation");
+            }
+            button("Neste steg");
+            equal(all("#error-summary a").length, noteType === "required" ? 2 : 1,
+                "Existing selection and note validation requirements unchanged");
+            assert(query("#error-summary") === frame.contentDocument.activeElement, "ErrorSummary still receives focus");
+            assert(inputs.every((input) => input.getAttribute("aria-invalid") === "true"),
+                "Selection error exposes invalid state");
+            assert(inputs.every((input) => input.getAttribute("aria-describedby") === "fieldset-error-start"),
+                "Only the validation error describes each option after failure");
+            choose(answerType === "radio" ? "matching" : "a");
+            if (noteType === "required") note("Required justification");
+            assert(!query("#error-summary") && !query("[aria-invalid]"), "Errors clear independently as before");
+            button("Neste steg");
+            equal(state().pathHistory, ["start", "details"], "Successful validation preserves navigation");
+        });
+    }
+}
+
 await test("Multiple choices, native labels and exclusivity in both directions", async () => {
     await load();
     start();

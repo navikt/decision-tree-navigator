@@ -22,6 +22,36 @@ Forsiden ligger i [index.html](https://github.com/navikt/decision-tree-navigator
 
 Hver node kan ha et `read-more`-objekt med `read-more-about` (knappetekst) og `read-more-text` (innhold som støtter HTML). Når begge feltene har innhold, vises en utvidbar forklaring mellom hjelpeteksten og spørsmålet.
 
+### Hjelpetekst til spørsmål og begrunnelser
+
+Behold `q` som tekst, og legg til det valgfrie feltet `"q.hint"` på samme nivå for å vise en kort hjelpetekst under spørsmålet:
+
+```json
+{
+  "q": "Hvilke formål gjelder?",
+  "q.hint": "Velg alle formål som passer.",
+  "note": {
+    "label": "Begrunn valgene",
+    "hint": "Beskriv hvorfor formålene gjelder.",
+    "required": true
+  }
+}
+```
+
+`"q.hint"` gjelder både radioknapper og avkryssing. Hjelpeteksten knyttes med `aria-describedby` bare til feltsettet, ikke også til `legend` eller hvert svaralternativ. `note.hint` knyttes bare til tekstfeltet, ikke også til etiketten. Dette begrenser gjentatte beskrivelser. Begge behandles som ren tekst, ikke HTML. Tomme felt eller felt med bare mellomrom utelates; avkryssingsgrupper uten egen hjelpetekst får «Velg minst ett alternativ.». Radiogrupper får ingen automatisk instruksjon om å velge ett alternativ. Tegngrense og eventuelle feilmeldinger beholder sine tilknytninger til tekstfeltet. Eksisterende `help` og `read-more` er uendret.
+
+### Obligatoriske og valgfrie felt
+
+Feltmarkeringene bygger på [Aksels veiledning for obligatoriske og valgfrie skjemafelter](https://aksel.nav.no/god-praksis/artikler/obligatoriske-og-valgfrie-skjemafelter), men Beslutt viser ikke generelle avsnitt om at alle felt må fylles ut:
+
+- Hovedspørsmålets `legend` avsluttes med «(må besvares)» i et `span` med `aria-hidden="true"`, både for radio og avkryssing. Indikatoren er synlig, men inngår ikke i gruppens tilgjengelige navn.
+- En valgfri begrunnelses etikett avsluttes med «(valgfritt)» i et `span` med `aria-hidden="true"`. Obligatoriske begrunnelser har tilsvarende «(må besvares)» i et skjult `span`, og tekstfeltet har `aria-required="true"`. Indikatorene er synlige, men inngår ikke i tekstfeltets tilgjengelige navn.
+- Introduksjonens «Navn til tjenesten» avsluttes med «(må besvares)» i et `span` med `aria-hidden="true"`, og feltet har `aria-required="true"`. Kontaktperson beholder «(valgfritt)» som vanlig tekst i etiketten.
+
+Spørsmål og obligatoriske begrunnelser får ikke «(obligatorisk)» eller stjerner i etikettene. Native `fieldset`, `legend`, `input` og `label` beholdes. Radiofeltsett har `role="radiogroup" aria-required="true"` slik at kravet gjelder hele gruppen, ikke hvert alternativ. Attributtet støttes av ARIA-rollen [`radiogroup`](https://www.w3.org/TR/wai-aria-1.2/#radiogroup), men ikke [`radio`](https://www.w3.org/TR/wai-aria-1.2/#radio) eller avkryssingsfeltsettets native grupperolle. Obligatoriske tekstfelt bruker `aria-required="true"`, ikke HTMLs `required`, slik at Beslutts eksisterende validering og feilmeldinger fortsatt styrer feilvisningen. Avkryssingsfeltsett får ikke `aria-required`, og avkryssingsvalg får verken `required` eller `aria-required`; det ville feilaktig kreve hvert enkelt valg.
+
+Minst ett svar kreves fortsatt, og `note.required` styrer fortsatt om begrunnelsen må fylles ut. Hjelpetekster bør være korte og spørsmålsspesifikke; unngå å gjenta spørsmålet eller generelle obligatorisk-instruksjoner i dem. Feiloppsummeringen, fokusmålene og de eksisterende feilbeskrivelsene på ugyldige felt beholdes.
+
 ### `type` og `governance`
 
 `type` sier hva slags beslutninger treet brukes til. Det finnes to typer:
@@ -147,7 +177,13 @@ Testene dekker avkryssing og eksklusivitet, forsinket validering og feiltilknytn
 
 1. Fullfør eksempeltreet med flere avkryssinger og begrunnelser. Åpne forhåndsvisning for utskrift og kontroller at alle valgte etiketter og begrunnelser er med, også ved lange tekster, linjebryting og sideskift.
 2. Kontroller Aksel-utseendet, synlig fokus og avkryssingsmerker. Bruk bare tastaturet: Tab til valgene, Mellomrom for å endre dem, og «Neste steg» for å fortsette.
-3. Kontroller med skjermleser at feltsettets spørsmål og etiketter leses, at feiloppsummeringen får fokus etter ugyldig «Neste steg», og at lenker og tilknyttede feilmeldinger fungerer.
+3. Bruk NVDA med Chrome eller Firefox. Kontroller både et radiospørsmål og et avkryssingsspørsmål, med og uten begrunnelse. Kontroller at spørsmål og spørsmålsspesifikk hjelpetekst formidles ved inngang i gruppen, og at det er forståelig at et svar kreves. Flytt mellom radioknapper med piltaster og mellom avkryssinger med Tab; noter om lange hjelpetekster eller krav gjentas unødvendig.
+4. Kontroller at «(valgfritt)» og «(må besvares)» er synlige etter begrunnelsens etikett, men ikke inngår i tekstfeltets tilgjengelige navn. Bare obligatoriske begrunnelser skal ha påkrevd-status. Kontroller hjelpetekst og tegngrense separat fra navnet.
+5. Fortsett uten svar og uten obligatorisk begrunnelse. Kontroller at feiloppsummeringen får fokus og formidler begge feilene, og følg lenkene til `legend` og tekstfeltet. Kontroller feilannonsering og eventuell duplisering fra live-region og feltbeskrivelser. Rett én feil om gangen; den andre skal bestå, og hjelpetekster skal ikke forsvinne.
+
+DOM-tester og nettleserens tilgjengelighetstre kan bekrefte navn, beskrivelser og tilstander, men ikke hva NVDA faktisk leser opp. Attributter alene dokumenterer ikke at gruppeinstruksjoner annonseres ved inngang, eller at gjentakelser unngås; dette må kontrolleres med skjermleseren.
+
+Ved kontroll i Chromes tilgjengelighetstre ble spørsmålet eksponert som gruppens navn og hjelpeteksten som gruppens beskrivelse. Svaralternativene hadde egne etiketter uten gjentatt spørsmålshjelp eller påkrevd-status. Obligatoriske begrunnelser hadde påkrevd-status. Etter ugyldig «Neste steg» hadde alternativene feilbeskrivelsen og ugyldig-status; begrunnelser beholdt hjelpetekst og tegngrense sammen med feilen. Dette ble kontrollert for radio og avkryssing, med ingen, valgfri og obligatorisk begrunnelse, både med og uten egen hjelpetekst. Faktiske NVDA-annonseringer er ikke verifisert; de manuelle kontrollene over gjenstår.
 
 ## Versjonering og godkjenning
 
@@ -211,6 +247,6 @@ Endringer som ikke krever ny godkjenning kan publiseres som minor- eller patch-v
 ## Spørsmål?
 Har du spørsmål om koden eller repoet, kan du [opprette en sak på GitHub](https://github.com/navikt/decision-tree-navigator/issues).
 
-For interne spørsmål kan du skrive til oss i Slack-kanalen [#TADA](https://nav-it.slack.com/archives/C03CXENSLMV).
+For interne spørsmål kan du skrive til oss i Slack-kanalen [#tada-intern](https://nav-it.slack.com/archives/C0908NJ5W5B).
 
-![KI](images/ki.png) Vi har brukt GitHub Copilot til å lage deler av koden.
+![KI](images/ki.png) KI er brukt i dette prosjektet.

@@ -1016,13 +1016,18 @@ function render() {
         const serviceLabel = document.createElement('label');
         serviceLabel.className = 'navds-label';
         serviceLabel.setAttribute('for', 'intro-service-name');
-        serviceLabel.textContent = 'Navn til tjenesten (obligatorisk)';
+        serviceLabel.textContent = 'Navn til tjenesten';
+        const serviceIndicator = document.createElement("span");
+        serviceIndicator.setAttribute("aria-hidden", "true");
+        serviceIndicator.textContent = " (må besvares)";
+        serviceLabel.appendChild(serviceIndicator);
         const serviceWrap = document.createElement('div');
         serviceWrap.className = 'navds-text-field';
         const serviceInput = document.createElement('input');
         serviceInput.type = 'text';
         serviceInput.id = 'intro-service-name';
         serviceInput.className = 'navds-text-field__input';
+        serviceInput.setAttribute("aria-required", "true");
         serviceInput.setAttribute('autocomplete', 'off');
         serviceInput.value = introMeta.serviceName || '';
         serviceInput.addEventListener('input', () => {
@@ -1139,7 +1144,22 @@ function render() {
         legend.id = `legend-${current}`;
         legend.tabIndex = -1;
         const baseText = (node && typeof node.q === "string") ? node.q.trim() : "";
-        legend.textContent = `${baseText || (checkbox ? "Velg alle alternativer som passer" : "Velg et alternativ")} (obligatorisk)`;
+        legend.textContent = baseText || "Ditt svar";
+        const indicator = document.createElement("span");
+        indicator.setAttribute("aria-hidden", "true");
+        indicator.textContent = " (må besvares)";
+        legend.appendChild(indicator);
+
+        const hintEl = fieldsetFrag.querySelector(".hint");
+        const hint = (typeof node["q.hint"] === "string" ? node["q.hint"].trim() : "") ||
+            (checkbox ? "Velg minst ett alternativ." : "");
+        if (hint) {
+            hintEl.id = `question-hint-${current}`;
+            hintEl.textContent = hint;
+            addDescribedBy(fieldset, hintEl.id);
+        } else {
+            hintEl.remove();
+        }
 
         selectedNext = selectedOption(node, selectedByNode[current])?.next || null;
         const entries = checkbox ? node.choices.map((choice) => [choice.id, choice]) : node.options;
@@ -1193,7 +1213,8 @@ function render() {
 
     // 5) Generate the free-text field from the template
     if (!introMode && node.note && node.note.label) {
-        const {label, hint, required} = node.note;
+        const {label, required} = node.note;
+        const hint = typeof node.note.hint === "string" ? node.note.hint.trim() : "";
         const noteFrag = cloneTemplate("note-template");
         const labelEl = noteFrag.querySelector("label");
         const hintEl = noteFrag.querySelector(".hint");
@@ -1207,7 +1228,11 @@ function render() {
         const taWrap = noteFrag.querySelector(".navds-textarea");
         taWrap.id = `ta-wrap-${current}`;
         labelEl.setAttribute("for", fieldId);
-        labelEl.textContent = label + (required ? " (obligatorisk)" : " (valgfritt)");
+        labelEl.textContent = label;
+        const indicator = document.createElement("span");
+        indicator.setAttribute("aria-hidden", "true");
+        indicator.textContent = required ? " (må besvares)" : " (valgfritt)";
+        labelEl.appendChild(indicator);
 
 
         if (hintEl) {
@@ -1231,7 +1256,7 @@ function render() {
             if (described.length) {
                 textarea.setAttribute("aria-describedby", described.join(" "));
             }
-            if (required) textarea.required = true;
+            if (required) textarea.setAttribute("aria-required", "true");
 
 
             textarea.addEventListener("input", () => {

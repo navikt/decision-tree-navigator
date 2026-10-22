@@ -467,6 +467,10 @@ body.start #answers {
     margin-bottom: var(--a-spacing-4);
 }
 
+#question .hint {
+    font-style: italic;
+}
+
 .buttons {
     --__ac-stack-gap-xs: var(--a-spacing-4);
 }

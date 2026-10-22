@@ -7,6 +7,7 @@
   "start": {
     "step-title": "Bruksområder",
     "q": "Hvilke formål gjelder? Velg alle som passer.",
+    "q.hint": "Velg en eller flere formål. Velg «Ingen av disse» hvis ingen passer.",
     "answerType": "checkbox",
     "choices": [
       {"id": "a", "label": "Formål A"},
@@ -22,34 +23,37 @@
       "matching": {"next": "details", "buttonText": "Minst ett formål", "label": "Ett eller flere formål gjelder."},
       "none": {"next": "alternative", "buttonText": "Ingen formål", "label": "Ingen formål gjelder."}
     },
-    "note": {"label": "Begrunn valgene", "required": true}
+    "note": {"label": "Begrunn valgene", "hint": "Beskriv hvorfor de valgte formålene gjelder, eller hvorfor ingen av dem passer.", "required": true}
   },
   "details": {
     "step-title": "Oppfølging",
     "q": "Vil du følge opp formålene?",
+    "q.hint": "Ta stilling til om de valgte formålene trenger videre oppfølging.",
     "options": {
       "yes": {"next": "review", "buttonText": "Ja", "label": "Formålene følges opp."},
       "no": {"next": "review", "buttonText": "Nei", "label": "Formålene følges ikke opp."}
     },
-    "note": {"label": "Tilleggsopplysninger", "required": false}
+    "note": {"label": "Tilleggsopplysninger", "hint": "Du kan beskrive planlagt oppfølging og hvem som har ansvar.", "required": false}
   },
   "alternative": {
     "step-title": "Alternativ",
     "q": "Vil du vurdere andre formål?",
+    "q.hint": "Vurder om det finnes relevante formål som ikke var med i listen.",
     "options": {
       "yes": {"next": "review", "buttonText": "Ja", "label": "Andre formål vurderes."},
       "no": {"next": "review", "buttonText": "Nei", "label": "Ingen andre formål vurderes."}
     },
-    "note": {"label": "Tilleggsopplysninger", "required": false}
+    "note": {"label": "Tilleggsopplysninger", "hint": "Du kan oppgi hvilke andre formål du vil vurdere.", "required": false}
   },
   "review": {
     "step-title": "Kontroll",
     "q": "Er opplysningene kontrollert?",
+    "q.hint": "Se gjennom svarene og begrunnelsene før du fullfører eksempelet.",
     "options": {
       "yes": {"next": "done", "buttonText": "Ja", "label": "Opplysningene er kontrollert."},
       "no": {"next": "done", "buttonText": "Nei", "label": "Opplysningene er ikke kontrollert."}
     },
-    "note": {"label": "Merknad", "required": false}
+    "note": {"label": "Merknad", "hint": "Du kan beskrive eventuelle forbehold eller opplysninger som må kontrolleres senere.", "required": false}
   },
   "done": {
     "step-title": "Eksempelet er fullført",

@@ -139,8 +139,9 @@
 </template>
 
 <template id="radio-group-template">
-    <fieldset class="navds-radio-group navds-radio-group--medium navds-fieldset navds-fieldset--medium">
+    <fieldset role="radiogroup" aria-required="true" class="navds-radio-group navds-radio-group--medium navds-fieldset navds-fieldset--medium">
         <legend class="navds-fieldset__legend navds-label" tabindex="-1"></legend>
+        <div class="navds-hint-text hint"></div>
         <div class="navds-radio-buttons"></div>
     </fieldset>
 </template>
@@ -159,6 +160,7 @@
 <template id="checkbox-group-template">
     <fieldset class="navds-checkbox-group navds-checkbox-group--medium navds-fieldset navds-fieldset--medium">
         <legend class="navds-fieldset__legend navds-label" tabindex="-1"></legend>
+        <div class="navds-hint-text hint"></div>
         <div class="navds-checkboxes"></div>
     </fieldset>
 </template>
