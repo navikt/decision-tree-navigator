@@ -433,6 +433,10 @@ body.start #answers {
     margin: 0;
 }
 
+#path .navds-form-summary__value + dt {
+    margin-top: var(--a-spacing-2);
+}
+
 #diagram-section {
     padding-top: 2rem;
     padding-bottom: 3rem;
